@@ -24,6 +24,24 @@ void addItem(char *name, price p)
 	g_free(dispPrice);			// the GtkListStore made a copy
 }
 
+void getItem(gint index, char **name, char **dispPrice, price *p)
+{
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	char *a, *b;	// temporary places
+	price c;
+
+	path = gtk_tree_path_new_from_indices(index, -1);
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(items), &iter, path);
+	gtk_tree_model_get(GTK_TREE_MODEL(items), &iter, 0, &a, 1, &b, 2, &c, -1);
+	if (name != NULL)
+		*name = a;
+	if (dispPrice != NULL)
+		*dispPrice = b;
+	if (p != NULL)
+		*p = c;
+}
+
 GtkListStore *itemsStore(void)
 {
 	return items;

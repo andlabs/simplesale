@@ -22,6 +22,7 @@ extern orderWindow *newOrderWindow(void);
 /* items.c */
 extern void initItems(void);
 extern void addItem(char *, price);
+extern void getItem(gint, char **, char **, price *);
 extern GtkListStore *itemsStore(void);
 extern GtkTreeModel *itemsModel(void);
 extern void setItemsIconLayout(GtkCellLayout *);
@@ -31,5 +32,6 @@ typedef struct order order;
 extern order *newOrder(void);
 extern void addToOrder(order *, gint);
 extern void removeFromOrder(order *, GtkTreeIter *);
+extern price subtotal(order *);
 extern GtkTreeModel *orderModel(order *);
 extern void setOrderTableLayout(GtkTreeView *);

@@ -3,7 +3,7 @@
 
 struct order {
 	GtkListStore *store;
-	price curprice;
+	price subtotal;
 };
 
 order *newOrder(void)
@@ -21,21 +21,30 @@ order *newOrder(void)
 
 void addToOrder(order *o, gint index)
 {
-	// TODO split this into a separate function
 	char *name, *dispPrice;
-	GtkTreePath *path;
-	GtkTreeIter iiter, riter;
+	price p;
+	GtkTreeIter iter;
 
-	path = gtk_tree_path_new_from_indices(index, -1);
-	gtk_tree_model_get_iter(itemsModel(), &iiter, path);
-	gtk_tree_model_get(itemsModel(), &iiter, 0, &name, 1, &dispPrice, -1);
-	gtk_list_store_append(o->store, &riter);
-	gtk_list_store_set(o->store, &riter, 0, name, 1, dispPrice, 2, index, -1);
+	getItem(index, &name, &dispPrice, &p);
+	gtk_list_store_append(o->store, &iter);
+	gtk_list_store_set(o->store, &iter, 0, name, 1, dispPrice, 2, index, -1);
+	o->subtotal += p;
 }
 
 void removeFromOrder(order *o, GtkTreeIter *which)
 {
+	gint index;
+	price p;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(o->store), which, 2, &index, -1);
+	getItem(index, NULL, NULL, &p);
 	gtk_list_store_remove(o->store, which);
+	o->subtotal -= p;
+}
+
+price subtotal(order *o)
+{
+	return o->subtotal;
 }
 
 GtkTreeModel *orderModel(order *o)

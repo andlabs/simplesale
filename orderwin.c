@@ -22,6 +22,22 @@ struct orderWindow {
 	GtkWidget *itemsScroller;
 };
 
+static void updateTotalDisp(orderWindow *o)
+{
+	price tot, sub;
+	char *str;
+
+	sub = subtotal(o->o);
+	// TODO this is where total calculation will go;
+	tot = sub;
+	str = priceToString(tot, "Total: $");
+	gtk_header_bar_set_title(GTK_HEADER_BAR(o->topbar), str);
+	g_free(str);
+	str = priceToString(tot, "Subtotal: $");
+	gtk_header_bar_set_subtitle(GTK_HEADER_BAR(o->topbar), str);
+	g_free(str);
+}
+
 static void search(GtkSearchEntry *entry, gpointer data)
 {
 	orderWindow *o = (orderWindow *) data;
@@ -62,6 +78,7 @@ static void itemClicked(GtkIconView *view, GtkTreePath *path, gpointer data)
 	if (path == NULL)
 		g_error("filtered list store path converted to child path is NULL for a valid item inside itemClicked()");
 	addToOrder(o->o, listStorePathIndex(itemsModel(), path));
+	updateTotalDisp(o);
 }
 
 static void adjustDeleteEnabled(GtkTreeSelection *selection, gpointer data)
@@ -80,6 +97,7 @@ static void deleteClicked(GtkButton *button, gpointer data)
 	if (gtk_tree_selection_get_selected(o->orderSel, NULL, &iter) == FALSE)
 		g_error("Delete Item button clicked without any item selected (button should be disabled)");
 	removeFromOrder(o->o, &iter);
+	updateTotalDisp(o);
 }
 
 orderWindow *newOrderWindow(void) {
@@ -102,8 +120,6 @@ orderWindow *newOrderWindow(void) {
 	gtk_window_set_default_size(GTK_WINDOW(o->win), width, height * 3);
 
 	o->topbar = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(o->topbar), "Total: $3.45");
-	gtk_header_bar_set_subtitle(GTK_HEADER_BAR(o->topbar), "Subtotal: $2.34");
 	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(o->topbar), FALSE);
 	gtk_window_set_titlebar(GTK_WINDOW(o->win), o->topbar);
 
@@ -210,6 +226,8 @@ orderWindow *newOrderWindow(void) {
 	gtk_grid_attach_next_to(GTK_GRID(o->layout),
 		o->rightside, o->leftside,
 		GTK_POS_RIGHT, 2, 1);
+
+	updateTotalDisp(o);		// initial state
 
 	gtk_container_add(GTK_CONTAINER(o->win), o->layout);
 	gtk_widget_show_all(o->win);
