@@ -12,6 +12,7 @@ struct orderWindow {
 	GtkWidget *customer;
 	order *o;
 	GtkWidget *order;
+	GtkTreeSelection *orderSel;		// convenience
 	GtkWidget *orderScroller;
 	GtkWidget *delete;
 	GtkWidget *rightside;
@@ -61,6 +62,21 @@ static void itemClicked(GtkIconView *view, GtkTreePath *path, gpointer data)
 	if (path == NULL)
 		g_error("filtered list store path converted to child path is NULL for a valid item inside itemClicked()");
 	addToOrder(o->o, listStorePathIndex(itemsModel(), path));
+}
+
+static void adjustDeleteEnabled(GtkTreeSelection *selection, gpointer data)
+{
+	orderWindow *o = (orderWindow *) data;
+
+	gtk_widget_set_sensitive(o->delete,
+		gtk_tree_selection_count_selected_rows(o->orderSel) != 0);
+}
+
+static void deleteClicked(GtkButton *button, gpointer data)
+{
+	orderWindow *o = (orderWindow *) data;
+
+	// TODO
 }
 
 orderWindow *newOrderWindow(void) {
@@ -115,6 +131,9 @@ orderWindow *newOrderWindow(void) {
 
 	o->o = newOrder();
 	o->order = gtk_tree_view_new_with_model(orderModel(o->o));
+	o->orderSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(o->order));
+	// TODO figure out how to make it so that clicking on blank space deselects
+	g_signal_connect(o->orderSel, "changed", G_CALLBACK(adjustDeleteEnabled), o);
 	setOrderTableLayout(GTK_TREE_VIEW(o->order));
 	o->orderScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(o->orderScroller), o->order);
@@ -128,6 +147,8 @@ orderWindow *newOrderWindow(void) {
 		GTK_POS_BOTTOM, 2, 1);
 
 	o->delete = gtk_button_new_with_label("Delete Item");
+	gtk_widget_set_sensitive(o->delete, FALSE);		// initial state disabled since initial state is nothing selected
+	g_signal_connect(o->delete, "clicked", G_CALLBACK(deleteClicked), o);
 	gtk_widget_set_hexpand(o->delete, TRUE);
 	gtk_widget_set_halign(o->delete, GTK_ALIGN_END);
 	gtk_grid_attach_next_to(GTK_GRID(o->leftside),
