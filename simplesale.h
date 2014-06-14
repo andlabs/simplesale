@@ -11,3 +11,10 @@
 /* orderwin.c */
 typedef struct orderWindow orderWindow;
 extern orderWindow *newOrderWindow(void);
+
+/* items.c */
+extern void initItems(void);
+extern void addItem(char *, char *);
+extern GtkListStore *itemsStore(void);
+extern GtkTreeModel *itemsModel(void);
+extern void setItemsIconSell(GtkCellLayout *);
