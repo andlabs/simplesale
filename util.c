@@ -7,12 +7,12 @@ gint listStoreIterIndex(GtkTreeModel *model, GtkTreeIter *iter)
 	gint index;
 
 	path = gtk_tree_model_get_path(model, iter);
-	index = listStorePathIndex(model, path);
+	index = listStorePathIndex(path);
 	gtk_tree_path_free(path);
 	return index;
 }
 
-gint listStorePathIndex(GtkTreeModel *model, GtkTreePath *path)
+gint listStorePathIndex(GtkTreePath *path)
 {
 	gint *indices;
 

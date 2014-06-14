@@ -8,12 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define USED(...) ((void) (__VA_ARGS__))
+
 /* util.c */
 typedef guint64 price;
 #define PRICE(d, c) ((price) ((((price) (d)) * 100) + ((price) (c))))
 #define PRICEFMT G_GUINT64_FORMAT
 extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
-extern gint listStorePathIndex(GtkTreeModel *, GtkTreePath *);
+extern gint listStorePathIndex(GtkTreePath *);
 extern gchar *priceToString(price, char *);
 
 /* orderwin.c */

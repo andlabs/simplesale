@@ -40,6 +40,8 @@ static void updateTotalDisp(orderWindow *o)
 
 static void search(GtkSearchEntry *entry, gpointer data)
 {
+	USED(entry);
+
 	orderWindow *o = (orderWindow *) data;
 
 	gtk_tree_model_filter_refilter(GTK_TREE_MODEL_FILTER(o->itemsFiltered));
@@ -48,7 +50,7 @@ static void search(GtkSearchEntry *entry, gpointer data)
 static gboolean filter(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
 	orderWindow *o = (orderWindow *) data;
-	gchar *query;
+	const gchar *query;
 	const gchar *item;
 	gchar **words, **wp;
 
@@ -72,17 +74,21 @@ static gboolean filter(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 
 static void itemClicked(GtkIconView *view, GtkTreePath *path, gpointer data)
 {
+	USED(view);
+
 	orderWindow *o = (orderWindow *) data;
 
 	path = gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(o->itemsFiltered), path);
 	if (path == NULL)
 		g_error("filtered list store path converted to child path is NULL for a valid item inside itemClicked()");
-	addToOrder(o->o, listStorePathIndex(itemsModel(), path));
+	addToOrder(o->o, listStorePathIndex(path));
 	updateTotalDisp(o);
 }
 
 static void adjustDeleteEnabled(GtkTreeSelection *selection, gpointer data)
 {
+	USED(selection);
+
 	orderWindow *o = (orderWindow *) data;
 
 	gtk_widget_set_sensitive(o->delete,
@@ -91,6 +97,8 @@ static void adjustDeleteEnabled(GtkTreeSelection *selection, gpointer data)
 
 static void deleteClicked(GtkButton *button, gpointer data)
 {
+	USED(button);
+
 	orderWindow *o = (orderWindow *) data;
 	GtkTreeIter iter;
 
@@ -100,12 +108,11 @@ static void deleteClicked(GtkButton *button, gpointer data)
 	updateTotalDisp(o);
 }
 
-orderWindow *newOrderWindow(void) {
+orderWindow *newOrderWindow(void)
+{
 	orderWindow *o;
 	gint width, height;
 	GtkWidget *label;
-	GtkCellRenderer *r;
-	GtkTreeViewColumn *col;
 
 	o = g_malloc(sizeof (orderWindow));
 
