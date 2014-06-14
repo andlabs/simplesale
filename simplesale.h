@@ -6,6 +6,7 @@
 #include <gtk/gtk.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* orderwin.c */
 typedef struct orderWindow orderWindow;

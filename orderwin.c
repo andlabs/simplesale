@@ -16,9 +16,42 @@ struct orderWindow {
 	GtkWidget *rightside;
 	GtkWidget *searchBox;
 	GtkListStore *itemsStore;
+	GtkTreeModel *itemsFiltered;
 	GtkWidget *items;
 	GtkWidget *itemsScroller;
 };
+
+static void search(GtkSearchEntry *entry, gpointer data)
+{
+	orderWindow *o = (orderWindow *) data;
+
+	gtk_tree_model_filter_refilter(GTK_TREE_MODEL_FILTER(o->itemsFiltered));
+}
+
+static gboolean filter(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
+{
+	orderWindow *o = (orderWindow *) data;
+	gchar *query;
+	const gchar *item;
+	gchar **words, **wp;
+
+	// if no search, show everything
+	query = gtk_entry_get_text(GTK_ENTRY(o->searchBox));
+	if (query == NULL || strlen(query) == 0)
+		return TRUE;
+	gtk_tree_model_get(model, iter, 0, &item, -1);
+	// this make sure any word exists in the item name
+	// TODO really this?
+	words = g_strsplit(query, " ", 0);
+	for (wp = words; *wp != NULL; wp++)
+		/* TODO is strcasestr() guaranteed available with GLib? */
+		if (strcasestr(item, *wp) != NULL) {
+			g_strfreev(words);
+			return TRUE;
+		}
+	g_strfreev(words);
+	return FALSE;
+}
 
 orderWindow *newOrderWindow(void) {
 	orderWindow *o;
@@ -71,7 +104,7 @@ orderWindow *newOrderWindow(void) {
 		GTK_POS_RIGHT, 1, 1);
 
 	o->orderStore = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-	o->order = gtk_tree_view_new_with_model(o->orderStore);
+	o->order = gtk_tree_view_new_with_model(GTK_TREE_MODEL(o->orderStore));
 	r = gtk_cell_renderer_text_new();
 	col = gtk_tree_view_column_new_with_attributes("Item", r, "text", 0, NULL);
 	gtk_tree_view_column_set_expand(col, TRUE);
@@ -104,6 +137,7 @@ orderWindow *newOrderWindow(void) {
 	o->rightside = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(o->rightside), TRUE);
 	o->searchBox = gtk_search_entry_new();
+	g_signal_connect(o->searchBox, "search-changed", G_CALLBACK(search), o);
 	gtk_widget_set_hexpand(o->searchBox, TRUE);
 	gtk_widget_set_halign(o->searchBox, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(o->rightside),
@@ -111,7 +145,9 @@ orderWindow *newOrderWindow(void) {
 		GTK_POS_TOP, 1, 1);
 
 	o->itemsStore = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-	o->items = gtk_icon_view_new_with_model(GTK_TREE_MODEL(o->itemsStore));
+	o->itemsFiltered = gtk_tree_model_filter_new(GTK_TREE_MODEL(o->itemsStore), NULL);
+	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(o->itemsFiltered), filter, o, NULL);
+	o->items = gtk_icon_view_new_with_model(o->itemsFiltered);
 	gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(o->items), TRUE);
 	gtk_cell_layout_clear(GTK_CELL_LAYOUT(o->items));
 	r = gtk_cell_renderer_text_new();
