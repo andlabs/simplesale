@@ -50,25 +50,29 @@ static void search(GtkSearchEntry *entry, gpointer data)
 static gboolean filter(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
 	orderWindow *o = (orderWindow *) data;
-	const gchar *query;
-	const gchar *item;
+	gchar *query;
+	gchar *item;
 	gchar **words, **wp;
 
 	// if no search, show everything
-	query = gtk_entry_get_text(GTK_ENTRY(o->searchBox));
-	if (query == NULL || strlen(query) == 0)
+	// cast to gchar * because we'll be copying it later
+	query = (gchar *) gtk_entry_get_text(GTK_ENTRY(o->searchBox));
+	if (query == NULL || *query == '\0')		// empty string
 		return TRUE;
+	query = g_utf8_strdown(query, -1);
 	gtk_tree_model_get(model, iter, 0, &item, -1);
+	item = g_utf8_strdown(item, -1);
 	// this make sure any word exists in the item name
 	// TODO really this?
 	words = g_strsplit(query, " ", 0);
 	for (wp = words; *wp != NULL; wp++)
-		/* TODO is strcasestr() guaranteed available with GLib? */
-		if (strcasestr(item, *wp) != NULL) {
+		if (strstr(item, *wp) != NULL) {
 			g_strfreev(words);
 			return TRUE;
 		}
 	g_strfreev(words);
+	g_free(item);		// frees the lowercase copy
+	g_free(query);		// frees the lowercase copy
 	return FALSE;
 }
 
