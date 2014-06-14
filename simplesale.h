@@ -23,6 +23,7 @@ extern void setItemsIconLayout(GtkCellLayout *);
 typedef struct order order;
 extern order *newOrder(void);
 extern void addToOrder(order *, gint);
+extern void removeFromOrder(order *, GtkTreeIter *);
 extern GtkTreeModel *orderModel(order *);
 extern void setOrderTableLayout(GtkTreeView *);
 

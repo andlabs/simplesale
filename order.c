@@ -31,6 +31,11 @@ void addToOrder(order *o, gint index)
 	gtk_list_store_set(o->store, &riter, 0, name, 1, dispPrice, 2, index, -1);
 }
 
+void removeFromOrder(order *o, GtkTreeIter *which)
+{
+	gtk_list_store_remove(o->store, which);
+}
+
 GtkTreeModel *orderModel(order *o)
 {
 	return GTK_TREE_MODEL(o->store);

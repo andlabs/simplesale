@@ -75,8 +75,11 @@ static void adjustDeleteEnabled(GtkTreeSelection *selection, gpointer data)
 static void deleteClicked(GtkButton *button, gpointer data)
 {
 	orderWindow *o = (orderWindow *) data;
+	GtkTreeIter iter;
 
-	// TODO
+	if (gtk_tree_selection_get_selected(o->orderSel, NULL, &iter) == FALSE)
+		g_error("Delete Item button clicked without any item selected (button should be disabled)");
+	removeFromOrder(o->o, &iter);
 }
 
 orderWindow *newOrderWindow(void) {
