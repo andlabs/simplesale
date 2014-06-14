@@ -188,9 +188,9 @@ orderWindow *newOrderWindow(void) {
 
 	/* sample items */
 	{
-		addItem("Regular Slice", "$2.00");
-		addItem("Large Soda", "$1.50");
-		addItem("Cookie", "$1.00");
+		addItem("Regular Slice", PRICE(2, 00));
+		addItem("Large Soda", PRICE(1, 50));
+		addItem("Cookie", PRICE(1, 00));
 		addToOrder(o->o, 0);
 		addToOrder(o->o, 1);
 	}

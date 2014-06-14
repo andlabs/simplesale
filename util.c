@@ -24,3 +24,12 @@ gint listStorePathIndex(GtkTreeModel *model, GtkTreePath *path)
 		g_error("list store path indices array is NULL despite having length 1");
 	return indices[0];
 }
+
+gchar *priceToString(price p, char *prefix)
+{
+	price dollars, cents;
+
+	dollars = p / 100;
+	cents = p % 100;
+	return g_strdup_printf("%s%d.%02d", prefix, dollars, cents);
+}

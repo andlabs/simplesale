@@ -3,6 +3,7 @@
 
 struct order {
 	GtkListStore *store;
+	price curprice;
 };
 
 order *newOrder(void)
@@ -10,6 +11,7 @@ order *newOrder(void)
 	order *o;
 
 	o = g_malloc(sizeof (order));
+	memset(o, 0, sizeof (order));
 	o->store = gtk_list_store_new(3,
 		G_TYPE_STRING,		// item name
 		G_TYPE_STRING,		// display price
