@@ -3,6 +3,7 @@ package main
 
 import (
 	"flag"
+	"github.com/conformal/gotk3/glib"
 	"github.com/conformal/gotk3/gtk"
 )
 
@@ -33,6 +34,10 @@ import (
 import "C"
 
 // _ returns for errors returned by conformal/gotk3; jrick regrets having the errors in and we both agreed they should be dropped
+
+type orderWindow struct {
+	// TODO move all the variables here
+}
 
 func myMain() {
 	w, _ := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
@@ -82,7 +87,18 @@ func myMain() {
 		customerName,
 		customerLabel,
 		gtk.POS_RIGHT, 1, 1)
-	order, _ := gtk.TreeViewNew()
+	orderStore, _ := gtk.ListStoreNew(glib.TYPE_STRING, glib.TYPE_STRING)
+	order, _ := gtk.TreeViewNewWithModel(orderStore)
+	r, _ := gtk.CellRendererTextNew()
+	orderItemNameCol, _ := gtk.TreeViewColumnNewWithAttribute(
+		"Item", r, "text", 0)
+	orderItemNameCol.SetExpand(true)
+	r, _ = gtk.CellRendererTextNew()
+	orderItemPriceCol, _ := gtk.TreeViewColumnNewWithAttribute(
+		"Price", r, "text", 1)
+	order.AppendColumn(orderItemNameCol)
+	order.AppendColumn(orderItemPriceCol)
+//	order.SetHeadersVisible(true)
 	orderScroller, _ := gtk.ScrolledWindowNew(nil, nil)
 	orderScroller.Add(order)
 //	orderScroller.SetShadowType(gtk.SHADOW_IN)
@@ -94,6 +110,12 @@ func myMain() {
 		orderScroller,
 		customerLabel,
 		gtk.POS_BOTTOM, 2, 1)
+
+	// sample items
+	oiter := orderStore.Append()
+	orderStore.Set(oiter, []int{0, 1}, []interface{}{"Regular Slice", "$2.00"})
+	oiter = orderStore.Append()
+	orderStore.Set(oiter, []int{0, 1}, []interface{}{"Large Soda", "$1.50"})
 
 	rightside, _ := gtk.GridNew()
 	rightside.SetColumnHomogeneous(true)
