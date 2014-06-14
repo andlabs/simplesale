@@ -124,7 +124,7 @@ orderWindow *newOrderWindow(void)
 	gtk_window_set_title(GTK_WINDOW(o->win), "simplesale");
 	g_signal_connect(o->win, "delete-event", gtk_main_quit, NULL);
 
-	/* the initail height is too small */
+	// the initail height is too small
 	gtk_window_get_default_size(GTK_WINDOW(o->win), &width, &height);
 	if (height == -1)
 		gtk_window_get_size(GTK_WINDOW(o->win), NULL, &height);
@@ -213,7 +213,7 @@ orderWindow *newOrderWindow(void)
 		o->itemsScroller, o->searchBox,
 		GTK_POS_BOTTOM, 2, 1);
 
-	/* sample items */
+	// sample items
 	{
 		addItem("Regular Slice", PRICE(2, 00));
 		addItem("Large Soda", PRICE(1, 50));
