@@ -10,7 +10,7 @@ struct orderWindow {
 	GtkWidget *layout;
 	GtkWidget *leftside;
 	GtkWidget *customer;
-	GtkListStore *orderStore;
+	order *o;
 	GtkWidget *order;
 	GtkWidget *orderScroller;
 	GtkWidget *rightside;
@@ -102,16 +102,9 @@ orderWindow *newOrderWindow(void) {
 		o->customer, label,
 		GTK_POS_RIGHT, 1, 1);
 
-	o->orderStore = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-	o->order = gtk_tree_view_new_with_model(GTK_TREE_MODEL(o->orderStore));
-	r = gtk_cell_renderer_text_new();
-	col = gtk_tree_view_column_new_with_attributes("Item", r, "text", 0, NULL);
-	gtk_tree_view_column_set_expand(col, TRUE);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(o->order), col);
-	r = gtk_cell_renderer_text_new();
-	col = gtk_tree_view_column_new_with_attributes("Price", r, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(o->order), col);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(o->order), TRUE);
+	o->o = newOrder();
+	o->order = gtk_tree_view_new_with_model(orderModel(o->o));
+	setOrderTableLayout(GTK_TREE_VIEW(o->order));
 	o->orderScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(o->orderScroller), o->order);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(o->orderScroller), GTK_SHADOW_IN);
@@ -122,16 +115,6 @@ orderWindow *newOrderWindow(void) {
 	gtk_grid_attach_next_to(GTK_GRID(o->leftside),
 		o->orderScroller, label,
 		GTK_POS_BOTTOM, 2, 1);
-
-	/* sample items */
-	{
-		GtkTreeIter iter;
-
-		gtk_list_store_append(o->orderStore, &iter);
-		gtk_list_store_set(o->orderStore, &iter, 0, "Regular Slice", 1, "$2.00", -1);
-		gtk_list_store_append(o->orderStore, &iter);
-		gtk_list_store_set(o->orderStore, &iter, 0, "Large Soda", 1, "$1.50", -1);
-	}
 
 	o->rightside = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(o->rightside), TRUE);
@@ -165,6 +148,8 @@ orderWindow *newOrderWindow(void) {
 		addItem("Regular Slice", "$2.00");
 		addItem("Large Soda", "$1.50");
 		addItem("Cookie", "$1.00");
+		addToOrder(o->o, 0);
+		addToOrder(o->o, 1);
 	}
 
 	gtk_grid_set_column_homogeneous(GTK_GRID(o->layout), TRUE);

@@ -17,4 +17,14 @@ extern void initItems(void);
 extern void addItem(char *, char *);
 extern GtkListStore *itemsStore(void);
 extern GtkTreeModel *itemsModel(void);
-extern void setItemsIconSell(GtkCellLayout *);
+extern void setItemsIconLayout(GtkCellLayout *);
+
+/* order.c */
+typedef struct order order;
+extern order *newOrder(void);
+extern void addToOrder(order *, gint);
+extern GtkTreeModel *orderModel(order *);
+extern void setOrderTableLayout(GtkTreeView *);
+
+/* util.c */
+extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
