@@ -31,5 +31,5 @@ gchar *priceToString(price p, char *prefix)
 
 	dollars = p / 100;
 	cents = p % 100;
-	return g_strdup_printf("%s%d.%02d", prefix, dollars, cents);
+	return g_strdup_printf("%s%" PRICEFMT ".%02" PRICEFMT, prefix, dollars, cents);
 }

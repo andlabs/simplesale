@@ -3,7 +3,7 @@
 
 static gchar *theme = NULL;
 static GOptionEntry flags[] = {
-	{ "theme", 0, 0, G_OPTION_ARG_STRING, &theme, "if set, GTK+ theme to use", NULL },
+	{ "theme", 0, 0, G_OPTION_ARG_STRING, &theme, "if set, GTK+ theme to use", "THEME" },
 	{ NULL, 0, 0, 0, NULL, NULL, NULL },
 };
 
