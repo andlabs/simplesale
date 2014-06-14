@@ -2,8 +2,35 @@
 package main
 
 import (
+	"flag"
 	"github.com/conformal/gotk3/gtk"
 )
+
+// /* TODO THESE ARE TO DEAL WITH INCOMPLETENESS IN GOTK3 */
+// #cgo  pkg-config: gtk+-3.0
+// #include <gtk/gtk.h>
+// #include <stdint.h>
+// #include <stdlib.h>
+// void makeSuggestedAction(uintptr_t x)
+// {
+// 	gtk_style_context_add_class(
+// 		gtk_widget_get_style_context((GtkWidget *) x),
+// 		"suggested-action");
+// }
+// void makeDestructiveAction(uintptr_t x)
+// {
+// 	gtk_style_context_add_class(
+// 		gtk_widget_get_style_context((GtkWidget *) x),
+// 		"destructive-action");
+// }
+// void setTheme(char *x)
+// {
+// 	g_object_set(gtk_settings_get_default(),
+// 		"gtk-theme-name", x,
+// 		NULL);
+// 	free(x);
+// }
+import "C"
 
 // _ returns for errors returned by conformal/gotk3; jrick regrets having the errors in and we both agreed they should be dropped
 
@@ -12,14 +39,31 @@ func myMain() {
 	w.SetTitle("simplesale")
 	w.Connect("delete-event", gtk.MainQuit)
 
+	// the initail height is too small
+	width, height := w.GetDefaultSize()
+	if height == -1 {
+		_, height = w.GetSize()
+	}
+	w.SetDefaultSize(width, height * 3)
+
 	topbar, _ := gtk.HeaderBarNew()
 	topbar.SetTitle("Total: $3.45")
 	topbar.SetSubtitle("Subtotal: $2.34")
 	topbar.SetShowCloseButton(false)
 	w.SetTitlebar(topbar)
 
+	payNowButton, _ := gtk.ButtonNewWithLabel("Pay Now")
+//	payNowButton.StyleContext.AddClass("suggested-action")
+	C.makeSuggestedAction(C.uintptr_t(payNowButton.Native()))
+	topbar.PackStart(payNowButton)
+	payLaterButton, _ := gtk.ButtonNewWithLabel("Pay Later")
+//	payLaterButton.StyleContext.AddClass("suggested-action")
+	C.makeSuggestedAction(C.uintptr_t(payLaterButton.Native()))
+	topbar.PackStart(payLaterButton)
+
 	cancelButton, _ := gtk.ButtonNewWithLabel("Cancel Order")
-//	cancelButton.StyleContext.AddStyleClass("destructive-action")
+//	cancelButton.StyleContext.AddClass("destructive-action")
+	C.makeDestructiveAction(C.uintptr_t(cancelButton.Native()))
 	topbar.PackEnd(cancelButton)
 
 	layout, _ := gtk.GridNew()
@@ -97,8 +141,14 @@ func myMain() {
 	w.ShowAll()
 }
 
+var gtkTheme = flag.String("theme", "", "if set, GTK+ theme to use")
+
 func main() {
 	gtk.Init(nil)
+	flag.Parse()
+	if *gtkTheme != "" {
+		C.setTheme(C.CString(*gtkTheme))
+	}
 	myMain()
 	gtk.Main()
 }
