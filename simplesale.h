@@ -28,3 +28,4 @@ extern void setOrderTableLayout(GtkTreeView *);
 
 /* util.c */
 extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
+extern gint listStorePathIndex(GtkTreeModel *, GtkTreePath *);

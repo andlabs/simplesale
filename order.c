@@ -22,13 +22,13 @@ void addToOrder(order *o, gint index)
 	// TODO split this into a separate function
 	char *name, *dispPrice;
 	GtkTreePath *path;
-	GtkTreeIter iter;
+	GtkTreeIter iiter, riter;
 
 	path = gtk_tree_path_new_from_indices(index, -1);
-	gtk_tree_model_get_iter(itemsModel(), &iter, path);
-	gtk_tree_model_get(itemsModel(), &iter, 0, &name, 1, &dispPrice, -1);
-	gtk_list_store_append(o->store, &iter);
-	gtk_list_store_set(o->store, &iter, 0, name, 1, dispPrice, 2, index, -1);
+	gtk_tree_model_get_iter(itemsModel(), &iiter, path);
+	gtk_tree_model_get(itemsModel(), &iiter, 0, &name, 1, &dispPrice, -1);
+	gtk_list_store_append(o->store, &riter);
+	gtk_list_store_set(o->store, &riter, 0, name, 1, dispPrice, 2, index, -1);
 }
 
 GtkTreeModel *orderModel(order *o)

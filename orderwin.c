@@ -52,6 +52,16 @@ static gboolean filter(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 	return FALSE;
 }
 
+static void itemClicked(GtkIconView *view, GtkTreePath *path, gpointer data)
+{
+	orderWindow *o = (orderWindow *) data;
+
+	path = gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(o->itemsFiltered), path);
+	if (path == NULL)
+		g_error("filtered list store path converted to child path is NULL for a valid item inside itemClicked()");
+	addToOrder(o->o, listStorePathIndex(itemsModel(), path));
+}
+
 orderWindow *newOrderWindow(void) {
 	orderWindow *o;
 	gint width, height;
@@ -130,6 +140,7 @@ orderWindow *newOrderWindow(void) {
 	o->itemsFiltered = gtk_tree_model_filter_new(itemsModel(), NULL);
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(o->itemsFiltered), filter, o, NULL);
 	o->items = gtk_icon_view_new_with_model(o->itemsFiltered);
+	g_signal_connect(o->items, "item-activated", G_CALLBACK(itemClicked), o);
 	gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(o->items), TRUE);
 	setItemsIconLayout(GTK_CELL_LAYOUT(o->items));
 	o->itemsScroller = gtk_scrolled_window_new(NULL, NULL);
