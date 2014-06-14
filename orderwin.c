@@ -13,6 +13,7 @@ struct orderWindow {
 	order *o;
 	GtkWidget *order;
 	GtkWidget *orderScroller;
+	GtkWidget *delete;
 	GtkWidget *rightside;
 	GtkWidget *searchBox;
 	GtkTreeModel *itemsFiltered;
@@ -124,6 +125,13 @@ orderWindow *newOrderWindow(void) {
 	gtk_widget_set_valign(o->orderScroller, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(o->leftside),
 		o->orderScroller, label,
+		GTK_POS_BOTTOM, 2, 1);
+
+	o->delete = gtk_button_new_with_label("Delete Item");
+	gtk_widget_set_hexpand(o->delete, TRUE);
+	gtk_widget_set_halign(o->delete, GTK_ALIGN_END);
+	gtk_grid_attach_next_to(GTK_GRID(o->leftside),
+		o->delete, o->orderScroller,
 		GTK_POS_BOTTOM, 2, 1);
 
 	o->rightside = gtk_grid_new();
