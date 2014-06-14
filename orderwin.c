@@ -15,6 +15,7 @@ struct orderWindow {
 	GtkWidget *orderScroller;
 	GtkWidget *rightside;
 	GtkWidget *searchBox;
+	GtkListStore *itemsStore;
 	GtkWidget *items;
 	GtkWidget *itemsScroller;
 };
@@ -108,7 +109,17 @@ orderWindow *newOrderWindow(void) {
 	gtk_grid_attach_next_to(GTK_GRID(o->rightside),
 		o->searchBox, NULL,
 		GTK_POS_TOP, 1, 1);
-	o->items = gtk_icon_view_new();
+
+	o->itemsStore = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+	o->items = gtk_icon_view_new_with_model(GTK_TREE_MODEL(o->itemsStore));
+	gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(o->items), TRUE);
+	gtk_cell_layout_clear(GTK_CELL_LAYOUT(o->items));
+	r = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(o->items), r, TRUE);
+	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(o->items), r, "text", 0, NULL);
+	r = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(o->items), r, FALSE);
+	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(o->items), r, "text", 1, NULL);
 	o->itemsScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(o->itemsScroller), o->items);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(o->itemsScroller), GTK_SHADOW_IN);
@@ -119,6 +130,18 @@ orderWindow *newOrderWindow(void) {
 	gtk_grid_attach_next_to(GTK_GRID(o->rightside),
 		o->itemsScroller, o->searchBox,
 		GTK_POS_BOTTOM, 2, 1);
+
+	/* sample items */
+	{
+		GtkTreeIter iter;
+
+		gtk_list_store_append(o->itemsStore, &iter);
+		gtk_list_store_set(o->itemsStore, &iter, 0, "Regular Slice", 1, "$2.00", -1);
+		gtk_list_store_append(o->itemsStore, &iter);
+		gtk_list_store_set(o->itemsStore, &iter, 0, "Large Soda", 1, "$1.50", -1);
+		gtk_list_store_append(o->itemsStore, &iter);
+		gtk_list_store_set(o->itemsStore, &iter, 0, "Cookie", 1, "$1.00", -1);
+	}
 
 	gtk_grid_set_column_homogeneous(GTK_GRID(o->layout), TRUE);
 	gtk_widget_set_hexpand(o->leftside, TRUE);
