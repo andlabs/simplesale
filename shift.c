@@ -35,6 +35,23 @@ static void adjustResumeEnabled(GtkTreeSelection *selection, gpointer data)
 		gtk_tree_selection_count_selected_rows(s->listSel) != 0);
 }
 
+static void resumeClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	shift *s = (shift *) data;
+	GtkTreeIter iter;
+	order *o;
+	orderWindow *ow;
+
+	if (gtk_tree_selection_get_selected(s->listSel, NULL, &iter) == FALSE)
+		g_error("Resume Order button clicked without any order selected (button should be disabled)");
+	gtk_tree_model_get(GTK_TREE_MODEL(s->saved), &iter, 1, &o, -1);
+	ow = (orderWindow *) g_hash_table_lookup(s->orders, o);
+	orderWindowShow(ow);
+	gtk_list_store_remove(s->saved, &iter);
+}
+
 shift *newShift(char *name)
 {
 	shift *s;
@@ -108,7 +125,7 @@ shift *newShift(char *name)
 
 	s->resume = gtk_button_new_with_label("Resume Order");
 	gtk_widget_set_sensitive(s->resume, FALSE);		// initial state; no items present
-//	TODO resume
+	g_signal_connect(s->resume, "clicked", G_CALLBACK(resumeClicked), s);
 	gtk_widget_set_hexpand(s->resume, TRUE);
 	gtk_widget_set_halign(s->resume, GTK_ALIGN_END);
 	gtk_grid_attach_next_to(GTK_GRID(s->layout),
@@ -157,7 +174,7 @@ void shiftDoOrder(shift *s, order *o, int action)
 		gtk_list_store_append(s->saved, &iter);
 		gtk_list_store_set(s->saved, &iter, 0, orderWindowGetCustomer(ow), 1, o, -1);
 		orderWindowHide(ow);
-		break;
+		return;		// DON'T FALL THROUGH! we still need the order!
 	}
 
 	g_hash_table_remove(s->orders, o);
