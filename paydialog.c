@@ -10,6 +10,25 @@ struct payDialog {
 	GtkWidget *decimal;
 };
 
+static void stripInvalidChars(GtkEditable *editable, gchar *text, gint n, gpointer pos, gpointer data)
+{
+	USED(pos);		// don't validate here; we do that after the user is done
+
+	payDialog *p = (payDialog *) data;
+	gint i;
+
+	for (i = 0; i < n; i++) {
+		if (text[i] >= '0' && text[i] <= '9')
+			continue;
+		if (text[i] == '.')
+			continue;
+		gtk_widget_error_bell(p->amount);
+		g_signal_stop_emission_by_name(editable, "insert-text");
+		return;
+	}
+	// otherwise let the text in
+}
+
 static char *digitstrings[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
 static void rightAlign(GtkWidget *label)
@@ -75,6 +94,7 @@ label,xl,
 	p->amount = gtk_entry_new();
 	gtk_entry_set_width_chars(GTK_ENTRY(p->amount), 8);
 	gtk_entry_set_alignment(GTK_ENTRY(p->amount), 1);
+	g_signal_connect(p->amount, "insert-text", G_CALLBACK(stripInvalidChars), p);
 	// TODO restrict input to numeric
 	gtk_widget_set_hexpand(p->amount, TRUE);
 	gtk_widget_set_halign(p->amount, GTK_ALIGN_FILL);
@@ -120,13 +140,73 @@ label,xl,
 	return p;
 }
 
-gint runAndFreePayDialog(payDialog *p)
+gint runPayDialog(payDialog *p)
 {
-	gint result;
-
 	gtk_widget_show_all(p->dialog);
-	result = gtk_dialog_run(GTK_DIALOG(p->dialog));
+	return gtk_dialog_run(GTK_DIALOG(p->dialog));
+}
+
+gboolean payDialogAmountPaid(payDialog *p, price *pout)
+{
+	const gchar *amount;
+	price dollars = 0, cents = 0;
+	gint i, n;
+	GtkWidget *alert;
+
+	amount = gtk_entry_get_text(GTK_ENTRY(p->amount));
+	if (amount == NULL)				// must enter something
+		goto empty;
+	n = strlen(amount);
+	if (n == 0)						// must enter something
+		goto empty;
+	if (n == 1 && amount[0] == '.')		// just a . is invalid
+		goto bad;
+	for (i = 0; i < n; i++) {
+		if (amount[i] >= '0' && amount[i] <= '9') {
+			dollars = dollars * 10 + (amount[i] - '0');
+			continue;
+		}
+		if (amount[i] == '.')
+			break;
+		goto bad;			// unrecognized character
+	}
+	if (i < n) {				// amount[i] == '.'
+		i++;
+		if (i == n)			// ###. is valid
+			;
+		else if (i != n - 2)	// must have either none or two digits
+			goto bad;
+		else {
+			cents = amount[i] - '0';
+			cents = cents * 10 + (amount[i + 1] - '0');
+		}
+	}
+	*pout = PRICE(dollars, cents);
+	return TRUE;
+
+bad:
+	alert = gtk_message_dialog_new(GTK_WINDOW(p->dialog), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+		"The value \"%s\" is not a valid amount paid.", amount);
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
+		"Please correct this amount paid and try again.");
+	gtk_dialog_run(GTK_DIALOG(alert));
+	gtk_widget_destroy(alert);
+	return FALSE;
+
+empty:
+	alert = gtk_message_dialog_new(GTK_WINDOW(p->dialog), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+		"You must specify an amount paid.");
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
+		"Please enter an amount paid and try again.");
+	gtk_dialog_run(GTK_DIALOG(alert));
+	gtk_widget_destroy(alert);
+	return FALSE;
+}
+
+void freePayDialog(payDialog *p)
+{
 	gtk_widget_destroy(p->dialog);		// TODO does this destroy subwidgets?
 	g_free(p);
-	return result;
 }

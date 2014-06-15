@@ -138,10 +138,17 @@ static void payNowClicked(GtkButton *button, gpointer data)
 
 	orderWindow *o = (orderWindow *) data;
 	payDialog *p;
+	price paid;
 
 	p = newPayDialog(GTK_WINDOW(o->win), o->o);
-	if (runAndFreePayDialog(p) != GTK_RESPONSE_ACCEPT)
-		return;
+	do
+		if (runPayDialog(p) != GTK_RESPONSE_ACCEPT) {
+			freePayDialog(p);
+			return;
+		}
+	while (payDialogAmountPaid(p, &paid) == FALSE);
+	freePayDialog(p);
+	// TODO save amount paid
 	scDoOrder(o->o, orderPayNow);
 }
 
