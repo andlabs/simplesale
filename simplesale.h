@@ -46,9 +46,9 @@ extern void orderShowWindow(Order *);
 extern void orderHideWindow(Order *);
 
 // shift.c
-typedef struct shift shift;
-extern shift *newShift(char *);
-extern void shiftNewOrder(shift *);
+typedef struct Shift Shift;
+extern Shift *newShift(char *);
+extern void shiftNewOrder(Shift *);
 
 // paydialog.c
 typedef struct payDialog payDialog;

@@ -1,7 +1,7 @@
 // 15 june 2014
 #include "simplesale.h"
 
-struct shift {
+struct Shift {
 	char *employee;
 	GHashTable *orders;
 
@@ -18,7 +18,7 @@ static void newOrderClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
-	shift *s = (shift *) data;
+	Shift *s = (Shift *) data;
 
 	shiftNewOrder(s);
 }
@@ -29,7 +29,7 @@ static void adjustResumeEnabled(GtkTreeSelection *selection, gpointer data)
 {
 	USED(selection);
 
-	shift *s = (shift *) data;
+	Shift *s = (Shift *) data;
 
 	gtk_widget_set_sensitive(s->resume,
 		gtk_tree_selection_count_selected_rows(s->listSel) != 0);
@@ -39,7 +39,7 @@ static void resumeClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
-	shift *s = (shift *) data;
+	Shift *s = (Shift *) data;
 	GtkTreeIter iter;
 	Order *o;
 
@@ -50,9 +50,9 @@ static void resumeClicked(GtkButton *button, gpointer data)
 	gtk_list_store_remove(s->saved, &iter);
 }
 
-shift *newShift(char *name)
+Shift *newShift(char *name)
 {
-	shift *s;
+	Shift *s;
 	gint width, height;
 	GtkWidget *topbar;
 	GtkWidget *button;
@@ -60,7 +60,7 @@ shift *newShift(char *name)
 	GtkCellRenderer *r;
 	GtkTreeViewColumn *col;
 
-	s = (shift *) g_malloc0(sizeof (shift));
+	s = (Shift *) g_malloc0(sizeof (Shift));
 	s->employee = g_strdup(name);
 	s->orders = g_hash_table_new(g_direct_hash, g_direct_equal);
 
@@ -138,7 +138,7 @@ shift *newShift(char *name)
 
 static void shiftDoOrder(Order *o, gint action, gpointer data)
 {
-	shift *s = (shift *) data;
+	Shift *s = (Shift *) data;
 	GtkTreeIter iter;
 
 	switch (action) {
@@ -160,7 +160,7 @@ static void shiftDoOrder(Order *o, gint action, gpointer data)
 }
 
 
-void shiftNewOrder(shift *s)
+void shiftNewOrder(Shift *s)
 {
 	Order *o;
 
