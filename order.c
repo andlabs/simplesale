@@ -24,7 +24,6 @@ struct Order {
 	GtkTreeModel *itemsFiltered;
 	GtkWidget *items;
 	GtkWidget *itemsScroller;
-	shift *s;			// TODO figure out how to make this unnecessary
 };
 
 typedef struct OrderClass OrderClass;
@@ -35,7 +34,7 @@ struct OrderClass {
 
 G_DEFINE_TYPE(Order, order, G_TYPE_OBJECT)
 
-static void buildOrderGUI(Order *, shift *);
+static void buildOrderGUI(Order *);
 static void freeOrderGUI(Order *);
 
 static void order_init(Order *o)
@@ -44,7 +43,7 @@ static void order_init(Order *o)
 		G_TYPE_STRING,		// item name
 		G_TYPE_STRING,		// display price
 		G_TYPE_INT);			// index in items model
-//	buildOrderGUI(o, o->s);
+	buildOrderGUI(o);
 }
 
 static void order_dispose(GObject *obj)
@@ -62,19 +61,26 @@ static void order_finalize(GObject *o)
 	G_OBJECT_CLASS(order_parent_class)->finalize(o);
 }
 
+static guint orderSignals[1];
+
 static void order_class_init(OrderClass *class)
 {
 	G_OBJECT_CLASS(class)->dispose = order_dispose;
 	G_OBJECT_CLASS(class)->finalize = order_finalize;
+
+	orderSignals[0] = g_signal_new(
+		"do", order_get_type(),
+		G_SIGNAL_RUN_LAST,
+		0,				// no class method slot
+		NULL, NULL,		// no accumulator
+		NULL,			// no marshaller
+		G_TYPE_NONE,		// void do(Order *o, gint code, gpointer data);
+		1, G_TYPE_INT);	// only specify the middle parameters; thanks larsu in irc.gimp.net/#gtk+
 }
 
-Order *newOrder(shift *s)
+Order *newOrder(void)
 {
-	Order *o;
-
-	o = (Order *) g_object_new(order_get_type(), NULL);
-	buildOrderGUI(o, s);
-	return o;
+	return (Order *) g_object_new(order_get_type(), NULL);
 }
 
 void freeOrder(Order *o)
@@ -239,7 +245,7 @@ static void cancelClicked(GtkButton *button, gpointer data)
 	gtk_widget_destroy(prompt);
 	if (response != GTK_RESPONSE_YES)
 		return;
-	shiftDoOrder(o->s, o, orderCancel);
+	g_signal_emit(o, orderSignals[0], 0, orderCancel);
 }
 
 static void payNowClicked(GtkButton *button, gpointer data)
@@ -259,7 +265,7 @@ static void payNowClicked(GtkButton *button, gpointer data)
 	while (payDialogAmountPaid(p, &paid) == FALSE);
 	freePayDialog(p);
 	// TODO save amount paid
-	shiftDoOrder(o->s, o, orderPayNow);
+	g_signal_emit(o, orderSignals[0], 0, orderPayNow);
 }
 
 static void payLaterClicked(GtkButton *button, gpointer data)
@@ -283,12 +289,10 @@ static void payLaterClicked(GtkButton *button, gpointer data)
 		return;
 	}
 	// all good
-	// TODO set customer name
-	printf("customer %s\n", customer);
-	shiftDoOrder(o->s, o, orderPayLater);
+	g_signal_emit(o, orderSignals[0], 0, orderPayLater);
 }
 
-static void buildOrderGUI(Order *o, shift *s)
+static void buildOrderGUI(Order *o)
 {
 	gint width, height;
 	GtkWidget *label;
@@ -403,8 +407,6 @@ static void buildOrderGUI(Order *o, shift *s)
 	gtk_grid_attach_next_to(GTK_GRID(o->layout),
 		o->rightside, o->leftside,
 		GTK_POS_RIGHT, 2, 1);
-
-	o->s = s;
 
 	updateTotalDisp(o);		// initial state
 

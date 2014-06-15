@@ -28,9 +28,13 @@ extern GtkTreeModel *itemsModel(void);
 extern void setItemsIconLayout(GtkCellLayout *);
 
 // order.c
-typedef struct shift shift;	// TODO make this unnecessary
+enum {
+	orderCancel,
+	orderPayNow,
+	orderPayLater,
+};
 typedef struct Order Order;
-extern Order *newOrder(shift *);
+extern Order *newOrder(void);
 extern void freeOrder(Order *);
 extern void addToOrder(Order *, gint);
 extern void removeFromOrder(Order *, GtkTreeIter *);
@@ -42,15 +46,9 @@ extern void orderShowWindow(Order *);
 extern void orderHideWindow(Order *);
 
 // shift.c
-enum {
-	orderCancel,
-	orderPayNow,
-	orderPayLater,
-};
-//typedef struct shift shift;
+typedef struct shift shift;
 extern shift *newShift(char *);
 extern void shiftNewOrder(shift *);
-extern void shiftDoOrder(shift *, Order *, int);
 
 // paydialog.c
 typedef struct payDialog payDialog;

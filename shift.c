@@ -136,24 +136,9 @@ shift *newShift(char *name)
 	return s;
 }
 
-void shiftNewOrder(shift *s)
+static void shiftDoOrder(Order *o, gint action, gpointer data)
 {
-	Order *o;
-
-	o = newOrder(s);
-	// sample items
-	{
-		addItem("Regular Slice", PRICE(2, 00));
-		addItem("Large Soda", PRICE(1, 50));
-		addItem("Cookie", PRICE(1, 00));
-		addToOrder(o, 0);
-		addToOrder(o, 1);
-	}
-	g_hash_table_insert(s->orders, o, NULL);
-}
-
-void shiftDoOrder(shift *s, Order *o, int action)
-{
+	shift *s = (shift *) data;
 	GtkTreeIter iter;
 
 	switch (action) {
@@ -172,4 +157,22 @@ void shiftDoOrder(shift *s, Order *o, int action)
 
 	g_hash_table_remove(s->orders, o);
 	freeOrder(o);
+}
+
+
+void shiftNewOrder(shift *s)
+{
+	Order *o;
+
+	o = newOrder();
+	g_signal_connect(o, "do", G_CALLBACK(shiftDoOrder), s);
+	// sample items
+	{
+		addItem("Regular Slice", PRICE(2, 00));
+		addItem("Large Soda", PRICE(1, 50));
+		addItem("Cookie", PRICE(1, 00));
+		addToOrder(o, 0);
+		addToOrder(o, 1);
+	}
+	g_hash_table_insert(s->orders, o, NULL);
 }
