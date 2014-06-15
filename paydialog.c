@@ -4,14 +4,21 @@
 struct payDialog {
 	GtkWidget *dialog;
 	GtkWidget *layout;
-	GtkWidget *dollars;
-	GtkWidget *cents;
+	GtkWidget *amount;
 	GtkWidget *buttongrid;
 	GtkWidget *digits[10];
 	GtkWidget *decimal;
 };
 
 static char *digitstrings[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
+static void rightAlign(GtkWidget *label)
+{
+	gfloat yalign;
+
+	gtk_misc_get_alignment(GTK_MISC(label), NULL, &yalign);
+	gtk_misc_set_alignment(GTK_MISC(label), 1, yalign);
+}
 
 payDialog *newPayDialog(GtkWindow *parent, order *o)
 {
@@ -31,19 +38,31 @@ payDialog *newPayDialog(GtkWindow *parent, order *o)
 	p->layout = gtk_grid_new();
 
 	label = gtk_label_new("Order Total:");
+	rightAlign(label);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
 		label, NULL,
 		GTK_POS_TOP, 1, 1);
 	firstlabel = label;
-	// TODO total not subtotal
-	pricestr = priceToString(subtotal(o), "$");
-	label = gtk_label_new(pricestr);
-	g_free(pricestr);
+{GtkWidget *xl;
+	label = gtk_label_new("$");
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
 		label, firstlabel,
-		GTK_POS_RIGHT, 4, 1);
-
+		GTK_POS_RIGHT, 1, 1);
+xl = label;
+	// TODO total not subtotal
+	pricestr = priceToString(subtotal(o), "");
+	label = gtk_label_new(pricestr);
+	g_free(pricestr);
+	rightAlign(label);
+	gtk_widget_set_hexpand(label, TRUE);
+	gtk_widget_set_halign(label, GTK_ALIGN_FILL);
+	gtk_grid_attach_next_to(GTK_GRID(p->layout),
+//		label, firstlabel,
+label,xl,
+		GTK_POS_RIGHT, 1, 1);
+}
 	label = gtk_label_new("Amount Given:");
+	rightAlign(label);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
 		label, firstlabel,
 		GTK_POS_BOTTOM, 1, 1);
@@ -53,22 +72,14 @@ payDialog *newPayDialog(GtkWindow *parent, order *o)
 		label, firstlabel,
 		GTK_POS_RIGHT, 1, 1);
 	firstlabel = label;		// for button grid
-	p->dollars = gtk_entry_new();
-	gtk_entry_set_width_chars(GTK_ENTRY(p->dollars), 4);
+	p->amount = gtk_entry_new();
+	gtk_entry_set_width_chars(GTK_ENTRY(p->amount), 8);
+	gtk_entry_set_alignment(GTK_ENTRY(p->amount), 1);
 	// TODO restrict input to numeric
+	gtk_widget_set_hexpand(p->amount, TRUE);
+	gtk_widget_set_halign(p->amount, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		p->dollars, label,
-		GTK_POS_RIGHT, 1, 1);
-	label = gtk_label_new(".");
-	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		label, p->dollars,
-		GTK_POS_RIGHT, 1, 1);
-	p->cents = gtk_spin_button_new_with_range(0, 99, 1);
-	gtk_spin_button_set_digits(GTK_SPIN_BUTTON(p->cents), 0);
-	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(p->cents), TRUE);
-	// TODO leading zero
-	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		p->cents, label,
+		p->amount, label,
 		GTK_POS_RIGHT, 1, 1);
 
 	p->buttongrid = gtk_grid_new();
@@ -96,9 +107,13 @@ payDialog *newPayDialog(GtkWindow *parent, order *o)
 	gtk_grid_attach_next_to(GTK_GRID(p->buttongrid),
 		p->decimal, p->digits[0],
 		GTK_POS_RIGHT, 1, 1);
+	gtk_widget_set_hexpand(p->buttongrid, TRUE);
+	gtk_widget_set_halign(p->buttongrid, GTK_ALIGN_FILL);
+	gtk_widget_set_vexpand(p->buttongrid, TRUE);
+	gtk_widget_set_valign(p->buttongrid, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
 		p->buttongrid, firstlabel,
-		GTK_POS_BOTTOM, 4, 1);
+		GTK_POS_BOTTOM, 2, 1);
 
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(p->dialog))), p->layout);
 
