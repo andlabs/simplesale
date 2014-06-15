@@ -5,7 +5,7 @@ struct Order {
 	GObject parent_instance;
 
 	GtkListStore *store;
-	price subtotal;
+	Price subtotal;
 
 	GtkWidget *win;
 	GtkWidget *topbar;
@@ -91,7 +91,7 @@ void freeOrder(Order *o)
 void addToOrder(Order *o, gint index)
 {
 	char *name, *dispPrice;
-	price p;
+	Price p;
 	GtkTreeIter iter;
 
 	getItem(index, &name, &dispPrice, &p);
@@ -103,7 +103,7 @@ void addToOrder(Order *o, gint index)
 void removeFromOrder(Order *o, GtkTreeIter *which)
 {
 	gint index;
-	price p;
+	Price p;
 
 	gtk_tree_model_get(GTK_TREE_MODEL(o->store), which, 2, &index, -1);
 	getItem(index, NULL, NULL, &p);
@@ -111,7 +111,7 @@ void removeFromOrder(Order *o, GtkTreeIter *which)
 	o->subtotal -= p;
 }
 
-price subtotal(Order *o)
+Price subtotal(Order *o)
 {
 	return o->subtotal;
 }
@@ -140,7 +140,7 @@ void setOrderTableLayout(GtkTreeView *table)
 
 static void updateTotalDisp(Order *o)
 {
-	price tot, sub;
+	Price tot, sub;
 	char *str;
 
 	sub = o->subtotal;
@@ -254,7 +254,7 @@ static void payNowClicked(GtkButton *button, gpointer data)
 
 	Order *o = (Order *) data;
 	payDialog *p;
-	price paid;
+	Price paid;
 
 	p = newPayDialog(GTK_WINDOW(o->win), o);
 	do

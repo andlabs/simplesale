@@ -11,18 +11,18 @@
 #define USED(x) ((void) (x))
 
 // util.c
-typedef guint64 price;
-#define PRICE(d, c) ((price) ((((price) (d)) * 100) + ((price) (c))))
+typedef guint64 Price;
+#define PRICE(d, c) ((Price) ((((Price) (d)) * 100) + ((Price) (c))))
 #define PRICEFMT G_GUINT64_FORMAT
 extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
 extern gint listStorePathIndex(GtkTreePath *);
-extern gchar *priceToString(price, char *);
+extern gchar *priceToString(Price, char *);
 extern void alignLabel(GtkWidget *, gfloat);
 
 // items.c
 extern void initItems(void);
-extern void addItem(char *, price);
-extern void getItem(gint, char **, char **, price *);
+extern void addItem(char *, Price);
+extern void getItem(gint, char **, char **, Price *);
 extern GtkListStore *itemsStore(void);
 extern GtkTreeModel *itemsModel(void);
 extern void setItemsIconLayout(GtkCellLayout *);
@@ -38,7 +38,7 @@ extern Order *newOrder(void);
 extern void freeOrder(Order *);
 extern void addToOrder(Order *, gint);
 extern void removeFromOrder(Order *, GtkTreeIter *);
-extern price subtotal(Order *);
+extern Price subtotal(Order *);
 extern GtkTreeModel *orderModel(Order *);
 extern void setOrderTableLayout(GtkTreeView *);
 extern const gchar *orderCustomer(Order *);
@@ -55,4 +55,4 @@ typedef struct payDialog payDialog;
 extern void freePayDialog(payDialog *);
 extern payDialog *newPayDialog(GtkWindow *, Order *);
 extern gint runPayDialog(payDialog *);
-extern gboolean payDialogAmountPaid(payDialog *, price *);
+extern gboolean payDialogAmountPaid(payDialog *, Price *);

@@ -25,9 +25,9 @@ gint listStorePathIndex(GtkTreePath *path)
 	return indices[0];
 }
 
-gchar *priceToString(price p, char *prefix)
+gchar *priceToString(Price p, char *prefix)
 {
-	price dollars, cents;
+	Price dollars, cents;
 
 	dollars = p / 100;
 	cents = p % 100;

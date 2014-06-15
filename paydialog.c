@@ -145,10 +145,10 @@ gint runPayDialog(payDialog *p)
 	return gtk_dialog_run(GTK_DIALOG(p->dialog));
 }
 
-gboolean payDialogAmountPaid(payDialog *p, price *pout)
+gboolean payDialogAmountPaid(payDialog *p, Price *pout)
 {
 	const gchar *amount;
-	price dollars = 0, cents = 0;
+	Price dollars = 0, cents = 0;
 	gint i, n;
 	GtkWidget *alert;
 
