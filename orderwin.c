@@ -20,6 +20,7 @@ struct orderWindow {
 	GtkTreeModel *itemsFiltered;
 	GtkWidget *items;
 	GtkWidget *itemsScroller;
+	shift *s;
 };
 
 static void updateTotalDisp(orderWindow *o)
@@ -129,7 +130,7 @@ static void cancelClicked(GtkButton *button, gpointer data)
 	gtk_widget_destroy(prompt);
 	if (response != GTK_RESPONSE_YES)
 		return;
-	scDoOrder(o->o, orderCancel);
+	shiftDoOrder(o->s, o->o, orderCancel);
 }
 
 static void payNowClicked(GtkButton *button, gpointer data)
@@ -149,7 +150,7 @@ static void payNowClicked(GtkButton *button, gpointer data)
 	while (payDialogAmountPaid(p, &paid) == FALSE);
 	freePayDialog(p);
 	// TODO save amount paid
-	scDoOrder(o->o, orderPayNow);
+	shiftDoOrder(o->s, o->o, orderPayNow);
 }
 
 static void payLaterClicked(GtkButton *button, gpointer data)
@@ -175,10 +176,10 @@ static void payLaterClicked(GtkButton *button, gpointer data)
 	// all good
 	// TODO set customer name
 	printf("customer %s\n", customer);
-	scDoOrder(o->o, orderPayLater);
+	shiftDoOrder(o->s, o->o, orderPayLater);
 }
 
-orderWindow *newOrderWindow(order *oo)
+orderWindow *newOrderWindow(shift *s, order *oo)
 {
 	orderWindow *o;
 	gint width, height;
@@ -297,6 +298,8 @@ orderWindow *newOrderWindow(order *oo)
 	gtk_grid_attach_next_to(GTK_GRID(o->layout),
 		o->rightside, o->leftside,
 		GTK_POS_RIGHT, 2, 1);
+
+	o->s = s;
 
 	updateTotalDisp(o);		// initial state
 

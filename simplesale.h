@@ -35,18 +35,20 @@ extern price subtotal(order *);
 extern GtkTreeModel *orderModel(order *);
 extern void setOrderTableLayout(GtkTreeView *);
 
-// orderwin.c
-typedef struct orderWindow orderWindow;
-extern orderWindow *newOrderWindow(order *);
-
-// main.c
+// shift.c
 enum {
 	orderCancel,
 	orderPayNow,
 	orderPayLater,
 };
-extern void scNewOrder(void);
-extern void scDoOrder(order *, int);
+typedef struct shift shift;
+extern shift *newShift(char *);
+extern void shiftNewOrder(shift *);
+extern void shiftDoOrder(shift *, order *, int);
+
+// orderwin.c
+typedef struct orderWindow orderWindow;
+extern orderWindow *newOrderWindow(shift *, order *);
 
 // paydialog.c
 typedef struct payDialog payDialog;

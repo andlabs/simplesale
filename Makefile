@@ -3,6 +3,7 @@ CFILES = items.c \
 	order.c \
 	orderwin.c \
 	paydialog.c \
+	shift.c \
 	util.c
 
 HFILES = simplesale.h
