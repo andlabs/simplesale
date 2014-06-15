@@ -27,27 +27,59 @@ struct Order {
 	shift *s;			// TODO figure out how to make this unnecessary
 };
 
+typedef struct OrderClass OrderClass;
+
+struct OrderClass {
+	GObjectClass parent_class;
+};
+
+G_DEFINE_TYPE(Order, order, G_TYPE_OBJECT)
+
 static void buildOrderGUI(Order *, shift *);
 static void freeOrderGUI(Order *);
+
+static void order_init(Order *o)
+{
+	o->store = gtk_list_store_new(3,
+		G_TYPE_STRING,		// item name
+		G_TYPE_STRING,		// display price
+		G_TYPE_INT);			// index in items model
+//	buildOrderGUI(o, o->s);
+}
+
+static void order_dispose(GObject *obj)
+{
+	Order *o = (Order *) obj;
+
+	freeOrderGUI(o);
+	g_object_unref(o->store);
+	G_OBJECT_CLASS(order_parent_class)->dispose(obj);
+}
+
+static void order_finalize(GObject *o)
+{
+	// call g_free() here if needed
+	G_OBJECT_CLASS(order_parent_class)->finalize(o);
+}
+
+static void order_class_init(OrderClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = order_dispose;
+	G_OBJECT_CLASS(class)->finalize = order_finalize;
+}
 
 Order *newOrder(shift *s)
 {
 	Order *o;
 
-	o = (Order *) g_malloc0(sizeof (Order));
-	o->store = gtk_list_store_new(3,
-		G_TYPE_STRING,		// item name
-		G_TYPE_STRING,		// display price
-		G_TYPE_INT);			// index in items model
+	o = (Order *) g_object_new(order_get_type(), NULL);
 	buildOrderGUI(o, s);
 	return o;
 }
 
 void freeOrder(Order *o)
 {
-	freeOrderGUI(o);
-	g_object_unref(o->store);
-	g_free(o);
+	g_object_unref(o);
 }
 
 void addToOrder(Order *o, gint index)
