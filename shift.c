@@ -54,7 +54,7 @@ shift *newShift(char *name)
 	s->layout = gtk_grid_new();
 
 	label = gtk_label_new("Orders for later:");
-	// TODO left align
+	alignLabel(label, 0);
 	gtk_widget_set_hexpand(label, TRUE);
 	gtk_widget_set_halign(label, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(s->layout),

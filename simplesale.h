@@ -17,6 +17,7 @@ typedef guint64 price;
 extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
 extern gint listStorePathIndex(GtkTreePath *);
 extern gchar *priceToString(price, char *);
+extern void alignLabel(GtkWidget *, gfloat);
 
 // items.c
 extern void initItems(void);

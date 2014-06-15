@@ -31,14 +31,6 @@ static void stripInvalidChars(GtkEditable *editable, gchar *text, gint n, gpoint
 
 static char *digitstrings[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
-static void rightAlign(GtkWidget *label)
-{
-	gfloat yalign;
-
-	gtk_misc_get_alignment(GTK_MISC(label), NULL, &yalign);
-	gtk_misc_set_alignment(GTK_MISC(label), 1, yalign);
-}
-
 payDialog *newPayDialog(GtkWindow *parent, order *o)
 {
 	payDialog *p;
@@ -58,7 +50,7 @@ payDialog *newPayDialog(GtkWindow *parent, order *o)
 	p->layout = gtk_grid_new();
 
 	label = gtk_label_new("Order Total:");
-	rightAlign(label);
+	alignLabel(label, 1);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
 		label, NULL,
 		GTK_POS_TOP, 1, 1);
@@ -73,7 +65,7 @@ xl = label;
 	pricestr = priceToString(subtotal(o), "");
 	label = gtk_label_new(pricestr);
 	g_free(pricestr);
-	rightAlign(label);
+	alignLabel(label, 1);
 	gtk_widget_set_hexpand(label, TRUE);
 	gtk_widget_set_halign(label, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
@@ -82,7 +74,7 @@ label,xl,
 		GTK_POS_RIGHT, 1, 1);
 }
 	label = gtk_label_new("Amount Given:");
-	rightAlign(label);
+	alignLabel(label, 1);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
 		label, firstlabel,
 		GTK_POS_BOTTOM, 1, 1);

@@ -33,3 +33,11 @@ gchar *priceToString(price p, char *prefix)
 	cents = p % 100;
 	return g_strdup_printf("%s%" PRICEFMT ".%02" PRICEFMT, prefix, dollars, cents);
 }
+
+void alignLabel(GtkWidget *label, gfloat alignment)
+{
+	gfloat yalign;
+
+	gtk_misc_get_alignment(GTK_MISC(label), NULL, &yalign);
+	gtk_misc_set_alignment(GTK_MISC(label), alignment, yalign);
+}
