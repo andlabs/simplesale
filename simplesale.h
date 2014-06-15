@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define USED(...) ((void) (__VA_ARGS__))
+#define USED(x) ((void) (x))
 
 // util.c
 typedef guint64 price;
