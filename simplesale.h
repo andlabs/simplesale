@@ -29,17 +29,17 @@ extern void setItemsIconLayout(GtkCellLayout *);
 
 // order.c
 typedef struct shift shift;	// TODO make this unnecessary
-typedef struct order order;
-extern order *newOrder(shift *);
-extern void freeOrder(order *);
-extern void addToOrder(order *, gint);
-extern void removeFromOrder(order *, GtkTreeIter *);
-extern price subtotal(order *);
-extern GtkTreeModel *orderModel(order *);
+typedef struct Order Order;
+extern Order *newOrder(shift *);
+extern void freeOrder(Order *);
+extern void addToOrder(Order *, gint);
+extern void removeFromOrder(Order *, GtkTreeIter *);
+extern price subtotal(Order *);
+extern GtkTreeModel *orderModel(Order *);
 extern void setOrderTableLayout(GtkTreeView *);
-extern const gchar *orderCustomer(order *);
-extern void orderShowWindow(order *);
-extern void orderHideWindow(order *);
+extern const gchar *orderCustomer(Order *);
+extern void orderShowWindow(Order *);
+extern void orderHideWindow(Order *);
 
 // shift.c
 enum {
@@ -50,11 +50,11 @@ enum {
 //typedef struct shift shift;
 extern shift *newShift(char *);
 extern void shiftNewOrder(shift *);
-extern void shiftDoOrder(shift *, order *, int);
+extern void shiftDoOrder(shift *, Order *, int);
 
 // paydialog.c
 typedef struct payDialog payDialog;
 extern void freePayDialog(payDialog *);
-extern payDialog *newPayDialog(GtkWindow *, order *);
+extern payDialog *newPayDialog(GtkWindow *, Order *);
 extern gint runPayDialog(payDialog *);
 extern gboolean payDialogAmountPaid(payDialog *, price *);

@@ -1,7 +1,9 @@
 // 14 june 2014
 #include "simplesale.h"
 
-struct order {
+struct Order {
+	GObject parent_instance;
+
 	GtkListStore *store;
 	price subtotal;
 
@@ -25,14 +27,14 @@ struct order {
 	shift *s;			// TODO figure out how to make this unnecessary
 };
 
-static void buildOrderGUI(order *, shift *);
-static void freeOrderGUI(order *);
+static void buildOrderGUI(Order *, shift *);
+static void freeOrderGUI(Order *);
 
-order *newOrder(shift *s)
+Order *newOrder(shift *s)
 {
-	order *o;
+	Order *o;
 
-	o = (order *) g_malloc0(sizeof (order));
+	o = (Order *) g_malloc0(sizeof (Order));
 	o->store = gtk_list_store_new(3,
 		G_TYPE_STRING,		// item name
 		G_TYPE_STRING,		// display price
@@ -41,14 +43,14 @@ order *newOrder(shift *s)
 	return o;
 }
 
-void freeOrder(order *o)
+void freeOrder(Order *o)
 {
 	freeOrderGUI(o);
 	g_object_unref(o->store);
 	g_free(o);
 }
 
-void addToOrder(order *o, gint index)
+void addToOrder(Order *o, gint index)
 {
 	char *name, *dispPrice;
 	price p;
@@ -60,7 +62,7 @@ void addToOrder(order *o, gint index)
 	o->subtotal += p;
 }
 
-void removeFromOrder(order *o, GtkTreeIter *which)
+void removeFromOrder(Order *o, GtkTreeIter *which)
 {
 	gint index;
 	price p;
@@ -71,12 +73,12 @@ void removeFromOrder(order *o, GtkTreeIter *which)
 	o->subtotal -= p;
 }
 
-price subtotal(order *o)
+price subtotal(Order *o)
 {
 	return o->subtotal;
 }
 
-GtkTreeModel *orderModel(order *o)
+GtkTreeModel *orderModel(Order *o)
 {
 	return GTK_TREE_MODEL(o->store);
 }
@@ -98,7 +100,7 @@ void setOrderTableLayout(GtkTreeView *table)
 
 // GUI stuff
 
-static void updateTotalDisp(order *o)
+static void updateTotalDisp(Order *o)
 {
 	price tot, sub;
 	char *str;
@@ -118,14 +120,14 @@ static void search(GtkSearchEntry *entry, gpointer data)
 {
 	USED(entry);
 
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 
 	gtk_tree_model_filter_refilter(GTK_TREE_MODEL_FILTER(o->itemsFiltered));
 }
 
 static gboolean filter(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 	gchar *query;
 	gchar *item;
 	gchar **words, **wp;
@@ -156,7 +158,7 @@ static void itemClicked(GtkIconView *view, GtkTreePath *path, gpointer data)
 {
 	USED(view);
 
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 
 	path = gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(o->itemsFiltered), path);
 	if (path == NULL)
@@ -169,7 +171,7 @@ static void adjustDeleteEnabled(GtkTreeSelection *selection, gpointer data)
 {
 	USED(selection);
 
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 
 	gtk_widget_set_sensitive(o->delete,
 		gtk_tree_selection_count_selected_rows(o->orderSel) != 0);
@@ -179,7 +181,7 @@ static void deleteClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 	GtkTreeIter iter;
 
 	if (gtk_tree_selection_get_selected(o->orderSel, NULL, &iter) == FALSE)
@@ -192,7 +194,7 @@ static void cancelClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 	GtkWidget *prompt;
 	gint response;
 
@@ -212,7 +214,7 @@ static void payNowClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 	payDialog *p;
 	price paid;
 
@@ -232,7 +234,7 @@ static void payLaterClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
-	order *o = (order *) data;
+	Order *o = (Order *) data;
 	const gchar *customer;
 
 	customer = gtk_entry_get_text(GTK_ENTRY(o->customer));
@@ -254,7 +256,7 @@ static void payLaterClicked(GtkButton *button, gpointer data)
 	shiftDoOrder(o->s, o, orderPayLater);
 }
 
-static void buildOrderGUI(order *o, shift *s)
+static void buildOrderGUI(Order *o, shift *s)
 {
 	gint width, height;
 	GtkWidget *label;
@@ -378,23 +380,23 @@ static void buildOrderGUI(order *o, shift *s)
 	gtk_widget_show_all(o->win);
 }
 
-static void freeOrderGUI(order *o)
+static void freeOrderGUI(Order *o)
 {
 	gtk_widget_destroy(o->win);		// TODO does this destroy subwidgets?
 	g_object_unref(o->itemsFiltered);
 }
 
-const gchar *orderCustomer(order *o)
+const gchar *orderCustomer(Order *o)
 {
 	return gtk_entry_get_text(GTK_ENTRY(o->customer));
 }
 
-void orderShowWindow(order *o)
+void orderShowWindow(Order *o)
 {
 	gtk_widget_show_all(o->win);
 }
 
-void orderHideWindow(order *o)
+void orderHideWindow(Order *o)
 {
 	gtk_widget_hide(o->win);
 }

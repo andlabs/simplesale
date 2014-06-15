@@ -31,7 +31,7 @@ static void stripInvalidChars(GtkEditable *editable, gchar *text, gint n, gpoint
 
 static char *digitstrings[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
-payDialog *newPayDialog(GtkWindow *parent, order *o)
+payDialog *newPayDialog(GtkWindow *parent, Order *o)
 {
 	payDialog *p;
 	GtkWidget *label, *firstlabel;

@@ -41,7 +41,7 @@ static void resumeClicked(GtkButton *button, gpointer data)
 
 	shift *s = (shift *) data;
 	GtkTreeIter iter;
-	order *o;
+	Order *o;
 
 	if (gtk_tree_selection_get_selected(s->listSel, NULL, &iter) == FALSE)
 		g_error("Resume Order button clicked without any order selected (button should be disabled)");
@@ -138,7 +138,7 @@ shift *newShift(char *name)
 
 void shiftNewOrder(shift *s)
 {
-	order *o;
+	Order *o;
 
 	o = newOrder(s);
 	// sample items
@@ -152,7 +152,7 @@ void shiftNewOrder(shift *s)
 	g_hash_table_insert(s->orders, o, NULL);
 }
 
-void shiftDoOrder(shift *s, order *o, int action)
+void shiftDoOrder(shift *s, Order *o, int action)
 {
 	GtkTreeIter iter;
 
