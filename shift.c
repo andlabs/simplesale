@@ -42,13 +42,11 @@ static void resumeClicked(GtkButton *button, gpointer data)
 	shift *s = (shift *) data;
 	GtkTreeIter iter;
 	order *o;
-	orderWindow *ow;
 
 	if (gtk_tree_selection_get_selected(s->listSel, NULL, &iter) == FALSE)
 		g_error("Resume Order button clicked without any order selected (button should be disabled)");
 	gtk_tree_model_get(GTK_TREE_MODEL(s->saved), &iter, 1, &o, -1);
-	ow = (orderWindow *) g_hash_table_lookup(s->orders, o);
-	orderWindowShow(ow);
+	orderShowWindow(o);
 	gtk_list_store_remove(s->saved, &iter);
 }
 
@@ -141,9 +139,8 @@ shift *newShift(char *name)
 void shiftNewOrder(shift *s)
 {
 	order *o;
-	orderWindow *ow;
 
-	o = newOrder();
+	o = newOrder(s);
 	// sample items
 	{
 		addItem("Regular Slice", PRICE(2, 00));
@@ -152,16 +149,12 @@ void shiftNewOrder(shift *s)
 		addToOrder(o, 0);
 		addToOrder(o, 1);
 	}
-	ow = newOrderWindow(s, o);
-	g_hash_table_insert(s->orders, o, ow);
+	g_hash_table_insert(s->orders, o, NULL);
 }
 
 void shiftDoOrder(shift *s, order *o, int action)
 {
-	orderWindow *ow;
 	GtkTreeIter iter;
-
-	ow = (orderWindow *) g_hash_table_lookup(s->orders, o);
 
 	switch (action) {
 	case orderCancel:
@@ -172,12 +165,11 @@ void shiftDoOrder(shift *s, order *o, int action)
 		break;
 	case orderPayLater:
 		gtk_list_store_append(s->saved, &iter);
-		gtk_list_store_set(s->saved, &iter, 0, orderWindowGetCustomer(ow), 1, o, -1);
-		orderWindowHide(ow);
+		gtk_list_store_set(s->saved, &iter, 0, orderCustomer(o), 1, o, -1);
+		orderHideWindow(o);
 		return;		// DON'T FALL THROUGH! we still need the order!
 	}
 
 	g_hash_table_remove(s->orders, o);
-	freeOrderWindow(ow);
 	freeOrder(o);
 }

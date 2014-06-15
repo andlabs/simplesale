@@ -1,7 +1,6 @@
 CFILES = items.c \
 	main.c \
 	order.c \
-	orderwin.c \
 	paydialog.c \
 	shift.c \
 	util.c
