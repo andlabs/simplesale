@@ -112,16 +112,74 @@ static void deleteClicked(GtkButton *button, gpointer data)
 	updateTotalDisp(o);
 }
 
-orderWindow *newOrderWindow(void)
+static void cancelClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	orderWindow *o = (orderWindow *) data;
+	GtkWidget *prompt;
+	gint response;
+
+	prompt = gtk_message_dialog_new(GTK_WINDOW(o->win), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
+		"Are you sure you want to cancel the current order?");
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(prompt),
+		"If you click Yes, the current order will be voided.");
+	response = gtk_dialog_run(GTK_DIALOG(prompt));
+	gtk_widget_destroy(prompt);
+	if (response != GTK_RESPONSE_YES)
+		return;
+	scDoOrder(o->o, orderCancel);
+}
+
+static void payNowClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	orderWindow *o = (orderWindow *) data;
+
+	// TODO pop up pay now dialog
+
+	scDoOrder(o->o, orderPayNow);
+}
+
+static void payLaterClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	orderWindow *o = (orderWindow *) data;
+	const gchar *customer;
+
+	customer = gtk_entry_get_text(GTK_ENTRY(o->customer));
+	if (customer == NULL || *customer == '\0') {
+		GtkWidget *alert;
+
+		alert = gtk_message_dialog_new(GTK_WINDOW(o->win), GTK_DIALOG_MODAL,
+			GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+			"You did not say which customer this order is for.");
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
+			"Please enter the customer's name in the Customer: field and try again.");
+		gtk_dialog_run(GTK_DIALOG(alert));
+		gtk_widget_destroy(alert);
+		return;
+	}
+	// all good
+	// TODO set customer name
+	printf("customer %s\n", customer);
+	scDoOrder(o->o, orderPayLater);
+}
+
+orderWindow *newOrderWindow(order *oo)
 {
 	orderWindow *o;
 	gint width, height;
 	GtkWidget *label;
 
-	o = g_malloc(sizeof (orderWindow));
+	o = (orderWindow *) g_malloc0(sizeof (orderWindow));
 
 	o->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(o->win), "simplesale");
+	// TODO remove the following
 	g_signal_connect(o->win, "delete-event", gtk_main_quit, NULL);
 
 	// the initail height is too small
@@ -136,13 +194,16 @@ orderWindow *newOrderWindow(void)
 
 	o->payNow = gtk_button_new_with_label("Pay Now");
 	gtk_style_context_add_class(gtk_widget_get_style_context(o->payNow), "suggested-action");
+	g_signal_connect(o->payNow, "clicked", G_CALLBACK(payNowClicked), o);
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(o->topbar), o->payNow);
 	o->payLater = gtk_button_new_with_label("Pay Later");
 	gtk_style_context_add_class(gtk_widget_get_style_context(o->payLater), "suggested-action");
+	g_signal_connect(o->payLater, "clicked", G_CALLBACK(payLaterClicked), o);
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(o->topbar), o->payLater);
 
 	o->cancel = gtk_button_new_with_label("Cancel Order");
 	gtk_style_context_add_class(gtk_widget_get_style_context(o->cancel), "destructive-action");
+	g_signal_connect(o->cancel, "clicked", G_CALLBACK(cancelClicked), o);
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(o->topbar), o->cancel);
 
 	o->layout = gtk_grid_new();
@@ -159,7 +220,7 @@ orderWindow *newOrderWindow(void)
 		o->customer, label,
 		GTK_POS_RIGHT, 1, 1);
 
-	o->o = newOrder();
+	o->o = oo;
 	o->order = gtk_tree_view_new_with_model(orderModel(o->o));
 	o->orderSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(o->order));
 	// TODO figure out how to make it so that clicking on blank space deselects
@@ -195,7 +256,6 @@ orderWindow *newOrderWindow(void)
 		o->searchBox, NULL,
 		GTK_POS_TOP, 1, 1);
 
-	initItems();
 	o->itemsFiltered = gtk_tree_model_filter_new(itemsModel(), NULL);
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(o->itemsFiltered), filter, o, NULL);
 	o->items = gtk_icon_view_new_with_model(o->itemsFiltered);
@@ -212,15 +272,6 @@ orderWindow *newOrderWindow(void)
 	gtk_grid_attach_next_to(GTK_GRID(o->rightside),
 		o->itemsScroller, o->searchBox,
 		GTK_POS_BOTTOM, 2, 1);
-
-	// sample items
-	{
-		addItem("Regular Slice", PRICE(2, 00));
-		addItem("Large Soda", PRICE(1, 50));
-		addItem("Cookie", PRICE(1, 00));
-		addToOrder(o->o, 0);
-		addToOrder(o->o, 1);
-	}
 
 	gtk_grid_set_column_homogeneous(GTK_GRID(o->layout), TRUE);
 	gtk_widget_set_hexpand(o->leftside, TRUE);

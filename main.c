@@ -7,6 +7,56 @@ static GOptionEntry flags[] = {
 	{ NULL, 0, 0, 0, NULL, NULL, NULL },
 };
 
+typedef struct controller controller;
+
+struct controller {
+	GHashTable *orders;
+};
+
+static controller *c;
+
+static void initController(void)
+{
+	c = (controller *) g_malloc0(sizeof (controller));
+	c->orders = g_hash_table_new(g_direct_hash, g_direct_equal);
+}
+
+void scNewOrder(void)
+{
+	order *o;
+	orderWindow *ow;
+
+	o = newOrder();
+	ow = newOrderWindow(o);
+	// sample items
+	{
+		addItem("Regular Slice", PRICE(2, 00));
+		addItem("Large Soda", PRICE(1, 50));
+		addItem("Cookie", PRICE(1, 00));
+		addToOrder(o, 0);
+		addToOrder(o, 1);
+	}
+	g_hash_table_insert(c->orders, o, ow);
+}
+
+void scDoOrder(order *o, int action)
+{
+	// TODO get out orderWindow
+	USED(o);
+	switch (action) {
+	case orderCancel:
+		printf("order cancelled\n");
+		break;
+	case orderPayNow:
+		printf("order paid now\n");
+		break;
+	case orderPayLater:
+		printf("order paid later\n");
+		break;
+	}
+	gtk_main_quit();
+}
+
 int main(int argc, char *argv[])
 {
 	GOptionContext *flagscontext;
@@ -25,7 +75,9 @@ int main(int argc, char *argv[])
 			"gtk-theme-name", theme,
 			NULL);
 
-	newOrderWindow();
+	initController();
+	initItems();
+	scNewOrder();
 	gtk_main();
 	return 0;
 

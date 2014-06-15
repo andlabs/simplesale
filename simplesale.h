@@ -18,10 +18,6 @@ extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
 extern gint listStorePathIndex(GtkTreePath *);
 extern gchar *priceToString(price, char *);
 
-// orderwin.c
-typedef struct orderWindow orderWindow;
-extern orderWindow *newOrderWindow(void);
-
 // items.c
 extern void initItems(void);
 extern void addItem(char *, price);
@@ -38,3 +34,16 @@ extern void removeFromOrder(order *, GtkTreeIter *);
 extern price subtotal(order *);
 extern GtkTreeModel *orderModel(order *);
 extern void setOrderTableLayout(GtkTreeView *);
+
+// orderwin.c
+typedef struct orderWindow orderWindow;
+extern orderWindow *newOrderWindow(order *);
+
+// main.c
+enum {
+	orderCancel,
+	orderPayNow,
+	orderPayLater,
+};
+extern void scNewOrder(void);
+extern void scDoOrder(order *, int);
