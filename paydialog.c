@@ -53,6 +53,7 @@ payDialog *newPayDialog(GtkWindow *parent, order *o)
 		"_Pay", GTK_RESPONSE_ACCEPT,
 		"_Cancel", GTK_RESPONSE_REJECT,
 		NULL);
+	// TODO set primary/secondary buttons
 
 	p->layout = gtk_grid_new();
 
