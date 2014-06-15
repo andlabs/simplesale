@@ -2,6 +2,7 @@ CFILES = items.c \
 	main.c \
 	order.c \
 	orderwin.c \
+	paydialog.c \
 	util.c
 
 HFILES = simplesale.h

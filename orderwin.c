@@ -137,9 +137,11 @@ static void payNowClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	orderWindow *o = (orderWindow *) data;
+	payDialog *p;
 
-	// TODO pop up pay now dialog
-
+	p = newPayDialog(GTK_WINDOW(o->win), o->o);
+	if (runAndFreePayDialog(p) != GTK_RESPONSE_ACCEPT)
+		return;
 	scDoOrder(o->o, orderPayNow);
 }
 

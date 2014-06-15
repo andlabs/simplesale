@@ -47,3 +47,8 @@ enum {
 };
 extern void scNewOrder(void);
 extern void scDoOrder(order *, int);
+
+// paydialog.c
+typedef struct payDialog payDialog;
+extern payDialog *newPayDialog(GtkWindow *, order *);
+extern gint runAndFreePayDialog(payDialog *);
