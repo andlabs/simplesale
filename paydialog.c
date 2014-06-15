@@ -133,6 +133,12 @@ label,xl,
 	return p;
 }
 
+void freePayDialog(payDialog *p)
+{
+	gtk_widget_destroy(p->dialog);		// TODO does this destroy subwidgets?
+	g_free(p);
+}
+
 gint runPayDialog(payDialog *p)
 {
 	gtk_widget_show_all(p->dialog);
@@ -196,10 +202,4 @@ empty:
 	gtk_dialog_run(GTK_DIALOG(alert));
 	gtk_widget_destroy(alert);
 	return FALSE;
-}
-
-void freePayDialog(payDialog *p)
-{
-	gtk_widget_destroy(p->dialog);		// TODO does this destroy subwidgets?
-	g_free(p);
 }

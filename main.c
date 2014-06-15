@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 			NULL);
 
 	initItems();
-	shiftNewOrder(newShift("Test Cashier"));
+	newShift("Test Cashier");
 	gtk_main();
 	return 0;
 

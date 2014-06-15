@@ -308,3 +308,10 @@ orderWindow *newOrderWindow(shift *s, order *oo)
 
 	return o;
 }
+
+void freeOrderWindow(orderWindow *o)
+{
+	gtk_widget_destroy(o->win);		// TODO does this destroy subwidgets?
+	g_object_unref(o->itemsFiltered);
+	g_free(o);
+}

@@ -7,10 +7,20 @@ struct shift {
 
 	GtkWidget *win;
 	GtkWidget *layout;
+	GtkListStore *saved;
 	GtkWidget *list;
 	GtkWidget *listScroller;
 	GtkWidget *resume;
 };
+
+static void newOrderClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	shift *s = (shift *) data;
+
+	shiftNewOrder(s);
+}
 
 shift *newShift(char *name)
 {
@@ -19,6 +29,8 @@ shift *newShift(char *name)
 	GtkWidget *topbar;
 	GtkWidget *button;
 	GtkWidget *label;
+	GtkCellRenderer *r;
+	GtkTreeViewColumn *col;
 
 	s = (shift *) g_malloc0(sizeof (shift));
 	s->employee = g_strdup(name);
@@ -42,7 +54,7 @@ shift *newShift(char *name)
 
 	button = gtk_button_new_with_label("New Order");
 	gtk_style_context_add_class(gtk_widget_get_style_context(button), "suggested-action");
-//	g_signal_connect(button, "clicked", G_CALLBACK(newOrder), s);
+	g_signal_connect(button, "clicked", G_CALLBACK(newOrderClicked), s);
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(topbar), button);
 
 	button = gtk_button_new_with_label("Clock Out");
@@ -61,7 +73,12 @@ shift *newShift(char *name)
 		label, NULL,
 		GTK_POS_TOP, 1, 1);
 
-	s->list = gtk_list_box_new();
+	s->saved = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
+	s->list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(s->saved));
+	r = gtk_cell_renderer_text_new();
+	col = gtk_tree_view_column_new_with_attributes("", r, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(s->list), col);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(s->list), FALSE);
 	s->listScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(s->listScroller), s->list);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(s->listScroller), GTK_SHADOW_IN);
@@ -108,9 +125,10 @@ void shiftNewOrder(shift *s)
 
 void shiftDoOrder(shift *s, order *o, int action)
 {
-	USED(s);
-	// TODO get out orderWindow
-	USED(o);
+	orderWindow *ow;
+
+	ow = (orderWindow *) g_hash_table_lookup(s->orders, o);
+
 	switch (action) {
 	case orderCancel:
 		printf("order cancelled\n");
@@ -122,5 +140,8 @@ void shiftDoOrder(shift *s, order *o, int action)
 		printf("order paid later\n");
 		break;
 	}
-	gtk_main_quit();
+
+	g_hash_table_remove(s->orders, o);
+	freeOrderWindow(ow);
+	freeOrder(o);
 }

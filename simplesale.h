@@ -30,6 +30,7 @@ extern void setItemsIconLayout(GtkCellLayout *);
 // order.c
 typedef struct order order;
 extern order *newOrder(void);
+extern void freeOrder(order *);
 extern void addToOrder(order *, gint);
 extern void removeFromOrder(order *, GtkTreeIter *);
 extern price subtotal(order *);
@@ -50,10 +51,11 @@ extern void shiftDoOrder(shift *, order *, int);
 // orderwin.c
 typedef struct orderWindow orderWindow;
 extern orderWindow *newOrderWindow(shift *, order *);
+extern void freeOrderWindow(orderWindow *);
 
 // paydialog.c
 typedef struct payDialog payDialog;
+extern void freePayDialog(payDialog *);
 extern payDialog *newPayDialog(GtkWindow *, order *);
 extern gint runPayDialog(payDialog *);
 extern gboolean payDialogAmountPaid(payDialog *, price *);
-extern void freePayDialog(payDialog *);

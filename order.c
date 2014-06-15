@@ -10,13 +10,18 @@ order *newOrder(void)
 {
 	order *o;
 
-	o = g_malloc(sizeof (order));
-	memset(o, 0, sizeof (order));
+	o = (order *) g_malloc0(sizeof (order));
 	o->store = gtk_list_store_new(3,
 		G_TYPE_STRING,		// item name
 		G_TYPE_STRING,		// display price
 		G_TYPE_INT);			// index in items model
 	return o;
+}
+
+void freeOrder(order *o)
+{
+	g_object_unref(o->store);
+	g_free(o);
 }
 
 void addToOrder(order *o, gint index)
