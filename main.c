@@ -27,7 +27,6 @@ void scNewOrder(void)
 	orderWindow *ow;
 
 	o = newOrder();
-	ow = newOrderWindow(o);
 	// sample items
 	{
 		addItem("Regular Slice", PRICE(2, 00));
@@ -36,6 +35,7 @@ void scNewOrder(void)
 		addToOrder(o, 0);
 		addToOrder(o, 1);
 	}
+	ow = newOrderWindow(o);
 	g_hash_table_insert(c->orders, o, ow);
 }
 
