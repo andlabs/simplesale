@@ -52,6 +52,9 @@ extern void shiftDoOrder(shift *, order *, int);
 typedef struct orderWindow orderWindow;
 extern orderWindow *newOrderWindow(shift *, order *);
 extern void freeOrderWindow(orderWindow *);
+extern const gchar *orderWindowGetCustomer(orderWindow *);
+extern void orderWindowShow(orderWindow *);
+extern void orderWindowHide(orderWindow *);
 
 // paydialog.c
 typedef struct payDialog payDialog;

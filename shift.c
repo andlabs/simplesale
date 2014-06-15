@@ -9,6 +9,7 @@ struct shift {
 	GtkWidget *layout;
 	GtkListStore *saved;
 	GtkWidget *list;
+	GtkTreeSelection *listSel;
 	GtkWidget *listScroller;
 	GtkWidget *resume;
 };
@@ -20,6 +21,18 @@ static void newOrderClicked(GtkButton *button, gpointer data)
 	shift *s = (shift *) data;
 
 	shiftNewOrder(s);
+}
+
+// TODO clockOutClicked
+
+static void adjustResumeEnabled(GtkTreeSelection *selection, gpointer data)
+{
+	USED(selection);
+
+	shift *s = (shift *) data;
+
+	gtk_widget_set_sensitive(s->resume,
+		gtk_tree_selection_count_selected_rows(s->listSel) != 0);
 }
 
 shift *newShift(char *name)
@@ -75,6 +88,9 @@ shift *newShift(char *name)
 
 	s->saved = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
 	s->list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(s->saved));
+	s->listSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(s->list));
+	// TODO figure out how to make it so that clicking on blank space deselects
+	g_signal_connect(s->listSel, "changed", G_CALLBACK(adjustResumeEnabled), s);
 	r = gtk_cell_renderer_text_new();
 	col = gtk_tree_view_column_new_with_attributes("", r, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(s->list), col);
@@ -126,6 +142,7 @@ void shiftNewOrder(shift *s)
 void shiftDoOrder(shift *s, order *o, int action)
 {
 	orderWindow *ow;
+	GtkTreeIter iter;
 
 	ow = (orderWindow *) g_hash_table_lookup(s->orders, o);
 
@@ -137,7 +154,9 @@ void shiftDoOrder(shift *s, order *o, int action)
 		printf("order paid now\n");
 		break;
 	case orderPayLater:
-		printf("order paid later\n");
+		gtk_list_store_append(s->saved, &iter);
+		gtk_list_store_set(s->saved, &iter, 0, orderWindowGetCustomer(ow), 1, o, -1);
+		orderWindowHide(ow);
 		break;
 	}
 

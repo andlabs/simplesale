@@ -1,6 +1,8 @@
 // 13 june 2014
 #include "simplesale.h"
 
+// TODO right now there's an increasingly awkward separation between the order window and the order; get rid of it
+
 struct orderWindow {
 	GtkWidget *win;
 	GtkWidget *topbar;
@@ -314,4 +316,19 @@ void freeOrderWindow(orderWindow *o)
 	gtk_widget_destroy(o->win);		// TODO does this destroy subwidgets?
 	g_object_unref(o->itemsFiltered);
 	g_free(o);
+}
+
+const gchar *orderWindowGetCustomer(orderWindow *o)
+{
+	return gtk_entry_get_text(GTK_ENTRY(o->customer));
+}
+
+void orderWindowShow(orderWindow *o)
+{
+	gtk_widget_show_all(o->win);
+}
+
+void orderWindowHide(orderWindow *o)
+{
+	gtk_widget_hide(o->win);
 }
