@@ -39,7 +39,7 @@ static void shift_dispose(GObject *obj)
 	Shift *s = (Shift *) obj;
 
 	freeShiftGUI(s);
-	g_object_unref(s->orders);
+	g_hash_table_unref(s->orders);
 	G_OBJECT_CLASS(shift_parent_class)->dispose(obj);
 }
 
@@ -118,7 +118,15 @@ static void newOrderClicked(GtkButton *button, gpointer data)
 	shiftNewOrder(s);
 }
 
-// TODO clockOutClicked
+static void clockOutClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	Shift *s = (Shift *) data;
+
+	// TODO message box
+	g_signal_emit(s, shiftSignals[0], 0);
+}
 
 static void adjustResumeEnabled(GtkTreeSelection *selection, gpointer data)
 {
@@ -176,8 +184,7 @@ static void buildShiftGUI(Shift *s)
 
 	button = gtk_button_new_with_label("Clock Out");
 	gtk_style_context_add_class(gtk_widget_get_style_context(button), "destructive-action");
-//	g_signal_connect(button, "clicked", G_CALLBACK(clockOut), s);
-	g_signal_connect(button, "clicked", gtk_main_quit, NULL);
+	g_signal_connect(button, "clicked", G_CALLBACK(clockOutClicked), s);
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(s->topbar), button);
 
 	s->layout = gtk_grid_new();
@@ -220,12 +227,12 @@ static void buildShiftGUI(Shift *s)
 		GTK_POS_BOTTOM, 1, 1);
 
 	gtk_container_add(GTK_CONTAINER(s->win), s->layout);
-	gtk_widget_show_all(s->win);
 }
 
 static void freeShiftGUI(Shift *s)
 {
 	gtk_widget_destroy(s->win);		// TODO does this destroy subwidgets?
+	g_object_unref(s->saved);
 }
 
 static void shiftDoOrder(Order *o, gint action, gpointer data)
@@ -266,4 +273,14 @@ void shiftNewOrder(Shift *s)
 		addToOrder(o, 1);
 	}
 	g_hash_table_insert(s->orders, o, NULL);
+}
+
+void shiftShowWindow(Shift *s)
+{
+	gtk_widget_show_all(s->win);
+}
+
+void shiftHideWindow(Shift *s)
+{
+	gtk_widget_hide(s->win);
 }

@@ -40,16 +40,35 @@ struct Login {
 	GtkWidget *login;
 };
 
+static void clockedOut(Shift *s, gpointer data)
+{
+	Login *l = (Login *) data;
+
+	shiftHideWindow(s);
+	g_object_unref(s);
+	gtk_widget_show_all(l->win);
+	gtk_widget_set_sensitive(l->login, TRUE);
+}
+
 static void loginClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
 	Login *l = (Login *) data;
+//	char *password;
+	Shift *s;
 
 	gtk_widget_set_sensitive(l->login, FALSE);
-	sleep(5);
-	gtk_widget_show(l->incorrect);
-	gtk_widget_set_sensitive(l->login, TRUE);
+//	password = gtk_entry_get_text(GTK_ENTRY(l->password));
+//	gtk_entry_set_text(GTK_ENTRY(l->password), "");
+//	sleep(5);
+//	gtk_widget_show(l->incorrect);
+//	gtk_widget_set_sensitive(l->login, TRUE);
+
+	gtk_widget_hide(l->win);
+	s = newShift("TODO");
+	g_signal_connect(s, "clock-out", G_CALLBACK(clockedOut), l);
+	shiftShowWindow(s);
 }
 
 Login *newLogin(void)

@@ -55,10 +55,10 @@ static void order_dispose(GObject *obj)
 	G_OBJECT_CLASS(order_parent_class)->dispose(obj);
 }
 
-static void order_finalize(GObject *o)
+static void order_finalize(GObject *obj)
 {
 	// call g_free() here if needed
-	G_OBJECT_CLASS(order_parent_class)->finalize(o);
+	G_OBJECT_CLASS(order_parent_class)->finalize(obj);
 }
 
 static guint orderSignals[1];
