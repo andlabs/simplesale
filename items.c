@@ -25,6 +25,11 @@ GtkTreeIter addItem(char *name, Price p)
 	return iter;
 }
 
+void deleteItem(GtkTreeIter *which)
+{
+	gtk_list_store_remove(items, which);
+}
+
 void getItem(gint index, char **name, char **dispPrice, Price *p)
 {
 	GtkTreePath *path;
@@ -112,7 +117,30 @@ static void addItemClicked(GtkButton *button, gpointer data)
 	gtk_tree_selection_select_iter(e->listSel, &iter);
 }
 
-// TODO signals before selection
+static void removeItemClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	ItemEditor *e = (ItemEditor *) data;
+	GtkTreeIter iter;
+	char *name;
+	GtkWidget *alert;
+	gint response;
+
+	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
+		g_error("Delete Item button clicked without any item selected (button should be disabled)");
+	gtk_tree_model_get(GTK_TREE_MODEL(items), &iter, 0, &name, -1);
+	alert = gtk_message_dialog_new(GTK_WINDOW(e->win), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
+		"Are you sure you want to delete \"%s\"?", name);
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
+		"Once you click Save and Close in the Item Editor window, the item will be permanently deleted and cannot be recovered later.");
+	response = gtk_dialog_run(GTK_DIALOG(alert));
+	gtk_widget_destroy(alert);
+	if (response != GTK_RESPONSE_YES)
+		return;
+	deleteItem(&iter);
+}
 
 static void itemSelected(GtkTreeSelection *selection, gpointer data)
 {
@@ -199,7 +227,7 @@ ItemEditor *newItemEditor(void)
 		GTK_POS_RIGHT, 1, 1);
 	e->remove = gtk_button_new_from_icon_name("list-remove", GTK_ICON_SIZE_BUTTON);
 	// TODO style class?
-	// TODO connect
+	g_signal_connect(e->remove, "clicked", G_CALLBACK(removeItemClicked), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
 		e->remove, button,
 		GTK_POS_RIGHT, 1, 1);
