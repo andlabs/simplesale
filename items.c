@@ -100,12 +100,11 @@ struct ItemEditor {
 	GtkWidget *rightside;
 	GtkWidget *name;
 	GtkWidget *price;
+	GtkWidget *invalid;
 
 	GtkTreeIter current;
 	gboolean selecting;
 };
-
-// TODO live search signal
 
 static void addItemClicked(GtkButton *button, gpointer data)
 {
@@ -160,11 +159,12 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 	if (selected) {
 		gtk_tree_model_get(GTK_TREE_MODEL(items), &e->current, 0, &name, 2, &price, -1);
 		pricestr = priceToString(price, "");
-	}
+	} else
+		gtk_label_set_text(GTK_LABEL(e->invalid), "");
 	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
-	e->selecting = FALSE;
 	gtk_entry_set_text(GTK_ENTRY(e->price), pricestr);
+	e->selecting = FALSE;
 	if (selected)
 		g_free(pricestr);
 
@@ -187,6 +187,29 @@ static void nameChanged(GtkEditable *editable, gpointer data)
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("item changed without any item selected (textbox should be disabled)");
 	gtk_list_store_set(items, &iter, 0, gtk_entry_get_text(GTK_ENTRY(e->name)), -1);
+}
+
+static void priceChanged(GtkEditable *editable, gpointer data)
+{
+	USED(editable);
+
+	ItemEditor *e = (ItemEditor *) data;
+	GtkTreeIter iter;
+	Price price;
+	char *dispPrice;
+
+	if (e->selecting)	// prevent spurious g_error() during selection changed
+		return;
+	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
+		g_error("item changed without any item selected (textbox should be disabled)");
+	if (priceEntryGetPrice(PRICE_ENTRY(e->price), &price) != priceEntryOK)
+		gtk_label_set_text(GTK_LABEL(e->invalid), "Entered price invalid; not changing.");
+	else {
+		gtk_label_set_text(GTK_LABEL(e->invalid), "");
+		dispPrice = priceToString(price, "$");
+		gtk_list_store_set(items, &iter, 1, dispPrice, 2, price, -1);
+		g_free(dispPrice);
+	}
 }
 
 ItemEditor *newItemEditor(void)
@@ -230,7 +253,7 @@ ItemEditor *newItemEditor(void)
 
 	e->leftside = gtk_grid_new();
 	e->search = gtk_search_entry_new();
-	// TODO signal for live search
+	// no live search; we assign the interactive search widget of the GtkTreeView below to this
 	gtk_widget_set_hexpand(e->search, TRUE);
 	gtk_widget_set_halign(e->search, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
@@ -254,6 +277,7 @@ ItemEditor *newItemEditor(void)
 	// TODO figure out how to make it so that clicking on blank space deselects
 	g_signal_connect(e->listSel, "changed", G_CALLBACK(itemSelected), e);
 	setItemsColumnLayout(GTK_TREE_VIEW(e->list));
+	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(e->list), GTK_ENTRY(e->search));
 	e->listScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(e->listScroller), e->list);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(e->listScroller), GTK_SHADOW_IN);
@@ -277,7 +301,7 @@ ItemEditor *newItemEditor(void)
 	gtk_widget_set_halign(e->name, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->name, label,
-		GTK_POS_RIGHT, 2, 1);
+		GTK_POS_RIGHT, 3, 1);
 {GtkWidget *l2 = label;
 	label = gtk_label_new("Price:");
 	alignLabel(label, 1);
@@ -291,10 +315,16 @@ l2=label;
 		GTK_POS_RIGHT, 1, 1);
 }
 	e->price = newPriceEntry();
-	gtk_widget_set_hexpand(e->price, TRUE);
-	gtk_widget_set_halign(e->price, GTK_ALIGN_START);		// not absurdly long
+	g_signal_connect(e->price, "changed", G_CALLBACK(priceChanged), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->price, label,
+		GTK_POS_RIGHT, 1, 1);
+	e->invalid = gtk_label_new("");
+	alignLabel(e->invalid, 0);
+	gtk_widget_set_hexpand(e->invalid, TRUE);
+	gtk_widget_set_halign(e->invalid, GTK_ALIGN_START);
+	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
+		e->invalid, e->price,
 		GTK_POS_RIGHT, 1, 1);
 
 	// TODO add an undo button?
