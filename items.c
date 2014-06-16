@@ -102,6 +102,7 @@ struct ItemEditor {
 	GtkWidget *price;
 
 	GtkTreeIter current;
+	gboolean selecting;
 };
 
 // TODO live search signal
@@ -160,7 +161,9 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 		gtk_tree_model_get(GTK_TREE_MODEL(items), &e->current, 0, &name, 2, &price, -1);
 		pricestr = priceToString(price, "");
 	}
+	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
+	e->selecting = FALSE;
 	gtk_entry_set_text(GTK_ENTRY(e->price), pricestr);
 	if (selected)
 		g_free(pricestr);
@@ -179,6 +182,8 @@ static void nameChanged(GtkEditable *editable, gpointer data)
 	ItemEditor *e = (ItemEditor *) data;
 	GtkTreeIter iter;
 
+	if (e->selecting)	// prevent spurious g_error() during selection changed
+		return;
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("item changed without any item selected (textbox should be disabled)");
 	gtk_list_store_set(items, &iter, 0, gtk_entry_get_text(GTK_ENTRY(e->name)), -1);
