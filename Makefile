@@ -3,6 +3,7 @@ CFILES = items.c \
 	login.c \
 	order.c \
 	paydialog.c \
+	price.c \
 	shift.c \
 	util.c
 

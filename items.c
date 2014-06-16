@@ -9,7 +9,7 @@ void initItems(void)
 	items = gtk_list_store_new(3,
 		G_TYPE_STRING,			// item name
 		G_TYPE_STRING,			// display price
-		G_TYPE_UINT64);			// actual price
+		PRICETYPE);				// actual price
 	// index is the item ID
 }
 

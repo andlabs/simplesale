@@ -25,15 +25,6 @@ gint listStorePathIndex(GtkTreePath *path)
 	return indices[0];
 }
 
-gchar *priceToString(Price p, char *prefix)
-{
-	Price dollars, cents;
-
-	dollars = p / 100;
-	cents = p % 100;
-	return g_strdup_printf("%s%" PRICEFMT ".%02" PRICEFMT, prefix, dollars, cents);
-}
-
 void alignLabel(GtkWidget *label, gfloat alignment)
 {
 	gfloat yalign;

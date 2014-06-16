@@ -11,13 +11,16 @@
 #define USED(x) ((void) (x))
 
 // util.c
+extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
+extern gint listStorePathIndex(GtkTreePath *);
+extern void alignLabel(GtkWidget *, gfloat);
+
+// price.c
 typedef guint64 Price;
 #define PRICE(d, c) ((Price) ((((Price) (d)) * 100) + ((Price) (c))))
 #define PRICEFMT G_GUINT64_FORMAT
-extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
-extern gint listStorePathIndex(GtkTreePath *);
+#define PRICETYPE G_TYPE_UINT64
 extern gchar *priceToString(Price, char *);
-extern void alignLabel(GtkWidget *, gfloat);
 
 // items.c
 extern void initItems(void);
