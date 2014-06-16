@@ -48,6 +48,10 @@ extern void getItem(gint, char **, char **, Price *);
 extern GtkListStore *itemsStore(void);
 extern GtkTreeModel *itemsModel(void);
 extern void setItemsIconLayout(GtkCellLayout *);
+extern void setItemsColumnLayout(GtkTreeView *);
+
+typedef struct ItemEditor ItemEditor;
+extern ItemEditor *newItemEditor(void);
 
 // order.c
 enum {
@@ -84,5 +88,6 @@ extern gboolean payDialogAmountPaid(PayDialog *, Price *);
 // login.c
 extern void initAccounts(void);
 extern void addAccount(char *, char *);
+
 typedef struct Login Login;
 extern Login *newLogin(void);

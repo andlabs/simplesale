@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
 	if (argc > 1) {
 		if (strcmp(argv[1], "item") == 0)
-;//			newItemEditor();
+			newItemEditor();
 	} else {
 		addAccount("Test Owner", "abcd");
 		addAccount("Test Cashier", "efgh");

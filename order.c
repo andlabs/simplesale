@@ -123,17 +123,8 @@ GtkTreeModel *orderModel(Order *o)
 
 void setOrderTableLayout(GtkTreeView *table)
 {
-	GtkCellRenderer *r;
-	GtkTreeViewColumn *col;
-
-	r = gtk_cell_renderer_text_new();
-	col = gtk_tree_view_column_new_with_attributes("Item", r, "text", 0, NULL);
-	gtk_tree_view_column_set_expand(col, TRUE);
-	gtk_tree_view_append_column(table, col);
-	r = gtk_cell_renderer_text_new();
-	col = gtk_tree_view_column_new_with_attributes("Price", r, "text", 1, NULL);
-	gtk_tree_view_append_column(table, col);
-	gtk_tree_view_set_headers_visible(table, TRUE);
+	// they're identical
+	setItemsColumnLayout(table);
 }
 
 // GUI stuff
