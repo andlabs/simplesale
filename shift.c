@@ -2,10 +2,13 @@
 #include "simplesale.h"
 
 struct Shift {
+	GObject parent_instance;
+
 	char *employee;
 	GHashTable *orders;
 
 	GtkWidget *win;
+	GtkWidget *topbar;
 	GtkWidget *layout;
 	GtkListStore *saved;
 	GtkWidget *list;
@@ -13,6 +16,98 @@ struct Shift {
 	GtkWidget *listScroller;
 	GtkWidget *resume;
 };
+
+typedef struct ShiftClass ShiftClass;
+
+struct ShiftClass {
+	GObjectClass parent_class;
+};
+
+G_DEFINE_TYPE(Shift, shift, G_TYPE_OBJECT)
+
+static void buildShiftGUI(Shift *);
+static void freeShiftGUI(Shift *);
+
+static void shift_init(Shift *s)
+{
+	s->orders = g_hash_table_new(g_direct_hash, g_direct_equal);
+	buildShiftGUI(s);
+}
+
+static void shift_dispose(GObject *obj)
+{
+	Shift *s = (Shift *) obj;
+
+	freeShiftGUI(s);
+	g_object_unref(s->orders);
+	G_OBJECT_CLASS(shift_parent_class)->dispose(obj);
+}
+
+static void shift_finalize(GObject *obj)
+{
+	Shift *s = (Shift *) obj;
+
+	g_free(s->employee);
+	G_OBJECT_CLASS(shift_parent_class)->finalize(obj);
+}
+
+static GParamSpec *shiftProperties[2];
+static guint shiftSignals[1];
+
+// cheat with these two; we only have one property
+
+static void shift_setProperty(GObject *obj, guint id, const GValue *value, GParamSpec *pspec)
+{
+	USED(id);
+	USED(pspec);
+
+	Shift *s = (Shift *) obj;
+
+	g_free(s->employee);
+	s->employee = g_value_dup_string(value);
+	gtk_header_bar_set_title(GTK_HEADER_BAR(s->topbar), s->employee);
+}
+
+static void shift_getProperty(GObject *obj, guint id, GValue *value, GParamSpec *pspec)
+{
+	USED(id);
+	USED(pspec);
+
+	Shift *s = (Shift *) obj;
+
+	g_value_set_string(value, s->employee);
+}
+
+static void shift_class_init(ShiftClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = shift_dispose;
+	G_OBJECT_CLASS(class)->finalize = shift_finalize;
+	G_OBJECT_CLASS(class)->set_property = shift_setProperty;
+	G_OBJECT_CLASS(class)->get_property = shift_getProperty;
+
+	shiftProperties[1] = g_param_spec_string(
+		"employee",
+		"Employee name",
+		"Employee name",
+		"<unnamed employee>",				// TODO
+		G_PARAM_CONSTRUCT_ONLY |		// don't change later
+			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+	g_object_class_install_properties(G_OBJECT_CLASS(class), 2, shiftProperties);
+
+	shiftSignals[0] = g_signal_new(
+		"clock-out", shift_get_type(),
+		G_SIGNAL_RUN_LAST,
+		0,				// no class method slot
+		NULL, NULL,		// no accumulator
+		NULL,			// no marshaller
+		G_TYPE_NONE,		// void clockOut(Shift *s, gpointer data);
+		0);				// only specify the middle parameters; thanks larsu in irc.gimp.net/#gtk+
+}
+
+Shift *newShift(char *name)
+{
+	return (Shift *) g_object_new(shift_get_type(), "employee", name, NULL);
+}
 
 static void newOrderClicked(GtkButton *button, gpointer data)
 {
@@ -50,19 +145,13 @@ static void resumeClicked(GtkButton *button, gpointer data)
 	gtk_list_store_remove(s->saved, &iter);
 }
 
-Shift *newShift(char *name)
+static void buildShiftGUI(Shift *s)
 {
-	Shift *s;
 	gint width, height;
-	GtkWidget *topbar;
 	GtkWidget *button;
 	GtkWidget *label;
 	GtkCellRenderer *r;
 	GtkTreeViewColumn *col;
-
-	s = (Shift *) g_malloc0(sizeof (Shift));
-	s->employee = g_strdup(name);
-	s->orders = g_hash_table_new(g_direct_hash, g_direct_equal);
 
 	s->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(s->win), "simplesale");
@@ -75,21 +164,21 @@ Shift *newShift(char *name)
 		gtk_window_get_size(GTK_WINDOW(s->win), NULL, &height);
 	gtk_window_set_default_size(GTK_WINDOW(s->win), width, height * 2);
 
-	topbar = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(topbar), s->employee);
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(topbar), FALSE);
-	gtk_window_set_titlebar(GTK_WINDOW(s->win), topbar);
+	s->topbar = gtk_header_bar_new();
+	gtk_header_bar_set_title(GTK_HEADER_BAR(s->topbar), s->employee);
+	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(s->topbar), FALSE);
+	gtk_window_set_titlebar(GTK_WINDOW(s->win), s->topbar);
 
 	button = gtk_button_new_with_label("New Order");
 	gtk_style_context_add_class(gtk_widget_get_style_context(button), "suggested-action");
 	g_signal_connect(button, "clicked", G_CALLBACK(newOrderClicked), s);
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(topbar), button);
+	gtk_header_bar_pack_start(GTK_HEADER_BAR(s->topbar), button);
 
 	button = gtk_button_new_with_label("Clock Out");
 	gtk_style_context_add_class(gtk_widget_get_style_context(button), "destructive-action");
 //	g_signal_connect(button, "clicked", G_CALLBACK(clockOut), s);
 	g_signal_connect(button, "clicked", gtk_main_quit, NULL);
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(topbar), button);
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(s->topbar), button);
 
 	s->layout = gtk_grid_new();
 
@@ -132,8 +221,11 @@ Shift *newShift(char *name)
 
 	gtk_container_add(GTK_CONTAINER(s->win), s->layout);
 	gtk_widget_show_all(s->win);
+}
 
-	return s;
+static void freeShiftGUI(Shift *s)
+{
+	gtk_widget_destroy(s->win);		// TODO does this destroy subwidgets?
 }
 
 static void shiftDoOrder(Order *o, gint action, gpointer data)
@@ -158,7 +250,6 @@ static void shiftDoOrder(Order *o, gint action, gpointer data)
 	g_hash_table_remove(s->orders, o);
 	freeOrder(o);
 }
-
 
 void shiftNewOrder(Shift *s)
 {
