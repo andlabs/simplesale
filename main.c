@@ -27,9 +27,15 @@ int main(int argc, char *argv[])
 
 	initAccounts();
 	initItems();
-	addAccount("Test Owner", "abcd");
-	addAccount("Test Cashier", "efgh");
-	newLogin();
+
+	if (argc > 1) {
+		if (strcmp(argv[1], "item") == 0)
+;//			newItemEditor();
+	} else {
+		addAccount("Test Owner", "abcd");
+		addAccount("Test Cashier", "efgh");
+		newLogin();
+	}
 	gtk_main();
 	return 0;
 
