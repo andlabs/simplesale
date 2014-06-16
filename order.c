@@ -256,7 +256,8 @@ static void payNowClicked(GtkButton *button, gpointer data)
 	PayDialog *p;
 	Price paid;
 
-	p = newPayDialog(GTK_WINDOW(o->win), o);
+	// TODO total, not subtotal
+	p = newPayDialog(GTK_WINDOW(o->win), o->subtotal);
 	do
 		if (runPayDialog(p) != GTK_RESPONSE_ACCEPT) {
 			freePayDialog(p);

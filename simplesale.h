@@ -53,7 +53,7 @@ extern void shiftNewOrder(Shift *);
 // paydialog.c
 typedef struct PayDialog PayDialog;
 extern void freePayDialog(PayDialog *);
-extern PayDialog *newPayDialog(GtkWindow *, Order *);
+extern PayDialog *newPayDialog(GtkWindow *, Price);
 extern gint runPayDialog(PayDialog *);
 extern gboolean payDialogAmountPaid(PayDialog *, Price *);
 

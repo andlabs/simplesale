@@ -2,6 +2,8 @@
 #include "simplesale.h"
 
 struct PayDialog {
+	Price price;
+
 	GtkWidget *dialog;
 	GtkWidget *layout;
 	GtkWidget *amount;
@@ -31,7 +33,7 @@ static void stripInvalidChars(GtkEditable *editable, gchar *text, gint n, gpoint
 
 static char *digitstrings[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
-PayDialog *newPayDialog(GtkWindow *parent, Order *o)
+PayDialog *newPayDialog(GtkWindow *parent, Price price)
 {
 	PayDialog *p;
 	GtkWidget *label, *firstlabel;
@@ -39,6 +41,7 @@ PayDialog *newPayDialog(GtkWindow *parent, Order *o)
 	int i;
 
 	p = (PayDialog *) g_malloc0(sizeof (PayDialog));
+	p->price = price;
 
 	p->dialog = gtk_dialog_new_with_buttons("Pay Now",
 		parent, GTK_DIALOG_MODAL,
@@ -61,8 +64,7 @@ PayDialog *newPayDialog(GtkWindow *parent, Order *o)
 		label, firstlabel,
 		GTK_POS_RIGHT, 1, 1);
 xl = label;
-	// TODO total not subtotal
-	pricestr = priceToString(subtotal(o), "");
+	pricestr = priceToString(p->price, "");
 	label = gtk_label_new(pricestr);
 	g_free(pricestr);
 	alignLabel(label, 1);
