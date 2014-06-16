@@ -172,6 +172,18 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 		gtk_entry_set_placeholder_text(GTK_ENTRY(e->name), "Select an item at left or click + to add a new item.");
 }
 
+static void nameChanged(GtkEditable *editable, gpointer data)
+{
+	USED(editable);
+
+	ItemEditor *e = (ItemEditor *) data;
+	GtkTreeIter iter;
+
+	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
+		g_error("item changed without any item selected (textbox should be disabled)");
+	gtk_list_store_set(items, &iter, 0, gtk_entry_get_text(GTK_ENTRY(e->name)), -1);
+}
+
 ItemEditor *newItemEditor(void)
 {
 	gint width, height;
@@ -255,6 +267,7 @@ ItemEditor *newItemEditor(void)
 		label, NULL,
 		GTK_POS_TOP, 1, 1);
 	e->name = gtk_entry_new();
+	g_signal_connect(e->name, "changed", G_CALLBACK(nameChanged), e);
 	gtk_widget_set_hexpand(e->name, TRUE);
 	gtk_widget_set_halign(e->name, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
