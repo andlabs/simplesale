@@ -253,7 +253,7 @@ static void payNowClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	Order *o = (Order *) data;
-	payDialog *p;
+	PayDialog *p;
 	Price paid;
 
 	p = newPayDialog(GTK_WINDOW(o->win), o);

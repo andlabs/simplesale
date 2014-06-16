@@ -51,11 +51,11 @@ extern Shift *newShift(char *);
 extern void shiftNewOrder(Shift *);
 
 // paydialog.c
-typedef struct payDialog payDialog;
-extern void freePayDialog(payDialog *);
-extern payDialog *newPayDialog(GtkWindow *, Order *);
-extern gint runPayDialog(payDialog *);
-extern gboolean payDialogAmountPaid(payDialog *, Price *);
+typedef struct PayDialog PayDialog;
+extern void freePayDialog(PayDialog *);
+extern PayDialog *newPayDialog(GtkWindow *, Order *);
+extern gint runPayDialog(PayDialog *);
+extern gboolean payDialogAmountPaid(PayDialog *, Price *);
 
 // login.c
 extern void initAccounts(void);

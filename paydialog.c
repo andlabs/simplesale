@@ -1,7 +1,7 @@
 // 15 june 2014
 #include "simplesale.h"
 
-struct payDialog {
+struct PayDialog {
 	GtkWidget *dialog;
 	GtkWidget *layout;
 	GtkWidget *amount;
@@ -14,7 +14,7 @@ static void stripInvalidChars(GtkEditable *editable, gchar *text, gint n, gpoint
 {
 	USED(pos);		// don't validate here; we do that after the user is done
 
-	payDialog *p = (payDialog *) data;
+	PayDialog *p = (PayDialog *) data;
 	gint i;
 
 	for (i = 0; i < n; i++) {
@@ -31,14 +31,14 @@ static void stripInvalidChars(GtkEditable *editable, gchar *text, gint n, gpoint
 
 static char *digitstrings[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
-payDialog *newPayDialog(GtkWindow *parent, Order *o)
+PayDialog *newPayDialog(GtkWindow *parent, Order *o)
 {
-	payDialog *p;
+	PayDialog *p;
 	GtkWidget *label, *firstlabel;
 	gchar *pricestr;
 	int i;
 
-	p = (payDialog *) g_malloc0(sizeof (payDialog));
+	p = (PayDialog *) g_malloc0(sizeof (PayDialog));
 
 	p->dialog = gtk_dialog_new_with_buttons("Pay Now",
 		parent, GTK_DIALOG_MODAL,
@@ -133,19 +133,19 @@ label,xl,
 	return p;
 }
 
-void freePayDialog(payDialog *p)
+void freePayDialog(PayDialog *p)
 {
 	gtk_widget_destroy(p->dialog);		// TODO does this destroy subwidgets?
 	g_free(p);
 }
 
-gint runPayDialog(payDialog *p)
+gint runPayDialog(PayDialog *p)
 {
 	gtk_widget_show_all(p->dialog);
 	return gtk_dialog_run(GTK_DIALOG(p->dialog));
 }
 
-gboolean payDialogAmountPaid(payDialog *p, Price *pout)
+gboolean payDialogAmountPaid(PayDialog *p, Price *pout)
 {
 	const gchar *amount;
 	Price dollars = 0, cents = 0;
