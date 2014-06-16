@@ -22,6 +22,25 @@ typedef guint64 Price;
 #define PRICETYPE G_TYPE_UINT64
 extern gchar *priceToString(Price, char *);
 
+#define PRICE_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), priceEntry_get_type(), PriceEntry))
+#define PRICE_ENTRY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), priceEntry_get_type(), PriceEntryClass))
+typedef struct PriceEntry PriceEntry;
+typedef struct PriceEntryClass PriceEntryClass;
+struct PriceEntry {
+	GtkEntry parent_instance;
+};
+struct PriceEntryClass {
+	GtkEntryClass parent_class;
+};
+extern GtkWidget *newPriceEntry(void);
+extern GType priceEntry_get_type(void);
+enum {
+	priceEntryOK,
+	priceEntryEmpty,
+	priceEntryInvalid,
+};
+extern int priceEntryGetPrice(PriceEntry *, Price *);
+
 // items.c
 extern void initItems(void);
 extern void addItem(char *, Price);
