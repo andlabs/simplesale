@@ -36,8 +36,21 @@ struct Login {
 	GtkWidget *list;
 	GtkWidget *listScroller;
 	GtkWidget *password;
+	GtkWidget *incorrect;
 	GtkWidget *login;
 };
+
+static void loginClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	Login *l = (Login *) data;
+
+	gtk_widget_set_sensitive(l->login, FALSE);
+	sleep(5);
+	gtk_widget_show(l->incorrect);
+	gtk_widget_set_sensitive(l->login, TRUE);
+}
 
 Login *newLogin(void)
 {
@@ -62,6 +75,7 @@ Login *newLogin(void)
 	l->list = gtk_icon_view_new_with_model(GTK_TREE_MODEL(accounts));
 	gtk_icon_view_set_text_column(GTK_ICON_VIEW(l->list), 0);
 	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(l->list), 2);
+	gtk_icon_view_set_item_width(GTK_ICON_VIEW(l->list), -1);
 	l->listScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(l->listScroller), l->list);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(l->listScroller), GTK_SHADOW_IN);
@@ -82,18 +96,23 @@ Login *newLogin(void)
 		l->password, l->listScroller,
 		GTK_POS_BOTTOM, 2, 1);
 
+	l->incorrect = gtk_label_new("Password incorrect.");
+	gtk_grid_attach_next_to(GTK_GRID(l->layout),
+		l->incorrect, l->password,
+		GTK_POS_RIGHT, 1, 1);
+
 	l->login = gtk_button_new_with_label("Log In");
 	gtk_style_context_add_class(gtk_widget_get_style_context(l->login), "suggested-action");
-	// TODO connect
-	// TODO disable
+	g_signal_connect(l->login, "clicked", G_CALLBACK(loginClicked), l);
 	gtk_widget_set_hexpand(l->login, TRUE);
-	gtk_widget_set_halign(l->login, GTK_ALIGN_END);
+	gtk_widget_set_halign(l->login, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(l->layout),
-		l->login, l->password,
-		GTK_POS_RIGHT, 2, 1);
+		l->login, l->incorrect,
+		GTK_POS_RIGHT, 1, 1);
 
 	gtk_container_add(GTK_CONTAINER(l->win), l->layout);
 	gtk_widget_show_all(l->win);
+	gtk_widget_hide(l->incorrect);
 
 	return l;
 }
