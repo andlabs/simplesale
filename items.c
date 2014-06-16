@@ -13,7 +13,7 @@ void initItems(void)
 	// index is the item ID
 }
 
-void addItem(char *name, Price p)
+GtkTreeIter addItem(char *name, Price p)
 {
 	GtkTreeIter iter;
 	char *dispPrice;
@@ -22,6 +22,7 @@ void addItem(char *name, Price p)
 	gtk_list_store_append(items, &iter);
 	gtk_list_store_set(items, &iter, 0, name, 1, dispPrice, 2, p, -1);
 	g_free(dispPrice);			// the GtkListStore made a copy
+	return iter;
 }
 
 void getItem(gint index, char **name, char **dispPrice, Price *p)
@@ -94,7 +95,54 @@ struct ItemEditor {
 	GtkWidget *rightside;
 	GtkWidget *name;
 	GtkWidget *price;
+
+	GtkTreeIter current;
 };
+
+// TODO live search signal
+
+static void addItemClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	ItemEditor *e = (ItemEditor *) data;
+	GtkTreeIter iter;
+
+	iter = addItem("New Item", 0);
+	gtk_tree_selection_select_iter(e->listSel, &iter);
+}
+
+// TODO signals before selection
+
+static void itemSelected(GtkTreeSelection *selection, gpointer data)
+{
+	USED(selection);
+
+	ItemEditor *e = (ItemEditor *) data;
+	gboolean selected;
+	char *name = "";
+	char *pricestr = "";
+	Price price;
+
+	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &e->current);
+	gtk_widget_set_sensitive(e->remove, selected);
+	gtk_widget_set_sensitive(e->name, selected);
+	gtk_widget_set_sensitive(e->price, selected);
+	if (selected) {
+		gtk_tree_model_get(GTK_TREE_MODEL(items), &e->current, 0, &name, 2, &price, -1);
+		pricestr = priceToString(price, "");
+	}
+	gtk_entry_set_text(GTK_ENTRY(e->name), name);
+	gtk_entry_set_text(GTK_ENTRY(e->price), pricestr);
+	if (selected)
+		g_free(pricestr);
+
+	// informational
+	if (selected)
+		gtk_entry_set_placeholder_text(GTK_ENTRY(e->name), "Enter item name here and item price below.");
+	else
+		gtk_entry_set_placeholder_text(GTK_ENTRY(e->name), "Select an item at left or click + to add a new item.");
+}
 
 ItemEditor *newItemEditor(void)
 {
@@ -137,7 +185,7 @@ ItemEditor *newItemEditor(void)
 
 	e->leftside = gtk_grid_new();
 	e->search = gtk_search_entry_new();
-	// TODO signal for live
+	// TODO signal for live search
 	gtk_widget_set_hexpand(e->search, TRUE);
 	gtk_widget_set_halign(e->search, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
@@ -145,12 +193,11 @@ ItemEditor *newItemEditor(void)
 		GTK_POS_TOP, 1, 1);
 	button = gtk_button_new_from_icon_name("list-add", GTK_ICON_SIZE_BUTTON);
 	// TODO style class?
-	// TODO connect
+	g_signal_connect(button, "clicked", G_CALLBACK(addItemClicked), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
 		button, e->search,
 		GTK_POS_RIGHT, 1, 1);
 	e->remove = gtk_button_new_from_icon_name("list-remove", GTK_ICON_SIZE_BUTTON);
-	gtk_widget_set_sensitive(e->remove, FALSE);		// initial state; no items selected
 	// TODO style class?
 	// TODO connect
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
@@ -159,7 +206,8 @@ ItemEditor *newItemEditor(void)
 
 	e->list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(items));
 	e->listSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(e->list));
-	// TODO connect listSel
+	// TODO figure out how to make it so that clicking on blank space deselects
+	g_signal_connect(e->listSel, "changed", G_CALLBACK(itemSelected), e);
 	setItemsColumnLayout(GTK_TREE_VIEW(e->list));
 	e->listScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(e->listScroller), e->list);
@@ -214,6 +262,8 @@ l2=label;
 
 	gtk_container_add(GTK_CONTAINER(e->win), e->layout);
 	gtk_widget_show_all(e->win);
+
+	itemSelected(NULL, e);		// set up initial state
 
 	return e;
 }

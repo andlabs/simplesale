@@ -43,7 +43,7 @@ extern int priceEntryGetPrice(PriceEntry *, Price *);
 
 // items.c
 extern void initItems(void);
-extern void addItem(char *, Price);
+extern GtkTreeIter addItem(char *, Price);
 extern void getItem(gint, char **, char **, Price *);
 extern GtkListStore *itemsStore(void);
 extern GtkTreeModel *itemsModel(void);
