@@ -56,3 +56,9 @@ extern void freePayDialog(payDialog *);
 extern payDialog *newPayDialog(GtkWindow *, Order *);
 extern gint runPayDialog(payDialog *);
 extern gboolean payDialogAmountPaid(payDialog *, Price *);
+
+// login.c
+extern void initAccounts(void);
+extern void addAccount(char *, char *);
+typedef struct Login Login;
+extern Login *newLogin(void);

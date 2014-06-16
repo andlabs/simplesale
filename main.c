@@ -25,7 +25,11 @@ int main(int argc, char *argv[])
 			"gtk-theme-name", theme,
 			NULL);
 
+	initAccounts();
 	initItems();
+	addAccount("Test Owner", "abcd");
+	addAccount("Test Cashier", "efgh");
+	newLogin();
 	newShift("Test Cashier");
 	gtk_main();
 	return 0;
