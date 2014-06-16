@@ -182,6 +182,7 @@ gboolean payDialogAmountPaid(PayDialog *p, Price *pout)
 			cents = cents * 10 + (amount[i + 1] - '0');
 		}
 	}
+	// TODO check less than p->price
 	*pout = PRICE(dollars, cents);
 	return TRUE;
 
