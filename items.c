@@ -236,7 +236,6 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 
 ItemEditor *newItemEditor(void)
 {
-	gint width, height;
 	ItemEditor *e;
 	GtkWidget *topbar;
 	GtkWidget *button;
@@ -250,25 +249,11 @@ ItemEditor *newItemEditor(void)
 	g_signal_connect(e->win, "delete-event", gtk_main_quit, NULL);
 
 	// the initail height is too small
-	gtk_window_get_default_size(GTK_WINDOW(e->win), &width, &height);
-	if (height == -1)
-		gtk_window_get_size(GTK_WINDOW(e->win), NULL, &height);
-	gtk_window_set_default_size(GTK_WINDOW(e->win), width, height * 2);
+	expandWindowHeight(GTK_WINDOW(e->win), 2);
 
-	topbar = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(topbar), "Item Editor");
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(topbar), FALSE);
-	gtk_window_set_titlebar(GTK_WINDOW(e->win), topbar);
-
-	button = gtk_button_new_with_label("Save and Close");
-	gtk_style_context_add_class(gtk_widget_get_style_context(button), "suggested-action");
-	g_signal_connect(button, "clicked", G_CALLBACK(saveClicked), e);
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(topbar), button);
-
-	button = gtk_button_new_with_label("Discard and Close");
-	gtk_style_context_add_class(gtk_widget_get_style_context(button), "destructive-action");
-	g_signal_connect(button, "clicked", G_CALLBACK(discardClicked), e);
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(topbar), button);
+	topbar = newHeaderBar("Item Editor", e->win);
+	newConfirmHeaderButton("Save and Close", G_CALLBACK(saveClicked), e, topbar);
+	newCancelHeaderButton("Discard and Close", G_CALLBACK(discardClicked), e, topbar);
 
 	e->layout = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(e->layout), TRUE);
@@ -300,13 +285,7 @@ ItemEditor *newItemEditor(void)
 	g_signal_connect(e->listSel, "changed", G_CALLBACK(itemSelected), e);
 	setItemsColumnLayout(GTK_TREE_VIEW(e->list));
 	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(e->list), GTK_ENTRY(e->search));
-	e->listScroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add(GTK_CONTAINER(e->listScroller), e->list);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(e->listScroller), GTK_SHADOW_IN);
-	gtk_widget_set_hexpand(e->listScroller, TRUE);
-	gtk_widget_set_halign(e->listScroller, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(e->listScroller, TRUE);
-	gtk_widget_set_valign(e->listScroller, GTK_ALIGN_FILL);
+	e->listScroller = newListScroller(e->list);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
 		e->listScroller, e->search,
 		GTK_POS_BOTTOM, 4, 1);

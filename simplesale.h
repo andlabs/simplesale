@@ -14,6 +14,11 @@
 extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
 extern gint listStorePathIndex(GtkTreePath *);
 extern void alignLabel(GtkWidget *, gfloat);
+extern void expandWindowHeight(GtkWindow *, gint);
+extern GtkWidget *newHeaderBar(char *, GtkWidget *);
+extern GtkWidget *newConfirmHeaderButton(char *, GCallback, gpointer, GtkWidget *);
+extern GtkWidget *newCancelHeaderButton(char *, GCallback, gpointer, GtkWidget *);
+extern GtkWidget *newListScroller(GtkWidget *);
 
 // price.c
 typedef guint64 Price;

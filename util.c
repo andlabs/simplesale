@@ -32,3 +32,61 @@ void alignLabel(GtkWidget *label, gfloat alignment)
 	gtk_misc_get_alignment(GTK_MISC(label), NULL, &yalign);
 	gtk_misc_set_alignment(GTK_MISC(label), alignment, yalign);
 }
+
+// in case GTK+'s default window height is too short
+void expandWindowHeight(GtkWindow *win, gint factor)
+{
+	gint width, height;
+
+	// the initail height is too small
+	gtk_window_get_default_size(win, &width, &height);
+	if (height == -1)
+		gtk_window_get_size(win, NULL, &height);
+	gtk_window_set_default_size(win, width, height * factor);
+}
+
+GtkWidget *newHeaderBar(char *title, GtkWidget *win)
+{
+	GtkWidget *topbar;
+
+	topbar = gtk_header_bar_new();
+	gtk_header_bar_set_title(GTK_HEADER_BAR(topbar), title);
+	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(topbar), FALSE);
+	gtk_window_set_titlebar(GTK_WINDOW(win), topbar);
+	return topbar;
+}
+
+static GtkWidget *newHeaderButton(char *label, char *style, GCallback callback, gpointer data, GtkWidget *topbar, void (*pack)(GtkHeaderBar *, GtkWidget *))
+{
+	GtkWidget *button;
+
+	button = gtk_button_new_with_label(label);
+	gtk_style_context_add_class(gtk_widget_get_style_context(button), style);
+	g_signal_connect(button, "clicked", callback, data);
+	(*pack)(GTK_HEADER_BAR(topbar), button);
+	return button;
+}
+
+GtkWidget *newConfirmHeaderButton(char *label, GCallback callback, gpointer data, GtkWidget *topbar)
+{
+	return newHeaderButton(label, "suggested-action", callback, data, topbar, gtk_header_bar_pack_start);
+}
+
+GtkWidget *newCancelHeaderButton(char *label, GCallback callback, gpointer data, GtkWidget *topbar)
+{
+	return newHeaderButton(label, "destructive-action", callback, data, topbar, gtk_header_bar_pack_end);
+}
+
+GtkWidget *newListScroller(GtkWidget *list)
+{
+	GtkWidget *listScroller;
+
+	listScroller = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(listScroller), list);
+	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(listScroller), GTK_SHADOW_IN);
+	gtk_widget_set_hexpand(listScroller, TRUE);
+	gtk_widget_set_halign(listScroller, GTK_ALIGN_FILL);
+	gtk_widget_set_vexpand(listScroller, TRUE);
+	gtk_widget_set_valign(listScroller, GTK_ALIGN_FILL);
+	return listScroller;
+}
