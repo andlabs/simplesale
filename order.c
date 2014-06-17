@@ -39,10 +39,9 @@ static void freeOrderGUI(Order *);
 
 static void order_init(Order *o)
 {
-	o->store = gtk_list_store_new(3,
+	o->store = gtk_list_store_new(2,
 		G_TYPE_STRING,		// item name
-		PRICETYPE,			// price
-		G_TYPE_INT);			// index in items model
+		PRICETYPE);			// price
 	buildOrderGUI(o);
 }
 
@@ -96,17 +95,15 @@ void addToOrder(Order *o, gint index)
 
 	getItem(index, &name, &price);
 	gtk_list_store_append(o->store, &iter);
-	gtk_list_store_set(o->store, &iter, 0, name, 1, price, 2, index, -1);
+	gtk_list_store_set(o->store, &iter, 0, name, 1, price, -1);
 	o->subtotal += price;
 }
 
 void removeFromOrder(Order *o, GtkTreeIter *which)
 {
-	gint index;
 	Price price;
 
-	gtk_tree_model_get(GTK_TREE_MODEL(o->store), which, 2, &index, -1);
-	getItem(index, NULL, &price);
+	gtk_tree_model_get(GTK_TREE_MODEL(o->store), which, 1, &price, -1);
 	gtk_list_store_remove(o->store, which);
 	o->subtotal -= price;
 }
