@@ -90,3 +90,14 @@ GtkWidget *newListScroller(GtkWidget *list)
 	gtk_widget_set_valign(listScroller, GTK_ALIGN_FILL);
 	return listScroller;
 }
+
+void attachLabel(char *text, GtkWidget *widget, GtkWidget *grid)
+{
+	GtkWidget *label;
+
+	label = gtk_label_new(text);
+	alignLabel(label, 1);
+	gtk_grid_attach_next_to(GTK_GRID(grid),
+		label, widget,
+		GTK_POS_LEFT, 1, 1);
+}

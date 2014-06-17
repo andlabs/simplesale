@@ -291,30 +291,20 @@ ItemEditor *newItemEditor(void)
 		GTK_POS_BOTTOM, 4, 1);
 
 	e->rightside = gtk_grid_new();
-	label = gtk_label_new("Name:");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, NULL,
-		GTK_POS_TOP, 1, 1);
+
 	e->name = gtk_entry_new();
 	g_signal_connect(e->name, "changed", G_CALLBACK(nameChanged), e);
 	gtk_widget_set_hexpand(e->name, TRUE);
 	gtk_widget_set_halign(e->name, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->name, label,
+		e->name, NULL,
 		GTK_POS_RIGHT, 3, 1);
-{GtkWidget *l2 = label;
-	label = gtk_label_new("Price:");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, l2,
-		GTK_POS_BOTTOM, 1, 1);
-l2=label;
+	attachLabel("Name:", e->name, e->rightside);
+
 	label = gtk_label_new("$");
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, l2,
-		GTK_POS_RIGHT, 1, 1);
-}
+		label, e->name,
+		GTK_POS_BOTTOM, 1, 1);
 	e->price = newPriceEntry();
 	g_signal_connect(e->price, "changed", G_CALLBACK(priceChanged), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
@@ -327,6 +317,7 @@ l2=label;
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->invalid, e->price,
 		GTK_POS_RIGHT, 1, 1);
+	attachLabel("Price:", label, e->rightside);
 
 	// TODO add an undo button?
 
