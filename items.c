@@ -10,6 +10,7 @@ void initItems(void)
 		G_TYPE_STRING,			// item name
 		PRICETYPE);				// price
 	// index is the item ID
+	loadItems();
 }
 
 GtkTreeIter addItem(char *name, Price price)

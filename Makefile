@@ -1,4 +1,5 @@
-CFILES = items.c \
+CFILES = db.c \
+	items.c \
 	main.c \
 	login.c \
 	order.c \

@@ -24,6 +24,8 @@ typedef guint64 Price;
 #define PRICEVALUE g_value_get_uint64
 #define PRICEMIN 0
 #define PRICEMAX G_MAXUINT64
+#define PRICEREAD g_data_input_stream_read_uint64
+#define PRICEWRITE g_data_output_stream_put_uint64
 extern gchar *priceToString(Price, char *);
 
 #define PRICE_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), priceEntry_get_type(), PriceEntry))
@@ -99,3 +101,8 @@ extern void addAccount(char *, char *);
 
 typedef struct Login Login;
 extern Login *newLogin(void);
+
+// db.c
+extern void createDB(void);
+extern void loadItems(void);
+extern void saveItems(void);
