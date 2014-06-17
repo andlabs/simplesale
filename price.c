@@ -173,6 +173,7 @@ static void priceRenderer_setProperty(GObject *obj, guint id, const GValue *valu
 		return;
 	}
 	newText = priceToString(p->price, p->prefix);
+	// TODO right-align
 	g_object_set(p, "text", newText, NULL);
 	g_free(newText);
 }
