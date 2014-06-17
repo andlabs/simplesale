@@ -266,9 +266,6 @@ void shiftNewOrder(Shift *s)
 	g_signal_connect(o, "do", G_CALLBACK(shiftDoOrder), s);
 	// sample items
 	{
-		addItem("Regular Slice", PRICE(2, 00));
-		addItem("Large Soda", PRICE(1, 50));
-		addItem("Cookie", PRICE(1, 00));
 		addToOrder(o, 0);
 		addToOrder(o, 1);
 	}

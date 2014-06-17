@@ -101,6 +101,36 @@ struct ItemEditor {
 	gboolean selecting;
 };
 
+static void saveClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	ItemEditor *e = (ItemEditor *) data;
+
+	saveItems();
+	gtk_main_quit();USED(e);// TODO signal completion
+}
+
+static void discardClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	ItemEditor *e = (ItemEditor *) data;
+	GtkWidget *alert;
+	gint response;
+
+	alert = gtk_message_dialog_new(GTK_WINDOW(e->win), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
+		"Are you sure you want to discard all changes and leave the Item Editor?");
+	response = gtk_dialog_run(GTK_DIALOG(alert));
+	gtk_widget_destroy(alert);
+	if (response != GTK_RESPONSE_YES)
+		return;
+	g_object_unref(items);
+	initItems();
+	gtk_main_quit();USED(e);// TODO signal completion
+}
+
 static void addItemClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
@@ -232,12 +262,12 @@ ItemEditor *newItemEditor(void)
 
 	button = gtk_button_new_with_label("Save and Close");
 	gtk_style_context_add_class(gtk_widget_get_style_context(button), "suggested-action");
-//	g_signal_connect(button, "clicked", G_CALLBACK(saveClicked), s);
+	g_signal_connect(button, "clicked", G_CALLBACK(saveClicked), e);
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(topbar), button);
 
 	button = gtk_button_new_with_label("Discard and Close");
 	gtk_style_context_add_class(gtk_widget_get_style_context(button), "destructive-action");
-//	g_signal_connect(button, "clicked", G_CALLBACK(discardClicked), s);
+	g_signal_connect(button, "clicked", G_CALLBACK(discardClicked), e);
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(topbar), button);
 
 	e->layout = gtk_grid_new();
