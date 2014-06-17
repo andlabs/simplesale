@@ -102,6 +102,9 @@ extern void addAccount(char *, char *);
 typedef struct Login Login;
 extern Login *newLogin(void);
 
+typedef struct AccountEditor AccountEditor;
+extern AccountEditor *newAccountEditor(void);
+
 // db.c
 extern void createDB(void);
 extern void loadItems(void);
