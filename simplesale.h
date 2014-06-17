@@ -20,6 +20,10 @@ typedef guint64 Price;
 #define PRICE(d, c) ((Price) ((((Price) (d)) * 100) + ((Price) (c))))
 #define PRICEFMT G_GUINT64_FORMAT
 #define PRICETYPE G_TYPE_UINT64
+#define PRICEPARAMSPEC g_param_spec_uint64
+#define PRICEVALUE g_value_get_uint64
+#define PRICEMIN 0
+#define PRICEMAX G_MAXUINT64
 extern gchar *priceToString(Price, char *);
 
 #define PRICE_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), priceEntry_get_type(), PriceEntry))
@@ -40,6 +44,9 @@ enum {
 	priceEntryInvalid,
 };
 extern int priceEntryGetPrice(PriceEntry *, Price *);
+
+typedef struct PriceRenderer PriceRenderer;
+extern GtkCellRenderer *newPriceRenderer();
 
 // items.c
 extern void initItems(void);

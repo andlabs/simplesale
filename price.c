@@ -69,6 +69,7 @@ static void priceEntry_initEditable(GtkEditableInterface *interface)
 	CHAIN(get_selection_bounds)
 	CHAIN(set_position)
 	CHAIN(get_position)
+#undef CHAIN
 }
 
 static void priceEntry_class_init(PriceEntryClass *class)
@@ -118,4 +119,95 @@ int priceEntryGetPrice(PriceEntry *p, Price *pout)
 	}
 	*pout = PRICE(dollars, cents);
 	return priceEntryOK;
+}
+
+// PriceRenderer is a special GtkCellRendererText that renders prices.
+
+struct PriceRenderer {
+	GtkCellRendererText parent_instance;
+
+	Price price;
+	char *prefix;
+};
+
+typedef struct PriceRendererClass PriceRendererClass;
+
+struct PriceRendererClass {
+	GtkCellRendererTextClass parent_class;
+};
+
+G_DEFINE_TYPE(PriceRenderer, priceRenderer, GTK_TYPE_CELL_RENDERER_TEXT)
+
+static void priceRenderer_init(PriceRenderer *p)
+{
+	USED(p);
+}
+
+static void priceRenderer_dispose(GObject *obj)
+{
+	G_OBJECT_CLASS(priceRenderer_parent_class)->dispose(obj);
+}
+
+static void priceRenderer_finalize(GObject *obj)
+{
+	PriceRenderer *p = (PriceRenderer *) obj;
+
+	g_free(p->prefix);
+	G_OBJECT_CLASS(priceRenderer_parent_class)->finalize(obj);
+}
+
+static GParamSpec *priceRendererProperties[3];
+
+static void priceRenderer_setProperty(GObject *obj, guint id, const GValue *value, GParamSpec *pspec)
+{
+	PriceRenderer *p = (PriceRenderer *) obj;
+	char *newText;
+
+	if (id == 1)			// price
+		p->price = PRICEVALUE(value);
+	else if (id == 2) {		// prefix
+		g_free(p->prefix);
+		p->prefix = g_value_dup_string(value);
+	} else {				// something else
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(p, id, pspec);
+		return;
+	}
+	newText = priceToString(p->price, p->prefix);
+	g_object_set(p, "text", newText, NULL);
+	g_free(newText);
+}
+
+static void priceRenderer_getProperty(GObject *obj, guint id, GValue *value, GParamSpec *pspec)
+{
+	USED(value);
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, id, pspec);
+}
+
+static void priceRenderer_class_init(PriceRendererClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = priceRenderer_dispose;
+	G_OBJECT_CLASS(class)->finalize = priceRenderer_finalize;
+	G_OBJECT_CLASS(class)->set_property = priceRenderer_setProperty;
+	G_OBJECT_CLASS(class)->get_property = priceRenderer_getProperty;
+
+	priceRendererProperties[1] = PRICEPARAMSPEC(
+		"price",
+		"Price",
+		"Price",
+		PRICEMIN, PRICEMAX,
+		0,
+		G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
+	priceRendererProperties[1] = g_param_spec_string(
+		"prefix",
+		"Prefix",
+		"Prefix for monetary values, usually $.",
+		"$",
+		G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
+	g_object_class_install_properties(G_OBJECT_CLASS(class), 3, priceRendererProperties);
+}
+
+GtkCellRenderer *newPriceRenderer(void)
+{
+	return (GtkCellRenderer *) g_object_new(priceRenderer_get_type(), NULL);
 }

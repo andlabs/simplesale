@@ -66,9 +66,9 @@ void setItemsIconLayout(GtkCellLayout *layout)
 	r = gtk_cell_renderer_text_new();
 	gtk_cell_layout_pack_start(layout, r, TRUE);
 	gtk_cell_layout_set_attributes(layout, r, "text", 0, NULL);
-	r = gtk_cell_renderer_text_new();
+	r = newPriceRenderer();
 	gtk_cell_layout_pack_start(layout, r, FALSE);
-	gtk_cell_layout_set_attributes(layout, r, "text", 1, NULL);
+	gtk_cell_layout_set_attributes(layout, r, "price", 2, NULL);
 }
 
 void setItemsColumnLayout(GtkTreeView *table)
