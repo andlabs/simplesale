@@ -198,12 +198,12 @@ static void priceRenderer_class_init(PriceRendererClass *class)
 		PRICEMIN, PRICEMAX,
 		0,
 		G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
-	priceRendererProperties[1] = g_param_spec_string(
+	priceRendererProperties[2] = g_param_spec_string(
 		"prefix",
 		"Prefix",
 		"Prefix for monetary values, usually $.",
 		"$",
-		G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
+		G_PARAM_WRITABLE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS);
 	g_object_class_install_properties(G_OBJECT_CLASS(class), 3, priceRendererProperties);
 }
 

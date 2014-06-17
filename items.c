@@ -6,22 +6,18 @@ static GtkListStore *items;
 
 void initItems(void)
 {
-	items = gtk_list_store_new(3,
+	items = gtk_list_store_new(2,
 		G_TYPE_STRING,			// item name
-		G_TYPE_STRING,			// display price
-		PRICETYPE);				// actual price
+		PRICETYPE);				// price
 	// index is the item ID
 }
 
-GtkTreeIter addItem(char *name, Price p)
+GtkTreeIter addItem(char *name, Price price)
 {
 	GtkTreeIter iter;
-	char *dispPrice;
 
-	dispPrice = priceToString(p, "$");
 	gtk_list_store_append(items, &iter);
-	gtk_list_store_set(items, &iter, 0, name, 1, dispPrice, 2, p, -1);
-	g_free(dispPrice);			// the GtkListStore made a copy
+	gtk_list_store_set(items, &iter, 0, name, 1, price, -1);
 	return iter;
 }
 
@@ -30,20 +26,18 @@ void deleteItem(GtkTreeIter *which)
 	gtk_list_store_remove(items, which);
 }
 
-void getItem(gint index, char **name, char **dispPrice, Price *p)
+void getItem(gint index, char **name, Price *p)
 {
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	char *a, *b;	// temporary places
+	char *a;	// temporary places
 	Price c;
 
 	path = gtk_tree_path_new_from_indices(index, -1);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(items), &iter, path);
-	gtk_tree_model_get(GTK_TREE_MODEL(items), &iter, 0, &a, 1, &b, 2, &c, -1);
+	gtk_tree_model_get(GTK_TREE_MODEL(items), &iter, 0, &a, 1, &c, -1);
 	if (name != NULL)
 		*name = a;
-	if (dispPrice != NULL)
-		*dispPrice = b;
 	if (p != NULL)
 		*p = c;
 }
@@ -68,7 +62,7 @@ void setItemsIconLayout(GtkCellLayout *layout)
 	gtk_cell_layout_set_attributes(layout, r, "text", 0, NULL);
 	r = newPriceRenderer();
 	gtk_cell_layout_pack_start(layout, r, FALSE);
-	gtk_cell_layout_set_attributes(layout, r, "price", 2, NULL);
+	gtk_cell_layout_set_attributes(layout, r, "price", 1, NULL);
 }
 
 void setItemsColumnLayout(GtkTreeView *table)
@@ -80,8 +74,8 @@ void setItemsColumnLayout(GtkTreeView *table)
 	col = gtk_tree_view_column_new_with_attributes("Item", r, "text", 0, NULL);
 	gtk_tree_view_column_set_expand(col, TRUE);
 	gtk_tree_view_append_column(table, col);
-	r = gtk_cell_renderer_text_new();
-	col = gtk_tree_view_column_new_with_attributes("Price", r, "text", 1, NULL);
+	r = newPriceRenderer();
+	col = gtk_tree_view_column_new_with_attributes("Price", r, "price", 1, NULL);
 	gtk_tree_view_append_column(table, col);
 	gtk_tree_view_set_headers_visible(table, TRUE);
 }
@@ -157,7 +151,7 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 	gtk_widget_set_sensitive(e->name, selected);
 	gtk_widget_set_sensitive(e->price, selected);
 	if (selected) {
-		gtk_tree_model_get(GTK_TREE_MODEL(items), &e->current, 0, &name, 2, &price, -1);
+		gtk_tree_model_get(GTK_TREE_MODEL(items), &e->current, 0, &name, 1, &price, -1);
 		pricestr = priceToString(price, "");
 	} else
 		gtk_label_set_text(GTK_LABEL(e->invalid), "");
@@ -196,7 +190,6 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 	ItemEditor *e = (ItemEditor *) data;
 	GtkTreeIter iter;
 	Price price;
-	char *dispPrice;
 
 	if (e->selecting)	// prevent spurious g_error() during selection changed
 		return;
@@ -206,9 +199,7 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 		gtk_label_set_text(GTK_LABEL(e->invalid), "Entered price invalid; not changing.");
 	else {
 		gtk_label_set_text(GTK_LABEL(e->invalid), "");
-		dispPrice = priceToString(price, "$");
-		gtk_list_store_set(items, &iter, 1, dispPrice, 2, price, -1);
-		g_free(dispPrice);
+		gtk_list_store_set(items, &iter, 1, price, -1);
 	}
 }
 

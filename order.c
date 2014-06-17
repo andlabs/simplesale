@@ -90,25 +90,25 @@ void freeOrder(Order *o)
 
 void addToOrder(Order *o, gint index)
 {
-	char *name, *dispPrice;
-	Price p;
+	char *name;
+	Price price;
 	GtkTreeIter iter;
 
-	getItem(index, &name, &dispPrice, &p);
+	getItem(index, &name, &price);
 	gtk_list_store_append(o->store, &iter);
-	gtk_list_store_set(o->store, &iter, 0, name, 1, dispPrice, 2, index, -1);
-	o->subtotal += p;
+	gtk_list_store_set(o->store, &iter, 0, name, 1, "", 2, index, -1);
+	o->subtotal += price;
 }
 
 void removeFromOrder(Order *o, GtkTreeIter *which)
 {
 	gint index;
-	Price p;
+	Price price;
 
 	gtk_tree_model_get(GTK_TREE_MODEL(o->store), which, 2, &index, -1);
-	getItem(index, NULL, NULL, &p);
+	getItem(index, NULL, &price);
 	gtk_list_store_remove(o->store, which);
-	o->subtotal -= p;
+	o->subtotal -= price;
 }
 
 Price subtotal(Order *o)
