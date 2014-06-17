@@ -41,7 +41,7 @@ static void order_init(Order *o)
 {
 	o->store = gtk_list_store_new(3,
 		G_TYPE_STRING,		// item name
-		G_TYPE_STRING,		// display price
+		PRICETYPE,			// price
 		G_TYPE_INT);			// index in items model
 	buildOrderGUI(o);
 }
@@ -96,7 +96,7 @@ void addToOrder(Order *o, gint index)
 
 	getItem(index, &name, &price);
 	gtk_list_store_append(o->store, &iter);
-	gtk_list_store_set(o->store, &iter, 0, name, 1, "", 2, index, -1);
+	gtk_list_store_set(o->store, &iter, 0, name, 1, price, 2, index, -1);
 	o->subtotal += price;
 }
 
