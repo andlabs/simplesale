@@ -61,7 +61,7 @@ static void removeItemClicked(GtkButton *button, gpointer data)
 
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("Delete Item button clicked without any item selected (button should be disabled)");
-	gtk_tree_model_get(itemsModel(), &iter, 0, &name, -1);
+	getItem(&iter, &name, NULL);
 	if (!askConfirm(e->win,
 		"Once you click Save and Close in the Item Editor window, the item will be permanently deleted and cannot be recovered later.",
 		"Are you sure you want to delete \"%s\"?", name))
@@ -84,7 +84,7 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 	gtk_widget_set_sensitive(e->price, selected);
 	e->selecting = TRUE;
 	if (selected) {
-		gtk_tree_model_get(itemsModel(), &e->current, 0, &name, 1, &price, -1);
+		getItem(&e->current, &name, &price);
 		priceEntrySetPrice(PRICE_ENTRY(e->price), price);
 	} else
 		priceEntryClear(PRICE_ENTRY(e->price));
