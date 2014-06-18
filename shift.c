@@ -114,8 +114,11 @@ static void newOrderClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	Shift *s = (Shift *) data;
+	Order *o;
 
-	shiftNewOrder(s);
+	o = newOrder();
+	g_signal_connect(o, "do", G_CALLBACK(shiftDoOrder), s);
+	g_hash_table_insert(s->orders, o, NULL);
 }
 
 static void clockOutClicked(GtkButton *button, gpointer data)
@@ -256,15 +259,6 @@ static void shiftDoOrder(Order *o, gint action, gpointer data)
 
 	g_hash_table_remove(s->orders, o);
 	freeOrder(o);
-}
-
-void shiftNewOrder(Shift *s)
-{
-	Order *o;
-
-	o = newOrder();
-	g_signal_connect(o, "do", G_CALLBACK(shiftDoOrder), s);
-	g_hash_table_insert(s->orders, o, NULL);
 }
 
 void shiftShowWindow(Shift *s)

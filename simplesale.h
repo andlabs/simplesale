@@ -80,7 +80,6 @@ extern void orderHideWindow(Order *);
 // shift.c
 typedef struct Shift Shift;
 extern Shift *newShift(char *);
-extern void shiftNewOrder(Shift *);
 extern void shiftShowWindow(Shift *);
 extern void shiftHideWindow(Shift *);
 
