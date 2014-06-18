@@ -6,6 +6,7 @@ struct PayDialog {
 
 	GtkWidget *dialog;
 	GtkWidget *layout;
+	GtkWidget *cost;
 	GtkWidget *amount;
 	GtkWidget *buttongrid;
 	GtkWidget *digits[10];
@@ -17,8 +18,6 @@ static char *digitstrings[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "
 PayDialog *newPayDialog(GtkWindow *parent, Price price)
 {
 	PayDialog *p;
-	GtkWidget *label, *firstlabel;
-	gchar *pricestr;
 	int i;
 
 	p = (PayDialog *) g_malloc0(sizeof (PayDialog));
@@ -33,46 +32,24 @@ PayDialog *newPayDialog(GtkWindow *parent, Price price)
 
 	p->layout = gtk_grid_new();
 
-	label = gtk_label_new("Order Total:");
-	alignLabel(label, 1);
+	// TODO make this look like a label
+	p->cost = newPriceEntry();
+	priceEntrySetPrice(PRICE_ENTRY(p->cost), p->price);
+	gtk_widget_set_sensitive(p->cost, FALSE);
+	gtk_widget_set_hexpand(p->cost, TRUE);
+	gtk_widget_set_halign(p->cost, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		label, NULL,
-		GTK_POS_TOP, 1, 1);
-	firstlabel = label;
-{GtkWidget *xl;
-	label = gtk_label_new("$");
-	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		label, firstlabel,
+		p->cost, NULL,
 		GTK_POS_RIGHT, 1, 1);
-xl = label;
-	pricestr = priceToString(p->price, "");
-	label = gtk_label_new(pricestr);
-	g_free(pricestr);
-	alignLabel(label, 1);
-	gtk_widget_set_hexpand(label, TRUE);
-	gtk_widget_set_halign(label, GTK_ALIGN_FILL);
-	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-//		label, firstlabel,
-label,xl,
-		GTK_POS_RIGHT, 1, 1);
-}
-	label = gtk_label_new("Amount Given:");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		label, firstlabel,
-		GTK_POS_BOTTOM, 1, 1);
-	firstlabel = label;
-	label = gtk_label_new("$");
-	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		label, firstlabel,
-		GTK_POS_RIGHT, 1, 1);
-	firstlabel = label;		// for button grid
+	attachLabel("Order Total:", p->cost, p->layout);
+
 	p->amount = newPriceEntry();
 	gtk_widget_set_hexpand(p->amount, TRUE);
 	gtk_widget_set_halign(p->amount, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		p->amount, label,
-		GTK_POS_RIGHT, 1, 1);
+		p->amount, p->cost,
+		GTK_POS_BOTTOM, 1, 1);
+	attachLabel("Amount Given:", p->amount, p->layout);
 
 	p->buttongrid = gtk_grid_new();
 	gtk_grid_set_row_homogeneous(GTK_GRID(p->buttongrid), TRUE);
@@ -104,8 +81,8 @@ label,xl,
 	gtk_widget_set_vexpand(p->buttongrid, TRUE);
 	gtk_widget_set_valign(p->buttongrid, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(p->layout),
-		p->buttongrid, firstlabel,
-		GTK_POS_BOTTOM, 2, 1);
+		p->buttongrid, p->amount,
+		GTK_POS_BOTTOM, 1, 1);
 
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(p->dialog))), p->layout);
 
