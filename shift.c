@@ -181,8 +181,6 @@ static void resumeClicked(GtkButton *button, gpointer data)
 
 static void buildShiftGUI(Shift *s)
 {
-	gint width, height;
-	GtkWidget *button;
 	GtkWidget *label;
 	GtkCellRenderer *r;
 	GtkTreeViewColumn *col;
@@ -193,25 +191,11 @@ static void buildShiftGUI(Shift *s)
 	g_signal_connect(s->win, "delete-event", gtk_main_quit, NULL);
 
 	// the initail height is too small
-	gtk_window_get_default_size(GTK_WINDOW(s->win), &width, &height);
-	if (height == -1)
-		gtk_window_get_size(GTK_WINDOW(s->win), NULL, &height);
-	gtk_window_set_default_size(GTK_WINDOW(s->win), width, height * 2);
+	expandWindowHeight(GTK_WINDOW(s->win), 2);
 
-	s->topbar = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(s->topbar), s->employee);
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(s->topbar), FALSE);
-	gtk_window_set_titlebar(GTK_WINDOW(s->win), s->topbar);
-
-	button = gtk_button_new_with_label("New Order");
-	gtk_style_context_add_class(gtk_widget_get_style_context(button), "suggested-action");
-	g_signal_connect(button, "clicked", G_CALLBACK(newOrderClicked), s);
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(s->topbar), button);
-
-	button = gtk_button_new_with_label("Clock Out");
-	gtk_style_context_add_class(gtk_widget_get_style_context(button), "destructive-action");
-	g_signal_connect(button, "clicked", G_CALLBACK(clockOutClicked), s);
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(s->topbar), button);
+	s->topbar = newHeaderBar(s->employee, s->win);
+	newConfirmHeaderButton("New Order", G_CALLBACK(newOrderClicked), s, s->topbar);
+	newCancelHeaderButton("Clock Out", G_CALLBACK(clockOutClicked), s, s->topbar);
 
 	s->layout = gtk_grid_new();
 
@@ -232,13 +216,7 @@ static void buildShiftGUI(Shift *s)
 	col = gtk_tree_view_column_new_with_attributes("", r, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(s->list), col);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(s->list), FALSE);
-	s->listScroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add(GTK_CONTAINER(s->listScroller), s->list);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(s->listScroller), GTK_SHADOW_IN);
-	gtk_widget_set_hexpand(s->listScroller, TRUE);
-	gtk_widget_set_halign(s->listScroller, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(s->listScroller, TRUE);
-	gtk_widget_set_valign(s->listScroller, GTK_ALIGN_FILL);
+	s->listScroller = newListScroller(s->list);
 	gtk_grid_attach_next_to(GTK_GRID(s->layout),
 		s->listScroller, label,
 		GTK_POS_BOTTOM, 1, 1);
