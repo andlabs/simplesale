@@ -90,23 +90,19 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 	ItemEditor *e = (ItemEditor *) data;
 	gboolean selected;
 	char *name = "";
-	char *pricestr = "";
 	Price price;
 
 	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &e->current);
 	gtk_widget_set_sensitive(e->remove, selected);
 	gtk_widget_set_sensitive(e->name, selected);
 	gtk_widget_set_sensitive(e->price, selected);
+	e->selecting = TRUE;
 	if (selected) {
 		gtk_tree_model_get(itemsModel(), &e->current, 0, &name, 1, &price, -1);
-		pricestr = priceToString(price, "");
+		priceEntrySetPrice(PRICE_ENTRY(e->price), price);
 	}
-	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
-	priceEntrySetText(PRICE_ENTRY(e->price), pricestr);
 	e->selecting = FALSE;
-	if (selected)
-		g_free(pricestr);
 
 	// informational
 	if (selected)

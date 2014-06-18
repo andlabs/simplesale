@@ -244,6 +244,18 @@ void priceEntrySetText(PriceEntry *pe, char *text)
 	gtk_entry_set_text(GTK_ENTRY(pe->entry), text);
 }
 
+void priceEntrySetPrice(PriceEntry *p, Price price)
+{
+	char *pricestr;
+
+	pricestr = priceToString(price, "");
+	gtk_entry_set_text(GTK_ENTRY(p->entry), pricestr);
+	g_free(pricestr);
+	// the above set_text() also sets the appropriate fields
+	// TODO this isn't really efficient, but it works... is there a safer way? :S
+	// maybe I'll just add a validation check...
+}
+
 // PriceRenderer is a special GtkCellRendererText that renders prices.
 
 struct PriceRenderer {

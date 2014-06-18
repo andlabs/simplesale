@@ -44,6 +44,7 @@ extern void priceEntryConnect(PriceEntry *, char *, GCallback, gpointer);
 extern gboolean priceEntryGetPrice(PriceEntry *, Price *);
 extern const char *priceEntryText(PriceEntry *);
 extern void priceEntrySetText(PriceEntry *, char *);
+extern void priceEntrySetPrice(PriceEntry *, Price);
 
 typedef struct PriceRenderer PriceRenderer;
 extern GtkCellRenderer *newPriceRenderer();
