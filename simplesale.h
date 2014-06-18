@@ -20,6 +20,7 @@ extern GtkWidget *newConfirmHeaderButton(char *, GCallback, gpointer, GtkWidget 
 extern GtkWidget *newCancelHeaderButton(char *, GCallback, gpointer, GtkWidget *);
 extern GtkWidget *newListScroller(GtkWidget *);
 extern void attachLabel(char *, GtkWidget *, GtkWidget *);
+extern gboolean askConfirm(GtkWidget *, char *, char *, ...);
 
 // price.c
 typedef guint64 Price;

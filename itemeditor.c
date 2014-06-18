@@ -33,15 +33,8 @@ static void discardClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	ItemEditor *e = (ItemEditor *) data;
-	GtkWidget *alert;
-	gint response;
 
-	alert = gtk_message_dialog_new(GTK_WINDOW(e->win), GTK_DIALOG_MODAL,
-		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
-		"Are you sure you want to discard all changes and leave the Item Editor?");
-	response = gtk_dialog_run(GTK_DIALOG(alert));
-	gtk_widget_destroy(alert);
-	if (response != GTK_RESPONSE_YES)
+	if (!askConfirm(e->win, NULL, "Are you sure you want to discard all changes and leave the Item Editor?"))
 		return;
 	initItems();
 	gtk_main_quit();USED(e);// TODO signal completion
@@ -65,20 +58,13 @@ static void removeItemClicked(GtkButton *button, gpointer data)
 	ItemEditor *e = (ItemEditor *) data;
 	GtkTreeIter iter;
 	char *name;
-	GtkWidget *alert;
-	gint response;
 
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("Delete Item button clicked without any item selected (button should be disabled)");
 	gtk_tree_model_get(itemsModel(), &iter, 0, &name, -1);
-	alert = gtk_message_dialog_new(GTK_WINDOW(e->win), GTK_DIALOG_MODAL,
-		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
-		"Are you sure you want to delete \"%s\"?", name);
-	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
-		"Once you click Save and Close in the Item Editor window, the item will be permanently deleted and cannot be recovered later.");
-	response = gtk_dialog_run(GTK_DIALOG(alert));
-	gtk_widget_destroy(alert);
-	if (response != GTK_RESPONSE_YES)
+	if (!askConfirm(e->win,
+		"Once you click Save and Close in the Item Editor window, the item will be permanently deleted and cannot be recovered later.",
+		"Are you sure you want to delete \"%s\"?", name))
 		return;
 	deleteItem(&iter);
 }

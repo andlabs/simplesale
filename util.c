@@ -101,3 +101,25 @@ void attachLabel(char *text, GtkWidget *widget, GtkWidget *grid)
 		label, widget,
 		GTK_POS_LEFT, 1, 1);
 }
+
+gboolean askConfirm(GtkWidget *parent, char *secondary, char *pformat, ...)
+{
+	gint response;
+	GtkWidget *alert;
+	char *primary;
+	va_list arg;
+
+	va_start(arg, pformat);
+	primary = g_strdup_vprintf(pformat, arg);
+	va_end(arg);
+	alert = gtk_message_dialog_new(GTK_WINDOW(parent), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
+		"%s", primary);
+	if (secondary != NULL && *secondary != '\0')		// only if there is secondary text
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
+			"%s", secondary);
+	response = gtk_dialog_run(GTK_DIALOG(alert));
+	gtk_widget_destroy(alert);
+	g_free(primary);
+	return response == GTK_RESPONSE_YES;
+}
