@@ -221,16 +221,16 @@ static void cancelClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	Order *o = (Order *) data;
-	GtkWidget *prompt;
+	GtkWidget *alert;
 	gint response;
 
-	prompt = gtk_message_dialog_new(GTK_WINDOW(o->win), GTK_DIALOG_MODAL,
+	alert = gtk_message_dialog_new(GTK_WINDOW(o->win), GTK_DIALOG_MODAL,
 		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
 		"Are you sure you want to cancel the current order?");
-	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(prompt),
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
 		"If you click Yes, the current order will be voided.");
-	response = gtk_dialog_run(GTK_DIALOG(prompt));
-	gtk_widget_destroy(prompt);
+	response = gtk_dialog_run(GTK_DIALOG(alert));
+	gtk_widget_destroy(alert);
 	if (response != GTK_RESPONSE_YES)
 		return;
 	g_signal_emit(o, orderSignals[0], 0, orderCancel);
