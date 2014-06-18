@@ -87,13 +87,14 @@ void freeOrder(Order *o)
 	g_object_unref(o);
 }
 
+// TODO change to use iterator
 void addToOrder(Order *o, gint index)
 {
 	char *name;
 	Price price;
 	GtkTreeIter iter;
 
-	getItem(index, &name, &price);
+	getItemByIndex(index, &name, &price);
 	gtk_list_store_append(o->store, &iter);
 	gtk_list_store_set(o->store, &iter, 0, name, 1, price, -1);
 	o->subtotal += price;

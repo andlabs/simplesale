@@ -29,20 +29,27 @@ void deleteItem(GtkTreeIter *which)
 	gtk_list_store_remove(items, which);
 }
 
-void getItem(gint index, char **name, Price *p)
+void getItem(GtkTreeIter *iter, char **name, Price *price)
 {
-	GtkTreePath *path;
-	GtkTreeIter iter;
 	char *a;	// temporary places
 	Price c;
 
-	path = gtk_tree_path_new_from_indices(index, -1);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(items), &iter, path);
-	gtk_tree_model_get(GTK_TREE_MODEL(items), &iter, 0, &a, 1, &c, -1);
+	gtk_tree_model_get(GTK_TREE_MODEL(items), iter, 0, &a, 1, &c, -1);
 	if (name != NULL)
 		*name = a;
-	if (p != NULL)
-		*p = c;
+	if (price != NULL)
+		*price = c;
+}
+
+// TODO remove need for this
+void getItemByIndex(gint index, char **name, Price *price)
+{
+	GtkTreePath *path;
+	GtkTreeIter iter;
+
+	path = gtk_tree_path_new_from_indices(index, -1);
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(items), &iter, path);
+	getItem(&iter, name, price);
 }
 
 void setItemName(GtkTreeIter *which, const char *name)
