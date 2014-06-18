@@ -59,6 +59,7 @@ extern void setItemPrice(GtkTreeIter *, Price);
 extern GtkTreeModel *itemsModel(void);
 extern void setItemsIconLayout(GtkCellLayout *);
 extern void setItemsColumnLayout(GtkTreeView *);
+extern void loadItems(void);
 extern void saveItems(void);
 
 // itemeditor.c
@@ -103,7 +104,10 @@ extern AccountEditor *newAccountEditor(void);
 
 // db.c
 extern void createDB(void);
-extern void loadItems(void);
+typedef struct dbIn dbIn;
+extern dbIn *dbInOpenItems(void);
+extern gboolean dbInReadItem(dbIn *, gchar **, Price *);
+extern void dbInCloseAndFree(dbIn *);
 typedef struct dbOut dbOut;
 extern void dbOutCreateAndFree(dbOut *);
 extern void dbOutWriteItemModel(GtkTreeModel *, dbOut *);

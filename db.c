@@ -63,33 +63,54 @@ static GDataOutputStream *dbToDataOutStream(GOutputStream *f)
 	return w;
 }
 
-void loadItems(void)
-{
+struct dbIn {
+	char *filename;
 	GFileInputStream *i;
 	GDataInputStream *r;
+};
+
+static dbIn *newdbIn(char *filename)
+{
+	dbIn *i;
+
+	i = (dbIn *) g_malloc0(sizeof (dbIn));
+	i->filename = filename;
+	i->i = opendb(filename);
+	i->r = dbToDataInStream(G_INPUT_STREAM(i->i));
+	return i;
+}
+
+dbIn *dbInOpenItems(void)
+{
+	return newdbIn(ITEMSNAME);
+}
+
+gboolean dbInReadItem(dbIn *i, char **name, Price *price)
+{
+	char *n;		// to avoid overwriting on error
+	Price p;
+	gsize len;		// because the docs don't say if this can be NULL or not
 	GError *err = NULL;
 
-	i = opendb(ITEMSNAME);
-	r = dbToDataInStream(G_INPUT_STREAM(i));
-	for (;;) {
-		char *name;
-		Price price;
-		gsize len;
+	n = g_data_input_stream_read_line_utf8(i->r, &len, NULL, &err);
+	// gcc stop complainiing about if (...) if (...) ... else ... I know what I'm doing here
+	if (n == NULL && err == NULL)		// end of file
+		return FALSE;
+	else if (n == NULL)
+		g_error("error reading item name from database file %s: %s", i->filename, err->message);
+	*name = n;
+	p = (Price) PRICEREAD(i->r, NULL, &err);
+	if (err != NULL)
+		g_error("error reading item price from database file %s: %s", i->filename, err->message);
+	*price = p;
+	return TRUE;	
+}
 
-		name = g_data_input_stream_read_line_utf8(r, &len, NULL, &err);
-		// gcc stop complainiing about if (...) if (...) ... else ... I know what I'm doing here
-		if (name == NULL && err == NULL)		// end of file
-			break;
-		else if (name == NULL)
-			g_error("error reading item name from items database: %s", err->message);
-		price = (Price) PRICEREAD(r, NULL, &err);
-		if (err != NULL)
-			g_error("error reading item price from items database: %s", err->message);
-		addItem(name, price);
-		g_free(name);
-	}
-	g_object_unref(r);
-	g_object_unref(i);
+void dbInCloseAndFree(dbIn *i)
+{
+	g_object_unref(i->r);
+	g_object_unref(i->i);
+	g_free(i);
 }
 
 struct dbOut {

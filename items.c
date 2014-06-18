@@ -95,6 +95,20 @@ void setItemsColumnLayout(GtkTreeView *table)
 	gtk_tree_view_set_headers_visible(table, TRUE);
 }
 
+void loadItems(void)
+{
+	dbIn *i;
+	char *name;
+	Price price;
+
+	i = dbInOpenItems();
+	while (dbInReadItem(i, &name, &price) == TRUE) {
+		addItem(name, price);
+		g_free(name);
+	}
+	dbInCloseAndFree(i);
+}
+
 void saveItems(void)
 {
 	dbOut *o;
