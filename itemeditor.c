@@ -13,7 +13,6 @@ struct ItemEditor {
 	GtkWidget *rightside;
 	GtkWidget *name;
 	GtkWidget *price;
-	GtkWidget *invalid;
 
 	GtkTreeIter current;
 	gboolean selecting;
@@ -101,8 +100,7 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 	if (selected) {
 		gtk_tree_model_get(itemsModel(), &e->current, 0, &name, 1, &price, -1);
 		pricestr = priceToString(price, "");
-	} else
-		gtk_label_set_text(GTK_LABEL(e->invalid), "");
+	}
 	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
 	priceEntrySetText(PRICE_ENTRY(e->price), pricestr);
@@ -144,12 +142,8 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("item changed without any item selected (textbox should be disabled)");
 	// TODO remove label
-	if (priceEntryGetPrice(PRICE_ENTRY(e->price), &price) != TRUE)
-		gtk_label_set_text(GTK_LABEL(e->invalid), "Entered price invalid; not changing.");
-	else {
-		gtk_label_set_text(GTK_LABEL(e->invalid), "");
+	if (priceEntryGetPrice(PRICE_ENTRY(e->price), &price) != FALSE)
 		setItemPrice(&iter, price);
-	}
 }
 
 ItemEditor *newItemEditor(void)
@@ -215,7 +209,7 @@ ItemEditor *newItemEditor(void)
 	gtk_widget_set_halign(e->name, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->name, NULL,
-		GTK_POS_RIGHT, 3, 1);
+		GTK_POS_RIGHT, 1, 1);
 	attachLabel("Name:", e->name, e->rightside);
 
 	e->price = newPriceEntry();
@@ -223,13 +217,6 @@ ItemEditor *newItemEditor(void)
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->price, e->name,
 		GTK_POS_BOTTOM, 1, 1);
-	e->invalid = gtk_label_new("");
-	alignLabel(e->invalid, 0);
-	gtk_widget_set_hexpand(e->invalid, TRUE);
-	gtk_widget_set_halign(e->invalid, GTK_ALIGN_START);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->invalid, e->price,
-		GTK_POS_RIGHT, 1, 1);
 	attachLabel("Price:", e->price, e->rightside);
 
 	// TODO add an undo button?
