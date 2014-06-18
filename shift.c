@@ -264,11 +264,6 @@ void shiftNewOrder(Shift *s)
 
 	o = newOrder();
 	g_signal_connect(o, "do", G_CALLBACK(shiftDoOrder), s);
-	// sample items
-	{
-		addToOrder(o, 0);
-		addToOrder(o, 1);
-	}
 	g_hash_table_insert(s->orders, o, NULL);
 }
 

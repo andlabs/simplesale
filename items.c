@@ -41,15 +41,13 @@ void getItem(GtkTreeIter *iter, char **name, Price *price)
 		*price = c;
 }
 
-// TODO remove need for this
-void getItemByIndex(gint index, char **name, Price *price)
+GtkTreeIter itemPathToIter(GtkTreePath *path)
 {
-	GtkTreePath *path;
 	GtkTreeIter iter;
 
-	path = gtk_tree_path_new_from_indices(index, -1);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(items), &iter, path);
-	getItem(&iter, name, price);
+	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(items), &iter, path) == FALSE)
+		g_error("error converting items path to iter");
+	return iter;
 }
 
 void setItemName(GtkTreeIter *which, const char *name)

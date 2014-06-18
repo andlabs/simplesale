@@ -55,7 +55,7 @@ extern void initItems(void);
 extern GtkTreeIter addItem(char *, Price);
 extern void deleteItem(GtkTreeIter *);
 extern void getItem(GtkTreeIter *, char **, Price *);
-extern void getItemByIndex(gint, char **, Price *);
+extern GtkTreeIter itemPathToIter(GtkTreePath *);
 extern void setItemName(GtkTreeIter *, const char *);
 extern void setItemPrice(GtkTreeIter *, Price);
 extern GtkTreeModel *itemsModel(void);
@@ -75,7 +75,7 @@ enum {
 typedef struct Order Order;
 extern Order *newOrder(void);
 extern void freeOrder(Order *);
-extern void addToOrder(Order *, gint);
+extern void addToOrder(Order *, GtkTreeIter *);
 extern void removeFromOrder(Order *, GtkTreeIter *);
 extern Price subtotal(Order *);
 extern GtkTreeModel *orderModel(Order *);

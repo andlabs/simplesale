@@ -87,16 +87,15 @@ void freeOrder(Order *o)
 	g_object_unref(o);
 }
 
-// TODO change to use iterator
-void addToOrder(Order *o, gint index)
+void addToOrder(Order *o, GtkTreeIter *iiter)
 {
 	char *name;
 	Price price;
-	GtkTreeIter iter;
+	GtkTreeIter oiter;
 
-	getItemByIndex(index, &name, &price);
-	gtk_list_store_append(o->store, &iter);
-	gtk_list_store_set(o->store, &iter, 0, name, 1, price, -1);
+	getItem(iiter, &name, &price);
+	gtk_list_store_append(o->store, &oiter);
+	gtk_list_store_set(o->store, &oiter, 0, name, 1, price, -1);
 	o->subtotal += price;
 }
 
@@ -186,11 +185,13 @@ static void itemClicked(GtkIconView *view, GtkTreePath *path, gpointer data)
 	USED(view);
 
 	Order *o = (Order *) data;
+	GtkTreeIter iter;
 
 	path = gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(o->itemsFiltered), path);
 	if (path == NULL)
 		g_error("filtered list store path converted to child path is NULL for a valid item inside itemClicked()");
-	addToOrder(o, listStorePathIndex(path));
+	iter = itemPathToIter(path);
+	addToOrder(o, &iter);
 	updateTotalDisp(o);
 }
 
