@@ -45,9 +45,14 @@ void getItem(gint index, char **name, Price *p)
 		*p = c;
 }
 
-GtkListStore *itemsStore(void)
+void setItemName(GtkTreeIter *which, const char *name)
 {
-	return items;
+	gtk_list_store_set(items, which, 0, name, -1);
+}
+
+void setItemPrice(GtkTreeIter *which, Price price)
+{
+	gtk_list_store_set(items, which, 1, price, -1);
 }
 
 GtkTreeModel *itemsModel(void)

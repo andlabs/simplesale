@@ -128,7 +128,7 @@ static void nameChanged(GtkEditable *editable, gpointer data)
 		return;
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("item changed without any item selected (textbox should be disabled)");
-	gtk_list_store_set(itemsStore(), &iter, 0, gtk_entry_get_text(GTK_ENTRY(e->name)), -1);
+	setItemName(&iter, gtk_entry_get_text(GTK_ENTRY(e->name)));
 }
 
 static void priceChanged(GtkEditable *editable, gpointer data)
@@ -148,7 +148,7 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 		gtk_label_set_text(GTK_LABEL(e->invalid), "Entered price invalid; not changing.");
 	else {
 		gtk_label_set_text(GTK_LABEL(e->invalid), "");
-		gtk_list_store_set(itemsStore(), &iter, 1, price, -1);
+		setItemPrice(&iter, price);
 	}
 }
 
