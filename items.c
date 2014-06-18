@@ -94,3 +94,12 @@ void setItemsColumnLayout(GtkTreeView *table)
 	gtk_tree_view_append_column(table, col);
 	gtk_tree_view_set_headers_visible(table, TRUE);
 }
+
+void saveItems(void)
+{
+	dbOut *o;
+
+	o = dbOutOpenItems();
+	dbOutWriteItemModel(GTK_TREE_MODEL(items), o);
+	dbOutCreateAndFree(o);
+}

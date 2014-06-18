@@ -92,6 +92,45 @@ void loadItems(void)
 	g_object_unref(i);
 }
 
+struct dbOut {
+	char *filename;
+	GOutputStream *o;
+	GDataOutputStream *w;
+};
+
+static dbOut *newdbOut(char *filename)
+{
+	dbOut *o;
+
+	o = (dbOut *) g_malloc0(sizeof (dbOut));
+	o->filename = filename;
+	o->o = g_memory_output_stream_new_resizable();
+	o->w = dbToDataOutStream(o->o);
+	return o;
+}
+
+void dbOutCreateAndFree(dbOut *o)
+{
+	GFileOutputStream *f;
+	GMemoryOutputStream *m;
+	gsize n;
+	GError *err = NULL;
+
+	f = createdb(o->filename);
+	m = G_MEMORY_OUTPUT_STREAM(o->o);
+	if (g_output_stream_write_all(G_OUTPUT_STREAM(f),
+		g_memory_output_stream_get_data(m),
+		g_memory_output_stream_get_data_size(m),
+		&n, NULL, &err) == FALSE)
+		g_error("error saving database file %s: %s", o->filename, err->message);
+	g_object_unref(f);
+	g_object_unref(o->w);
+	g_object_unref(o->o);
+	g_free(o);
+}
+
+// TODO dbOutAppendAndFree
+
 static gboolean writeItem(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
 	USED(path);
@@ -103,22 +142,21 @@ static gboolean writeItem(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *i
 
 	gtk_tree_model_get(model, iter, 0, &name, 1, &price, -1);
 	if (g_data_output_stream_put_string(w, name, NULL, &err) == FALSE)
-		g_error("error writing item named \"%s\" to items database: %s", name, err->message);
+		g_error("error writing item named \"%s\" to temporary storage: %s", name, err->message);
 	if (g_data_output_stream_put_byte(w, '\n', NULL, &err) == FALSE)
-		g_error("error writing newline for item \"%s\" to items database: %s", name, err->message);
+		g_error("error writing newline for item \"%s\" to temporary storage: %s", name, err->message);
 	if (PRICEWRITE(w, price, NULL, &err) == FALSE)
-		g_error("error writing price for item \"%s\" to item database: %s", name, err->message);
+		g_error("error writing price for item \"%s\" to temporary storage: %s", name, err->message);
 	return FALSE;
 }
 
-void saveItems(void)
+// for both items and orders
+void dbOutWriteItemModel(GtkTreeModel *model, dbOut *o)
 {
-	GFileOutputStream *o;
-	GDataOutputStream *w;
+	gtk_tree_model_foreach(model, writeItem, o->w);
+}
 
-	o = createdb(ITEMSNAME);
-	w = dbToDataOutStream(G_OUTPUT_STREAM(o));
-	gtk_tree_model_foreach(itemsModel(), writeItem, w);
-	g_object_unref(w);
-	g_object_unref(o);
+dbOut *dbOutOpenItems(void)
+{
+	return newdbOut(ITEMSNAME);
 }

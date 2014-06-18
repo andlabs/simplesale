@@ -367,6 +367,7 @@ static void freeOrderGUI(Order *o)
 	g_object_unref(o->itemsFiltered);
 }
 
+// TODO make this unnecessary
 const gchar *orderCustomer(Order *o)
 {
 	return gtk_entry_get_text(GTK_ENTRY(o->customer));
