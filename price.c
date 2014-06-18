@@ -33,25 +33,13 @@ static void realPriceEntry_initEditable(GtkEditableInterface *);
 G_DEFINE_TYPE_WITH_CODE(RealPriceEntry, realPriceEntry, GTK_TYPE_ENTRY,
 	G_IMPLEMENT_INTERFACE(GTK_TYPE_EDITABLE, realPriceEntry_initEditable))
 
-static void realPriceEntry_init(RealPriceEntry *p)
-{
-	gtk_entry_set_width_chars(GTK_ENTRY(p), 10);		// not too long, not too short
-	gtk_entry_set_alignment(GTK_ENTRY(p), 1);
-	p->price = 0;
-	p->valid = TRUE;
-}
-
-static void realPriceEntry_dispose(GObject *obj)
-{
-	G_OBJECT_CLASS(realPriceEntry_parent_class)->dispose(obj);
-}
-
-static void realPriceEntry_finalize(GObject *obj)
-{
-	G_OBJECT_CLASS(realPriceEntry_parent_class)->finalize(obj);
-}
-
-static GtkEditableInterface *chain = NULL;
+// the order we need to run our validation signals is:
+// 	our insert-text -> GtkEntry insert-text -> our validation -> GtkEntry changed -> other connected changes
+// so what we do is
+// 	- override the vtable insert-text (nothing else connects to insert-text
+// 	- connect to our own changed before anything else does
+// thanks to ebassi, mclasen, and halfline in irc.gimp.net/#gtk+
+// TODO rearrange eveyrthing to have related things close together
 
 static void realPriceEntryValidate(RealPriceEntry *p)
 {
@@ -99,6 +87,35 @@ invalid:
 		GTK_ENTRY_ICON_PRIMARY, "dialog-error");
 }
 
+static void realPriceEntry_changed(GtkEditable *editable, gpointer data)
+{
+	USED(editable);
+
+	// validate before chaining up so the new validity shows up
+	realPriceEntryValidate(REAL_PRICE_ENTRY(data));
+}
+
+static void realPriceEntry_init(RealPriceEntry *p)
+{
+	gtk_entry_set_width_chars(GTK_ENTRY(p), 10);		// not too long, not too short
+	gtk_entry_set_alignment(GTK_ENTRY(p), 1);
+	p->price = 0;
+	p->valid = TRUE;
+	g_signal_connect(p, "changed", G_CALLBACK(realPriceEntry_changed), p);
+}
+
+static void realPriceEntry_dispose(GObject *obj)
+{
+	G_OBJECT_CLASS(realPriceEntry_parent_class)->dispose(obj);
+}
+
+static void realPriceEntry_finalize(GObject *obj)
+{
+	G_OBJECT_CLASS(realPriceEntry_parent_class)->finalize(obj);
+}
+
+static GtkEditableInterface *chain = NULL;
+
 static void realPriceEntry_insertText(GtkEditable *editable, const gchar *text, gint n, gint *pos)
 {
 	gint i;
@@ -118,15 +135,6 @@ static void realPriceEntry_insertText(GtkEditable *editable, const gchar *text, 
 	// don't validate here; we need to validate between the chained ::insert-text and the chained ::change (otherwise things act weird)
 }
 
-void realPriceEntry_changed(GtkEditable *editable)
-{
-	// validate before chaining up so the new validity shows up
-	realPriceEntryValidate(REAL_PRICE_ENTRY(editable));
-	// and chain up
-	if (chain->changed != NULL)
-		chain->changed(editable);
-}
-
 static void realPriceEntry_initEditable(GtkEditableInterface *interface)
 {
 	chain = (GtkEditableInterface *) g_type_interface_peek_parent(interface);
@@ -135,8 +143,7 @@ static void realPriceEntry_initEditable(GtkEditableInterface *interface)
 	// signals
 	interface->insert_text = realPriceEntry_insertText;
 	CHAIN(delete_text)
-//	CHAIN(changed)
-	interface->changed = realPriceEntry_changed;
+	CHAIN(changed)
 	// vtable
 	CHAIN(do_insert_text)
 	CHAIN(do_delete_text)
