@@ -109,6 +109,29 @@ Shift *newShift(char *name)
 	return (Shift *) g_object_new(shift_get_type(), "employee", name, NULL);
 }
 
+static void shiftDoOrder(Order *o, gint action, gpointer data)
+{
+	Shift *s = (Shift *) data;
+	GtkTreeIter iter;
+
+	switch (action) {
+	case orderCancel:
+		printf("order cancelled\n");
+		break;
+	case orderPayNow:
+		printf("order paid now\n");
+		break;
+	case orderPayLater:
+		gtk_list_store_append(s->saved, &iter);
+		gtk_list_store_set(s->saved, &iter, 0, orderCustomer(o), 1, o, -1);
+		orderHideWindow(o);
+		return;		// DON'T FALL THROUGH! we still need the order!
+	}
+
+	g_hash_table_remove(s->orders, o);
+	freeOrder(o);
+}
+
 static void newOrderClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
@@ -236,29 +259,6 @@ static void freeShiftGUI(Shift *s)
 {
 	gtk_widget_destroy(s->win);		// TODO does this destroy subwidgets?
 	g_object_unref(s->saved);
-}
-
-static void shiftDoOrder(Order *o, gint action, gpointer data)
-{
-	Shift *s = (Shift *) data;
-	GtkTreeIter iter;
-
-	switch (action) {
-	case orderCancel:
-		printf("order cancelled\n");
-		break;
-	case orderPayNow:
-		printf("order paid now\n");
-		break;
-	case orderPayLater:
-		gtk_list_store_append(s->saved, &iter);
-		gtk_list_store_set(s->saved, &iter, 0, orderCustomer(o), 1, o, -1);
-		orderHideWindow(o);
-		return;		// DON'T FALL THROUGH! we still need the order!
-	}
-
-	g_hash_table_remove(s->orders, o);
-	freeOrder(o);
 }
 
 void shiftShowWindow(Shift *s)
