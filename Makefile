@@ -1,5 +1,6 @@
 CFILES = db.c \
 	items.c \
+	itemeditor.c \
 	main.c \
 	login.c \
 	order.c \

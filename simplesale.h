@@ -58,6 +58,7 @@ extern GtkTreeModel *itemsModel(void);
 extern void setItemsIconLayout(GtkCellLayout *);
 extern void setItemsColumnLayout(GtkTreeView *);
 
+// itemeditor.c
 typedef struct ItemEditor ItemEditor;
 extern ItemEditor *newItemEditor(void);
 
