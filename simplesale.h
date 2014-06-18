@@ -11,8 +11,6 @@
 #define USED(x) ((void) (x))
 
 // util.c
-extern gint listStoreIterIndex(GtkTreeModel *, GtkTreeIter *);
-extern gint listStorePathIndex(GtkTreePath *);
 extern void alignLabel(GtkWidget *, gfloat);
 extern void expandWindowHeight(GtkWindow *, gint);
 extern GtkWidget *newHeaderBar(char *, GtkWidget *);
