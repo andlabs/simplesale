@@ -334,7 +334,9 @@ static void buildOrderGUI(Order *o)
 	o->orderSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(o->order));
 	// TODO figure out how to make it so that clicking on blank space deselects
 	g_signal_connect(o->orderSel, "changed", G_CALLBACK(adjustDeleteEnabled), o);
+	// TODO split apart setting model to a separate function from setItemTableLayout()
 	setOrderTableLayout(GTK_TREE_VIEW(o->order));
+	gtk_tree_view_set_model(GTK_TREE_VIEW(o->order), orderModel(o));
 	o->orderScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(o->orderScroller), o->order);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(o->orderScroller), GTK_SHADOW_IN);
