@@ -37,7 +37,8 @@ static GtkWidget *newHeaderButton(char *label, char *style, GCallback callback, 
 	GtkWidget *button;
 
 	button = gtk_button_new_with_label(label);
-	gtk_style_context_add_class(gtk_widget_get_style_context(button), style);
+	if (style != NULL)
+		gtk_style_context_add_class(gtk_widget_get_style_context(button), style);
 	g_signal_connect(button, "clicked", callback, data);
 	(*pack)(GTK_HEADER_BAR(topbar), button);
 	return button;
@@ -51,6 +52,11 @@ GtkWidget *newConfirmHeaderButton(char *label, GCallback callback, gpointer data
 GtkWidget *newCancelHeaderButton(char *label, GCallback callback, gpointer data, GtkWidget *topbar)
 {
 	return newHeaderButton(label, "destructive-action", callback, data, topbar, gtk_header_bar_pack_end);
+}
+
+GtkWidget *newRegularHeaderButton(char *label, GCallback callback, gpointer data, GtkWidget *topbar)
+{
+	return newHeaderButton(label, NULL, callback, data, topbar, gtk_header_bar_pack_end);
 }
 
 GtkWidget *newListScroller(GtkWidget *list)

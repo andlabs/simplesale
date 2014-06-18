@@ -72,6 +72,15 @@ static void loginClicked(GtkButton *button, gpointer data)
 	shiftShowWindow(s);
 }
 
+static void settingsClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	Login *l = (Login *) data;
+
+	USED(l);
+}
+
 Login *newLogin(void)
 {
 	Login *l;
@@ -84,10 +93,8 @@ Login *newLogin(void)
 	// TODO remove the following
 	g_signal_connect(l->win, "delete-event", gtk_main_quit, NULL);
 
-	topbar = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(topbar), "Log In");
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(topbar), FALSE);
-	gtk_window_set_titlebar(GTK_WINDOW(l->win), topbar);
+	topbar = newHeaderBar("Log In", l->win);
+	newRegularHeaderButton("Settings", G_CALLBACK(settingsClicked), l, topbar);
 
 	l->layout = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(l->layout), TRUE);
@@ -96,13 +103,7 @@ Login *newLogin(void)
 	gtk_icon_view_set_text_column(GTK_ICON_VIEW(l->list), 0);
 	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(l->list), 2);
 	gtk_icon_view_set_item_width(GTK_ICON_VIEW(l->list), -1);
-	l->listScroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add(GTK_CONTAINER(l->listScroller), l->list);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(l->listScroller), GTK_SHADOW_IN);
-	gtk_widget_set_hexpand(l->listScroller, TRUE);
-	gtk_widget_set_halign(l->listScroller, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(l->listScroller, TRUE);
-	gtk_widget_set_valign(l->listScroller, GTK_ALIGN_FILL);
+	l->listScroller = newListScroller(l->list);
 	gtk_grid_attach_next_to(GTK_GRID(l->layout),
 		l->listScroller, NULL,
 		GTK_POS_BOTTOM, 4, 1);

@@ -16,6 +16,7 @@ extern void expandWindowHeight(GtkWindow *, gint);
 extern GtkWidget *newHeaderBar(char *, GtkWidget *);
 extern GtkWidget *newConfirmHeaderButton(char *, GCallback, gpointer, GtkWidget *);
 extern GtkWidget *newCancelHeaderButton(char *, GCallback, gpointer, GtkWidget *);
+extern GtkWidget *newRegularHeaderButton(char *, GCallback, gpointer, GtkWidget *);
 extern GtkWidget *newListScroller(GtkWidget *);
 extern void attachLabel(char *, GtkWidget *, GtkWidget *);
 extern gboolean askConfirm(GtkWidget *, char *, char *, ...);
