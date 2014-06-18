@@ -87,7 +87,7 @@ void freeOrder(Order *o)
 	g_object_unref(o);
 }
 
-void addToOrder(Order *o, GtkTreeIter *iiter)
+static void addToOrder(Order *o, GtkTreeIter *iiter)
 {
 	char *name;
 	Price price;
@@ -99,7 +99,7 @@ void addToOrder(Order *o, GtkTreeIter *iiter)
 	o->subtotal += price;
 }
 
-void removeFromOrder(Order *o, GtkTreeIter *which)
+static void removeFromOrder(Order *o, GtkTreeIter *which)
 {
 	Price price;
 
@@ -108,17 +108,12 @@ void removeFromOrder(Order *o, GtkTreeIter *which)
 	o->subtotal -= price;
 }
 
-Price total(Order *o)
+static Price total(Order *o)
 {
 	return o->subtotal;
 }
 
-GtkTreeModel *orderModel(Order *o)
-{
-	return GTK_TREE_MODEL(o->store);
-}
-
-void setOrderTableLayout(GtkTreeView *table)
+static void setOrderTableLayout(GtkTreeView *table)
 {
 	// they're identical
 	setItemsColumnLayout(table);
@@ -329,13 +324,13 @@ static void buildOrderGUI(Order *o)
 		o->customer, label,
 		GTK_POS_RIGHT, 1, 1);
 
-	o->order = gtk_tree_view_new_with_model(orderModel(o));
+	o->order = gtk_tree_view_new_with_model(GTK_TREE_MODEL(o->store));
 	o->orderSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(o->order));
 	// TODO figure out how to make it so that clicking on blank space deselects
 	g_signal_connect(o->orderSel, "changed", G_CALLBACK(adjustDeleteEnabled), o);
 	// TODO split apart setting model to a separate function from setItemTableLayout()
 	setOrderTableLayout(GTK_TREE_VIEW(o->order));
-	gtk_tree_view_set_model(GTK_TREE_VIEW(o->order), orderModel(o));
+	gtk_tree_view_set_model(GTK_TREE_VIEW(o->order), GTK_TREE_MODEL(o->store));
 	o->orderScroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(o->orderScroller), o->order);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(o->orderScroller), GTK_SHADOW_IN);
