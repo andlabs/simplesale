@@ -126,6 +126,7 @@ static void updateTotalDisp(Order *o)
 	Price tot, sub;
 	char *str;
 
+	// TODO move the gut of the work to price.c
 	sub = o->subtotal;
 	tot = total(o);
 	str = priceToString(tot, "Total: $");
@@ -153,11 +154,12 @@ static gboolean filter(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 	gchar **words, **wp;
 
 	// if no search, show everything
-	// cast to gchar * because we'll be copying it later
+	// cast to gchar * because we'll be copying it later (wouldn't be necessary if NULL was guaranteed to not be returned or if g_utf8_strdown() was documented as null safe)
 	query = (gchar *) gtk_entry_get_text(GTK_ENTRY(o->searchBox));
 	if (query == NULL || *query == '\0')		// empty string
 		return TRUE;
 	query = g_utf8_strdown(query, -1);
+	// TODO change to use getItem()?
 	gtk_tree_model_get(model, iter, 0, &item, -1);
 	item = g_utf8_strdown(item, -1);
 	// this make sure any word exists in the item name
@@ -217,17 +219,10 @@ static void cancelClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	Order *o = (Order *) data;
-	GtkWidget *alert;
-	gint response;
 
-	alert = gtk_message_dialog_new(GTK_WINDOW(o->win), GTK_DIALOG_MODAL,
-		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
-		"Are you sure you want to cancel the current order?");
-	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
-		"If you click Yes, the current order will be voided.");
-	response = gtk_dialog_run(GTK_DIALOG(alert));
-	gtk_widget_destroy(alert);
-	if (response != GTK_RESPONSE_YES)
+	if (!askConfirm(o->win,
+		"If you click Yes, the current order will be voided.",
+		"Are you sure you want to cancel the current order?"))
 		return;
 	g_signal_emit(o, orderSignals[0], 0, orderCancel);
 }
@@ -278,7 +273,6 @@ static void payLaterClicked(GtkButton *button, gpointer data)
 
 static void buildOrderGUI(Order *o)
 {
-	gint width, height;
 	GtkWidget *label;
 
 	o->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -287,32 +281,15 @@ static void buildOrderGUI(Order *o)
 	g_signal_connect(o->win, "delete-event", gtk_main_quit, NULL);
 
 	// the initail height is too small
-	gtk_window_get_default_size(GTK_WINDOW(o->win), &width, &height);
-	if (height == -1)
-		gtk_window_get_size(GTK_WINDOW(o->win), NULL, &height);
-	gtk_window_set_default_size(GTK_WINDOW(o->win), width, height * 3);
+	expandWindowHeight(GTK_WINDOW(o->win), 3);
 
-	o->topbar = gtk_header_bar_new();
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(o->topbar), FALSE);
-	gtk_window_set_titlebar(GTK_WINDOW(o->win), o->topbar);
-
-	o->payNow = gtk_button_new_with_label("Pay Now");
-	gtk_style_context_add_class(gtk_widget_get_style_context(o->payNow), "suggested-action");
-	g_signal_connect(o->payNow, "clicked", G_CALLBACK(payNowClicked), o);
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(o->topbar), o->payNow);
-	o->payLater = gtk_button_new_with_label("Pay Later");
-	gtk_style_context_add_class(gtk_widget_get_style_context(o->payLater), "suggested-action");
-	g_signal_connect(o->payLater, "clicked", G_CALLBACK(payLaterClicked), o);
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(o->topbar), o->payLater);
-
-	o->cancel = gtk_button_new_with_label("Cancel Order");
-	gtk_style_context_add_class(gtk_widget_get_style_context(o->cancel), "destructive-action");
-	g_signal_connect(o->cancel, "clicked", G_CALLBACK(cancelClicked), o);
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(o->topbar), o->cancel);
-
-	o->layout = gtk_grid_new();
+	o->topbar = newHeaderBar("<unset>", o->win);
+	o->payNow = newConfirmHeaderButton("Pay Now", G_CALLBACK(payNowClicked), o, o->topbar);
+	o->payLater = newConfirmHeaderButton("Pay Later", G_CALLBACK(payLaterClicked), o, o->topbar);
+	o->cancel = newCancelHeaderButton("Cancel Order", G_CALLBACK(cancelClicked), o, o->topbar);
 
 	o->leftside = gtk_grid_new();
+
 	label = gtk_label_new("Customer:");
 	gtk_grid_attach_next_to(GTK_GRID(o->leftside),
 		label, NULL,
@@ -324,6 +301,7 @@ static void buildOrderGUI(Order *o)
 		o->customer, label,
 		GTK_POS_RIGHT, 1, 1);
 
+	// TODO rename to orderList or something?
 	o->order = gtk_tree_view_new_with_model(GTK_TREE_MODEL(o->store));
 	o->orderSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(o->order));
 	// TODO figure out how to make it so that clicking on blank space deselects
@@ -331,13 +309,7 @@ static void buildOrderGUI(Order *o)
 	// TODO split apart setting model to a separate function from setItemTableLayout()
 	setOrderTableLayout(GTK_TREE_VIEW(o->order));
 	gtk_tree_view_set_model(GTK_TREE_VIEW(o->order), GTK_TREE_MODEL(o->store));
-	o->orderScroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add(GTK_CONTAINER(o->orderScroller), o->order);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(o->orderScroller), GTK_SHADOW_IN);
-	gtk_widget_set_hexpand(o->orderScroller, TRUE);
-	gtk_widget_set_halign(o->orderScroller, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(o->orderScroller, TRUE);
-	gtk_widget_set_valign(o->orderScroller, GTK_ALIGN_FILL);
+	o->orderScroller = newListScroller(o->order);
 	gtk_grid_attach_next_to(GTK_GRID(o->leftside),
 		o->orderScroller, label,
 		GTK_POS_BOTTOM, 2, 1);
@@ -353,6 +325,7 @@ static void buildOrderGUI(Order *o)
 
 	o->rightside = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(o->rightside), TRUE);
+
 	o->searchBox = gtk_search_entry_new();
 	g_signal_connect(o->searchBox, "search-changed", G_CALLBACK(search), o);
 	gtk_widget_set_hexpand(o->searchBox, TRUE);
@@ -361,35 +334,23 @@ static void buildOrderGUI(Order *o)
 		o->searchBox, NULL,
 		GTK_POS_TOP, 1, 1);
 
+	// TODO rename items to itemsGrid?
 	o->itemsFiltered = gtk_tree_model_filter_new(itemsModel(), NULL);
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(o->itemsFiltered), filter, o, NULL);
 	o->items = gtk_icon_view_new_with_model(o->itemsFiltered);
 	g_signal_connect(o->items, "item-activated", G_CALLBACK(itemClicked), o);
 	gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(o->items), TRUE);
 	setItemsIconLayout(GTK_CELL_LAYOUT(o->items));
-	o->itemsScroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add(GTK_CONTAINER(o->itemsScroller), o->items);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(o->itemsScroller), GTK_SHADOW_IN);
-	gtk_widget_set_hexpand(o->itemsScroller, TRUE);
-	gtk_widget_set_halign(o->itemsScroller, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(o->itemsScroller, TRUE);
-	gtk_widget_set_valign(o->itemsScroller, GTK_ALIGN_FILL);
+	o->itemsScroller = newListScroller(o->items);
 	gtk_grid_attach_next_to(GTK_GRID(o->rightside),
 		o->itemsScroller, o->searchBox,
 		GTK_POS_BOTTOM, 2, 1);
 
+	o->layout = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(o->layout), TRUE);
-	gtk_widget_set_hexpand(o->leftside, TRUE);
-	gtk_widget_set_halign(o->leftside, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(o->leftside, TRUE);
-	gtk_widget_set_valign(o->leftside, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(o->layout),
 		o->leftside, NULL,
 		GTK_POS_TOP, 1, 1);
-	gtk_widget_set_hexpand(o->rightside, TRUE);
-	gtk_widget_set_halign(o->rightside, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(o->rightside, TRUE);
-	gtk_widget_set_valign(o->rightside, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(o->layout),
 		o->rightside, o->leftside,
 		GTK_POS_RIGHT, 2, 1);
