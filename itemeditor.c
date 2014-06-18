@@ -124,7 +124,6 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 		return;
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("item changed without any item selected (textbox should be disabled)");
-	// TODO remove label
 	if (priceEntryGetPrice(PRICE_ENTRY(e->price), &price) != FALSE)
 		setItemPrice(&iter, price);
 }
@@ -149,23 +148,23 @@ ItemEditor *newItemEditor(void)
 	newConfirmHeaderButton("Save and Close", G_CALLBACK(saveClicked), e, topbar);
 	newCancelHeaderButton("Discard and Close", G_CALLBACK(discardClicked), e, topbar);
 
-	e->layout = gtk_grid_new();
-	gtk_grid_set_column_homogeneous(GTK_GRID(e->layout), TRUE);
-
 	e->leftside = gtk_grid_new();
 	e->search = gtk_search_entry_new();
 	// no live search; we assign the interactive search widget of the GtkTreeView below to this
+	// TODO that gets rid of typing in the treeview...
 	gtk_widget_set_hexpand(e->search, TRUE);
 	gtk_widget_set_halign(e->search, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
 		e->search, NULL,
 		GTK_POS_TOP, 1, 1);
+
 	button = gtk_button_new_from_icon_name("list-add", GTK_ICON_SIZE_BUTTON);
 	// TODO style class?
 	g_signal_connect(button, "clicked", G_CALLBACK(addItemClicked), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
 		button, e->search,
 		GTK_POS_RIGHT, 1, 1);
+
 	e->remove = gtk_button_new_from_icon_name("list-remove", GTK_ICON_SIZE_BUTTON);
 	// TODO style class?
 	g_signal_connect(e->remove, "clicked", G_CALLBACK(removeItemClicked), e);
@@ -173,11 +172,11 @@ ItemEditor *newItemEditor(void)
 		e->remove, button,
 		GTK_POS_RIGHT, 1, 1);
 
-	e->list = gtk_tree_view_new_with_model(itemsModel());
+	e->list = gtk_tree_view_new();
+	setItemsColumnLayout(GTK_TREE_VIEW(e->list));
 	e->listSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(e->list));
 	// TODO figure out how to make it so that clicking on blank space deselects
 	g_signal_connect(e->listSel, "changed", G_CALLBACK(itemSelected), e);
-	setItemsColumnLayout(GTK_TREE_VIEW(e->list));
 	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(e->list), GTK_ENTRY(e->search));
 	e->listScroller = newListScroller(e->list);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
@@ -204,6 +203,8 @@ ItemEditor *newItemEditor(void)
 
 	// TODO add an undo button?
 
+	e->layout = gtk_grid_new();
+	gtk_grid_set_column_homogeneous(GTK_GRID(e->layout), TRUE);
 	gtk_grid_attach_next_to(GTK_GRID(e->layout),
 		e->leftside, NULL,
 		GTK_POS_TOP, 1, 1);
