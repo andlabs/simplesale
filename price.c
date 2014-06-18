@@ -233,15 +233,10 @@ gboolean priceEntryGetPrice(PriceEntry *pe, Price *pout)
 	return FALSE;
 }
 
-// TODO replace with SetPrice() and Clear() functions
+// TODO remove
 const char *priceEntryText(PriceEntry *pe)
 {
 	return gtk_entry_get_text(GTK_ENTRY(pe->entry));
-}
-
-void priceEntrySetText(PriceEntry *pe, char *text)
-{
-	gtk_entry_set_text(GTK_ENTRY(pe->entry), text);
 }
 
 void priceEntrySetPrice(PriceEntry *p, Price price)
@@ -254,6 +249,14 @@ void priceEntrySetPrice(PriceEntry *p, Price price)
 	// the above set_text() also sets the appropriate fields
 	// TODO this isn't really efficient, but it works... is there a safer way? :S
 	// maybe I'll just add a validation check...
+}
+
+void priceEntryClear(PriceEntry *p)
+{
+	gtk_entry_set_text(GTK_ENTRY(p->entry), "");
+	// get rid of the warning icon; while it's still invalid, this is called when the editor is being disabled
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(p->entry),
+		GTK_ENTRY_ICON_PRIMARY, NULL);
 }
 
 // PriceRenderer is a special GtkCellRendererText that renders prices.

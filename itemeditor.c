@@ -100,7 +100,8 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 	if (selected) {
 		gtk_tree_model_get(itemsModel(), &e->current, 0, &name, 1, &price, -1);
 		priceEntrySetPrice(PRICE_ENTRY(e->price), price);
-	}
+	} else
+		priceEntryClear(PRICE_ENTRY(e->price));
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
 	e->selecting = FALSE;
 
