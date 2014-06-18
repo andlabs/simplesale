@@ -35,7 +35,7 @@ G_DEFINE_TYPE_WITH_CODE(RealPriceEntry, realPriceEntry, GTK_TYPE_ENTRY,
 
 static void realPriceEntry_init(RealPriceEntry *p)
 {
-	gtk_entry_set_width_chars(GTK_ENTRY(p), 8);
+	gtk_entry_set_width_chars(GTK_ENTRY(p), 10);		// not too long, not too short
 	gtk_entry_set_alignment(GTK_ENTRY(p), 1);
 	p->price = 0;
 	p->valid = TRUE;
@@ -179,6 +179,8 @@ static void priceEntry_init(PriceEntry *p)
 		p->label, NULL,
 		GTK_POS_TOP, 1, 1);
 	p->entry = newRealPriceEntry();
+	gtk_widget_set_hexpand(p->entry, TRUE);
+	gtk_widget_set_halign(p->entry, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(p),
 		p->entry, p->label,
 		GTK_POS_RIGHT, 1, 1);
