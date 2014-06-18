@@ -77,7 +77,7 @@ extern Order *newOrder(void);
 extern void freeOrder(Order *);
 extern void addToOrder(Order *, GtkTreeIter *);
 extern void removeFromOrder(Order *, GtkTreeIter *);
-extern Price subtotal(Order *);
+extern Price total(Order *);
 extern GtkTreeModel *orderModel(Order *);
 extern void setOrderTableLayout(GtkTreeView *);
 extern const gchar *orderCustomer(Order *);

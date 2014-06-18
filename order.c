@@ -108,7 +108,7 @@ void removeFromOrder(Order *o, GtkTreeIter *which)
 	o->subtotal -= price;
 }
 
-Price subtotal(Order *o)
+Price total(Order *o)
 {
 	return o->subtotal;
 }
@@ -132,8 +132,7 @@ static void updateTotalDisp(Order *o)
 	char *str;
 
 	sub = o->subtotal;
-	// TODO this is where total calculation will go;
-	tot = sub;
+	tot = total(o);
 	str = priceToString(tot, "Total: $");
 	gtk_header_bar_set_title(GTK_HEADER_BAR(o->topbar), str);
 	g_free(str);
@@ -246,8 +245,7 @@ static void payNowClicked(GtkButton *button, gpointer data)
 	PayDialog *p;
 	Price paid;
 
-	// TODO total, not subtotal
-	p = newPayDialog(GTK_WINDOW(o->win), o->subtotal);
+	p = newPayDialog(GTK_WINDOW(o->win), total(o));
 	do
 		if (runPayDialog(p) != GTK_RESPONSE_ACCEPT) {
 			freePayDialog(p);
