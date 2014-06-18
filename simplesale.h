@@ -38,20 +38,12 @@ extern gchar *priceToString(Price, char *);
 #define PRICE_ENTRY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), priceEntry_get_type(), PriceEntryClass))
 typedef struct PriceEntry PriceEntry;
 typedef struct PriceEntryClass PriceEntryClass;
-struct PriceEntry {
-	GtkEntry parent_instance;
-};
-struct PriceEntryClass {
-	GtkEntryClass parent_class;
-};
 extern GtkWidget *newPriceEntry(void);
 extern GType priceEntry_get_type(void);
-enum {
-	priceEntryOK,
-	priceEntryEmpty,
-	priceEntryInvalid,
-};
-extern int priceEntryGetPrice(PriceEntry *, Price *);
+extern void priceEntryConnect(PriceEntry *, char *, GCallback, gpointer);
+extern gboolean priceEntryGetPrice(PriceEntry *, Price *);
+extern const char *priceEntryText(PriceEntry *);
+extern void priceEntrySetText(PriceEntry *, char *);
 
 typedef struct PriceRenderer PriceRenderer;
 extern GtkCellRenderer *newPriceRenderer();

@@ -128,37 +128,17 @@ gboolean payDialogAmountPaid(PayDialog *p, Price *pout)
 {
 	GtkWidget *alert;
 	const char *amount;
-	int err;
 
-	err = priceEntryGetPrice(PRICE_ENTRY(p->amount), pout);
-	switch (err) {
-	case priceEntryOK:
+	if (priceEntryGetPrice(PRICE_ENTRY(p->amount), pout) == TRUE)
 		// TODO check less than p->price
 		return TRUE;
-	case priceEntryEmpty:
-		goto empty;
-	case priceEntryInvalid:
-		goto bad;
-	}
-	g_error("priceEntryGetPrice() returned invalid error code %d", err);
 
-bad:
-	amount = gtk_entry_get_text(GTK_ENTRY(p->amount));
+	amount = priceEntryText(PRICE_ENTRY(p->amount));
 	alert = gtk_message_dialog_new(GTK_WINDOW(p->dialog), GTK_DIALOG_MODAL,
 		GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
 		"The value \"%s\" is not a valid amount paid.", amount);
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
 		"Please correct this amount paid and try again.");
-	gtk_dialog_run(GTK_DIALOG(alert));
-	gtk_widget_destroy(alert);
-	return FALSE;
-
-empty:
-	alert = gtk_message_dialog_new(GTK_WINDOW(p->dialog), GTK_DIALOG_MODAL,
-		GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
-		"You must specify an amount paid.");
-	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(alert),
-		"Please enter an amount paid and try again.");
 	gtk_dialog_run(GTK_DIALOG(alert));
 	gtk_widget_destroy(alert);
 	return FALSE;

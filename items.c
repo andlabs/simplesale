@@ -188,7 +188,7 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 		gtk_label_set_text(GTK_LABEL(e->invalid), "");
 	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
-	gtk_entry_set_text(GTK_ENTRY(e->price), pricestr);
+	priceEntrySetText(PRICE_ENTRY(e->price), pricestr);
 	e->selecting = FALSE;
 	if (selected)
 		g_free(pricestr);
@@ -226,7 +226,8 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 		return;
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("item changed without any item selected (textbox should be disabled)");
-	if (priceEntryGetPrice(PRICE_ENTRY(e->price), &price) != priceEntryOK)
+	// TODO remove label
+	if (priceEntryGetPrice(PRICE_ENTRY(e->price), &price) != TRUE)
 		gtk_label_set_text(GTK_LABEL(e->invalid), "Entered price invalid; not changing.");
 	else {
 		gtk_label_set_text(GTK_LABEL(e->invalid), "");
@@ -239,7 +240,6 @@ ItemEditor *newItemEditor(void)
 	ItemEditor *e;
 	GtkWidget *topbar;
 	GtkWidget *button;
-	GtkWidget *label;
 
 	e = (ItemEditor *) g_malloc0(sizeof (ItemEditor));
 
@@ -301,15 +301,11 @@ ItemEditor *newItemEditor(void)
 		GTK_POS_RIGHT, 3, 1);
 	attachLabel("Name:", e->name, e->rightside);
 
-	label = gtk_label_new("$");
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, e->name,
-		GTK_POS_BOTTOM, 1, 1);
 	e->price = newPriceEntry();
-	g_signal_connect(e->price, "changed", G_CALLBACK(priceChanged), e);
+	priceEntryConnect(PRICE_ENTRY(e->price), "changed", G_CALLBACK(priceChanged), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->price, label,
-		GTK_POS_RIGHT, 1, 1);
+		e->price, e->name,
+		GTK_POS_BOTTOM, 1, 1);
 	e->invalid = gtk_label_new("");
 	alignLabel(e->invalid, 0);
 	gtk_widget_set_hexpand(e->invalid, TRUE);
@@ -317,7 +313,7 @@ ItemEditor *newItemEditor(void)
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->invalid, e->price,
 		GTK_POS_RIGHT, 1, 1);
-	attachLabel("Price:", label, e->rightside);
+	attachLabel("Price:", e->price, e->rightside);
 
 	// TODO add an undo button?
 

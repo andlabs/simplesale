@@ -10,32 +10,96 @@ gchar *priceToString(Price p, char *prefix)
 	return g_strdup_printf("%s%" PRICEFMT ".%02" PRICEFMT, prefix, dollars, cents);
 }
 
-// PriceEntry is a special GtkEntry that only allows prices to be entered.
+// RealPriceEntry is a special GtkEntry that only allows prices to be entered.
 
-static void priceEntry_initEditable(GtkEditableInterface *);
+#define REAL_PRICE_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), realPriceEntry_get_type(), RealPriceEntry))
 
-G_DEFINE_TYPE_WITH_CODE(PriceEntry, priceEntry, GTK_TYPE_ENTRY,
-	G_IMPLEMENT_INTERFACE(GTK_TYPE_EDITABLE, priceEntry_initEditable))
+typedef struct RealPriceEntry RealPriceEntry;
+typedef struct RealPriceEntryClass RealPriceEntryClass;
 
-static void priceEntry_init(PriceEntry *p)
+struct RealPriceEntry {
+	GtkEntry parent_instance;
+
+	Price price;
+	gboolean valid;
+};
+
+struct RealPriceEntryClass {
+	GtkEntryClass parent_class;
+};
+
+static void realPriceEntry_initEditable(GtkEditableInterface *);
+
+G_DEFINE_TYPE_WITH_CODE(RealPriceEntry, realPriceEntry, GTK_TYPE_ENTRY,
+	G_IMPLEMENT_INTERFACE(GTK_TYPE_EDITABLE, realPriceEntry_initEditable))
+
+static void realPriceEntry_init(RealPriceEntry *p)
 {
 	gtk_entry_set_width_chars(GTK_ENTRY(p), 8);
 	gtk_entry_set_alignment(GTK_ENTRY(p), 1);
+	p->price = 0;
+	p->valid = TRUE;
 }
 
-static void priceEntry_dispose(GObject *obj)
+static void realPriceEntry_dispose(GObject *obj)
 {
-	G_OBJECT_CLASS(priceEntry_parent_class)->dispose(obj);
+	G_OBJECT_CLASS(realPriceEntry_parent_class)->dispose(obj);
 }
 
-static void priceEntry_finalize(GObject *obj)
+static void realPriceEntry_finalize(GObject *obj)
 {
-	G_OBJECT_CLASS(priceEntry_parent_class)->finalize(obj);
+	G_OBJECT_CLASS(realPriceEntry_parent_class)->finalize(obj);
 }
 
 static GtkEditableInterface *chain = NULL;
 
-static void priceEntry_insertText(GtkEditable *editable, const gchar *text, gint n, gint *pos)
+static void realPriceEntryValidate(RealPriceEntry *p)
+{
+	const gchar *amount;
+	Price dollars = 0, cents = 0;
+	gint i, n;
+
+	amount = gtk_entry_get_text(GTK_ENTRY(p));
+	if (amount == NULL)				// must enter something
+		goto invalid;
+	n = strlen(amount);
+	if (n == 0)						// must enter something
+		goto invalid;
+	if (n == 1 && amount[0] == '.')		// just a . is invalid
+		goto invalid;
+	for (i = 0; i < n; i++) {
+		if (amount[i] >= '0' && amount[i] <= '9') {
+			dollars = dollars * 10 + (amount[i] - '0');
+			continue;
+		}
+		if (amount[i] == '.')
+			break;
+		goto invalid;		// unrecognized character
+	}
+	if (i < n) {				// amount[i] == '.'
+		i++;
+		if (i == n)			// ###. is valid
+			;
+		else if (i != n - 2)	// must have either none or two digits
+			goto invalid;
+		else {
+			cents = amount[i] - '0';
+			cents = cents * 10 + (amount[i + 1] - '0');
+		}
+	}
+	p->price = PRICE(dollars, cents);
+	p->valid = TRUE;
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(p),
+		GTK_ENTRY_ICON_PRIMARY, NULL);
+	return;
+
+invalid:
+	p->valid = FALSE;
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(p),
+		GTK_ENTRY_ICON_PRIMARY, "dialog-error");
+}
+
+static void realPriceEntry_insertText(GtkEditable *editable, const gchar *text, gint n, gint *pos)
 {
 	gint i;
 
@@ -48,19 +112,29 @@ static void priceEntry_insertText(GtkEditable *editable, const gchar *text, gint
 		gtk_widget_error_bell(GTK_WIDGET(editable));
 		return;
 	}
-	// otherwise let the text in
+	// let the text in
 	chain->insert_text(editable, text, n, pos);
+	// don't validate here; we need to validate between the chained ::insert-text and the chained ::change (otherwise things act weird)
 }
 
-static void priceEntry_initEditable(GtkEditableInterface *interface)
+void realPriceEntry_changed(GtkEditable *editable)
+{
+	// validate before chaining up so the new validity shows up
+	realPriceEntryValidate(REAL_PRICE_ENTRY(editable));
+	// and chain up
+	chain->changed(editable);
+}
+
+static void realPriceEntry_initEditable(GtkEditableInterface *interface)
 {
 	chain = (GtkEditableInterface *) g_type_interface_peek_parent(interface);
 #define CHAIN(x) interface->x = chain->x;
 	// these came from gtk/gtkeditable.h because the docs don't list this interface??? TODO
 	// signals
-	interface->insert_text = priceEntry_insertText;
+	interface->insert_text = realPriceEntry_insertText;
 	CHAIN(delete_text)
 	CHAIN(changed)
+//	interface->changed = realPriceEntry_changed;
 	// vtable
 	CHAIN(do_insert_text)
 	CHAIN(do_delete_text)
@@ -70,6 +144,57 @@ static void priceEntry_initEditable(GtkEditableInterface *interface)
 	CHAIN(set_position)
 	CHAIN(get_position)
 #undef CHAIN
+}
+
+static void realPriceEntry_class_init(RealPriceEntryClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = realPriceEntry_dispose;
+	G_OBJECT_CLASS(class)->finalize = realPriceEntry_finalize;
+}
+
+static GtkWidget *newRealPriceEntry(void)
+{
+	return (GtkWidget *) g_object_new(realPriceEntry_get_type(), NULL);
+}
+
+// PriceEntry contains a RealPriceEntry and the $ label.
+
+struct PriceEntry {
+	GtkGrid parent_instance;
+
+	GtkWidget *label;
+	GtkWidget *entry;
+};
+
+struct PriceEntryClass {
+	GtkGridClass parent_class;
+};
+
+G_DEFINE_TYPE(PriceEntry, priceEntry, GTK_TYPE_GRID)
+
+static void priceEntry_init(PriceEntry *p)
+{
+	p->label = gtk_label_new("$");
+	gtk_grid_attach_next_to(GTK_GRID(p),
+		p->label, NULL,
+		GTK_POS_TOP, 1, 1);
+	p->entry = newRealPriceEntry();
+	gtk_grid_attach_next_to(GTK_GRID(p),
+		p->entry, p->label,
+		GTK_POS_RIGHT, 1, 1);
+}
+
+static void priceEntry_dispose(GObject *obj)
+{
+	// DON'T UNREF p->label OR p->entry
+	// the following call will do it for us
+	// if we unref p->label or p->entry here ourselves, we unref a freed object
+	G_OBJECT_CLASS(priceEntry_parent_class)->dispose(obj);
+}
+
+static void priceEntry_finalize(GObject *obj)
+{
+	G_OBJECT_CLASS(priceEntry_parent_class)->finalize(obj);
 }
 
 static void priceEntry_class_init(PriceEntryClass *class)
@@ -83,42 +208,29 @@ GtkWidget *newPriceEntry(void)
 	return (GtkWidget *) g_object_new(priceEntry_get_type(), NULL);
 }
 
-int priceEntryGetPrice(PriceEntry *p, Price *pout)
+void priceEntryConnect(PriceEntry *p, char *signal, GCallback callback, gpointer data)
 {
-	const gchar *amount;
-	Price dollars = 0, cents = 0;
-	gint i, n;
+	g_signal_connect(p->entry, signal, callback, data);
+}
 
-	amount = gtk_entry_get_text(GTK_ENTRY(p));
-	if (amount == NULL)				// must enter something
-		return priceEntryEmpty;
-	n = strlen(amount);
-	if (n == 0)						// must enter something
-		return priceEntryEmpty;
-	if (n == 1 && amount[0] == '.')		// just a . is invalid
-		return priceEntryInvalid;
-	for (i = 0; i < n; i++) {
-		if (amount[i] >= '0' && amount[i] <= '9') {
-			dollars = dollars * 10 + (amount[i] - '0');
-			continue;
-		}
-		if (amount[i] == '.')
-			break;
-		return priceEntryInvalid;		// unrecognized character
+gboolean priceEntryGetPrice(PriceEntry *pe, Price *pout)
+{
+	if (REAL_PRICE_ENTRY(pe->entry)->valid) {
+		*pout = REAL_PRICE_ENTRY(pe->entry)->price;
+		return TRUE;
 	}
-	if (i < n) {				// amount[i] == '.'
-		i++;
-		if (i == n)			// ###. is valid
-			;
-		else if (i != n - 2)	// must have either none or two digits
-			return priceEntryInvalid;
-		else {
-			cents = amount[i] - '0';
-			cents = cents * 10 + (amount[i + 1] - '0');
-		}
-	}
-	*pout = PRICE(dollars, cents);
-	return priceEntryOK;
+	return FALSE;
+}
+
+// TODO replace with SetPrice() and Clear() functions
+const char *priceEntryText(PriceEntry *pe)
+{
+	return gtk_entry_get_text(GTK_ENTRY(pe->entry));
+}
+
+void priceEntrySetText(PriceEntry *pe, char *text)
+{
+	gtk_entry_set_text(GTK_ENTRY(pe->entry), text);
 }
 
 // PriceRenderer is a special GtkCellRendererText that renders prices.
