@@ -113,7 +113,8 @@ static void realPriceEntry_insertText(GtkEditable *editable, const gchar *text, 
 		return;
 	}
 	// let the text in
-	chain->insert_text(editable, text, n, pos);
+	if (chain->insert_text != NULL)
+		chain->insert_text(editable, text, n, pos);
 	// don't validate here; we need to validate between the chained ::insert-text and the chained ::change (otherwise things act weird)
 }
 
@@ -122,7 +123,8 @@ void realPriceEntry_changed(GtkEditable *editable)
 	// validate before chaining up so the new validity shows up
 	realPriceEntryValidate(REAL_PRICE_ENTRY(editable));
 	// and chain up
-	chain->changed(editable);
+	if (chain->changed != NULL)
+		chain->changed(editable);
 }
 
 static void realPriceEntry_initEditable(GtkEditableInterface *interface)
@@ -133,8 +135,8 @@ static void realPriceEntry_initEditable(GtkEditableInterface *interface)
 	// signals
 	interface->insert_text = realPriceEntry_insertText;
 	CHAIN(delete_text)
-	CHAIN(changed)
-//	interface->changed = realPriceEntry_changed;
+//	CHAIN(changed)
+	interface->changed = realPriceEntry_changed;
 	// vtable
 	CHAIN(do_insert_text)
 	CHAIN(do_delete_text)
