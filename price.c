@@ -10,6 +10,16 @@ gchar *priceToString(Price p, char *prefix)
 	return g_strdup_printf("%s%" PRICEFMT ".%02" PRICEFMT, prefix, dollars, cents);
 }
 
+void priceToBytes(Price price, uint8_t out[8])
+{
+	int i;
+
+	for (i = 7; i >= 0; i--) {
+		out[i] = (uint8_t) (price & 0xFF);
+		price >>= 8;
+	}
+}
+
 // RealPriceEntry is a special GtkEntry that only allows prices to be entered.
 
 #define REAL_PRICE_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), realPriceEntry_get_type(), RealPriceEntry))

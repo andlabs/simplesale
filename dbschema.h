@@ -55,4 +55,22 @@ SCHEMA schemas[NVER] = {
 	");",
 };
 
+enum {
+	qBegin,
+	qCommit,
+	qClearItems,
+	qAppendItem,
+};
+
+static struct {
+	schema query;
+	sqlite3_stmt *stmt;
+} stmts[] = {
+	{ "BEGIN EXCLUSIVE TRANSACTION;", NULL },
+	{ "COMMIT;", NULL },
+	{ "DELETE FROM items;", NULL },
+	{ "INSERT INTO items VALUES (?, ?);", NULL },
+	{ NULL, NULL },
+};
+
 #undef SCHEMA

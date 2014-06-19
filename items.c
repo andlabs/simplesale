@@ -116,7 +116,7 @@ void saveItems(void)
 {
 	dbOut *o;
 
-	o = dbOutOpenItems();
+	o = dbOutOpenAndResetItems();
 	dbOutWriteItemModel(GTK_TREE_MODEL(items), o);
-	dbOutCreateAndFree(o);
+	dbOutCommitAndFree(o);
 }

@@ -12,9 +12,6 @@
 
 static sqlite3 *db;
 
-static sqlite3_stmt *begin;
-static sqlite3_stmt *commit;
-
 #define ACCOUNTSNAME "accounts"
 #define ITEMSNAME "items"
 #define ORDERSNAME "orders"
@@ -24,6 +21,7 @@ static sqlite3_stmt *commit;
 void initDB(void)
 {
 	int err;
+	int i;
 
 	err = sqlite3_open_v2(DBFILE, &db, SQLITE_OPEN_READWRITE, NULL);
 	if (err != SQLITE_OK) {		// may not exist; try creating
@@ -55,27 +53,57 @@ void initDB(void)
 			}
 		}
 	}
-	err = sqlite3_prepare(db, "BEGIN EXCLUSIVE TRANSACTION;", -1, &begin, NULL);
-	if (err != SQLITE_OK)
-		g_error("error preparing BEGIN EXCLUSIVE TRANSACTION statement: %s", SQLERR);
-	err = sqlite3_prepare(db, "COMMIT;", -1, &commit, NULL);
-	if (err != SQLITE_OK)
-		g_error("error preparing COMMIT statement: %s", SQLERR);
+	for (i = 0; stmts[i].query != NULL; i++) {
+		err = sqlite3_prepare(db, stmts[i].query, -1, &stmts[i].stmt, NULL);
+		if (err != SQLITE_OK)
+			g_error("error preparing %s statement: %s", stmts[i].query, SQLERR);
+	}
 }
 
 void endDB(void)
 {
 	int err;
+	int i;
 
-	err = sqlite3_finalize(commit);
-	if (err != SQLITE_OK)
-		g_error("error finalizing COMMIT statement: %s", SQLERR);
-	err = sqlite3_finalize(begin);
-	if (err != SQLITE_OK)
-		g_error("error finalizing BEGIN EXCLUSIVE TRANSACTION statement: %s", SQLERR);
+	for (i = 0; stmts[i].query != NULL; i++) {
+		err = sqlite3_finalize(stmts[i].stmt);
+		if (err != SQLITE_OK)
+			g_error("error finalizing %s statement: %s", stmts[i].query, SQLERR);
+	}
 	err = sqlite3_close(db);
 	if (err != SQLITE_OK)
 		g_error("error closing database: %s\n", SQLERR);
+}
+
+// TRUE if a row is present, FALSE if not (that is, query done)
+static gboolean run(int i)
+{
+	int err;
+
+	err = sqlite3_step(stmts[i].stmt);
+	if (err == SQLITE_ROW)
+		return TRUE;
+	if (err != SQLITE_DONE)
+		g_error("error executing %s statement: %s", stmts[i].query, SQLERR);
+	return FALSE;
+}
+
+static void reset(int i)
+{
+	int err;
+
+	err = sqlite3_reset(stmts[i].stmt);
+	if (err != SQLITE_OK)
+		g_error("error resetting %s statement for next execution: %s", stmts[i].query, SQLERR);
+}
+
+static void bindBlob(int i, int arg, const void *blob, int n, void (*f)(void *))
+{
+	int err;
+
+	err = sqlite3_bind_blob(stmts[i].stmt, arg, blob, n, f);
+	if (err != SQLITE_OK)
+		g_error("error binding blob argument %d of %s statement: %s", arg, stmts[i].query, SQLERR);
 }
 
 static GFileInputStream *opendb(char *filename)
@@ -100,30 +128,6 @@ static GDataInputStream *dbToDataInStream(GInputStream *f)
 	g_data_input_stream_set_byte_order(r, G_DATA_STREAM_BYTE_ORDER_BIG_ENDIAN);
 	g_data_input_stream_set_newline_type(r, G_DATA_STREAM_NEWLINE_TYPE_LF);
 	return r;
-}
-
-static GFileOutputStream *createdb(char *filename)
-{
-	GFile *f;
-	GFileOutputStream *o;
-	GError *err = NULL;
-
-	f = g_file_new_for_path(filename);
-	// FALSE for no backup
-	o = g_file_replace(f, NULL, FALSE, G_FILE_CREATE_PRIVATE, NULL, &err);
-	g_object_unref(f);
-	if (o == NULL)
-		g_error("error creating or appending to database file %s: %s", filename, err->message);
-	return o;
-}
-
-static GDataOutputStream *dbToDataOutStream(GOutputStream *f)
-{
-	GDataOutputStream *w;
-
-	w = g_data_output_stream_new(f);
-	g_data_output_stream_set_byte_order(w, G_DATA_STREAM_BYTE_ORDER_BIG_ENDIAN);
-	return w;
 }
 
 struct dbIn {
@@ -177,70 +181,54 @@ void dbInCloseAndFree(dbIn *i)
 }
 
 struct dbOut {
-	char *filename;
-	GOutputStream *o;
-	GDataOutputStream *w;
+	int append;
 };
 
-static dbOut *newdbOut(char *filename)
+static dbOut *newdbOut(void)
+{
+	return (dbOut *) g_malloc0(sizeof (dbOut));
+}
+
+dbOut *dbOutOpenAndResetItems(void)
 {
 	dbOut *o;
 
-	o = (dbOut *) g_malloc0(sizeof (dbOut));
-	o->filename = filename;
-	o->o = g_memory_output_stream_new_resizable();
-	o->w = dbToDataOutStream(o->o);
+	run(qBegin);
+	run(qClearItems);
+	// TODO when do we reset these two?
+	o = newdbOut();
+	o->append = qAppendItem;
 	return o;
-}
-
-dbOut *dbOutOpenItems(void)
-{
-	return newdbOut(ITEMSNAME);
 }
 
 static gboolean writeItem(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
 	USED(path);
 
-	GDataOutputStream *w = (GDataOutputStream *) data;
+	dbOut *o = (dbOut *) data;
 	char *name;
 	Price price;
-	GError *err = NULL;
+	uint8_t pricebytes[8];
 
 	gtk_tree_model_get(model, iter, 0, &name, 1, &price, -1);
-	if (g_data_output_stream_put_string(w, name, NULL, &err) == FALSE)
-		g_error("error writing item named \"%s\" to temporary storage: %s", name, err->message);
-	if (g_data_output_stream_put_byte(w, '\n', NULL, &err) == FALSE)
-		g_error("error writing newline for item \"%s\" to temporary storage: %s", name, err->message);
-	if (PRICEWRITE(w, price, NULL, &err) == FALSE)
-		g_error("error writing price for item \"%s\" to temporary storage: %s", name, err->message);
+	bindBlob(o->append, 1, name, strlen(name), g_free);
+	// the above calls g_free() already
+	priceToBytes(price, pricebytes);
+	bindBlob(o->append, 2, pricebytes, 8, SQLITE_TRANSIENT);
+	run(o->append);
+	reset(o->append);
 	return FALSE;
 }
 
 // for both items and orders
 void dbOutWriteItemModel(GtkTreeModel *model, dbOut *o)
 {
-	gtk_tree_model_foreach(model, writeItem, o->w);
+	gtk_tree_model_foreach(model, writeItem, o);
 }
 
-void dbOutCreateAndFree(dbOut *o)
+void dbOutCommitAndFree(dbOut *o)
 {
-	GFileOutputStream *f;
-	GMemoryOutputStream *m;
-	gsize n;
-	GError *err = NULL;
-
-	f = createdb(o->filename);
-	m = G_MEMORY_OUTPUT_STREAM(o->o);
-	if (g_output_stream_write_all(G_OUTPUT_STREAM(f),
-		g_memory_output_stream_get_data(m),
-		g_memory_output_stream_get_data_size(m),
-		&n, NULL, &err) == FALSE)
-		g_error("error saving database file %s: %s", o->filename, err->message);
-	g_object_unref(f);
-	g_object_unref(o->w);
-	g_object_unref(o->o);
+	run(qCommit);
+	reset(qCommit);
 	g_free(o);
 }
-
-// TODO dbOutAppendAndFree
