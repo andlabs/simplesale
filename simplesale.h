@@ -59,6 +59,7 @@ extern void setItemName(GtkTreeIter *, const char *);
 extern void setItemPrice(GtkTreeIter *, Price);
 extern GtkTreeModel *itemsModel(void);
 extern void setItemsIconLayout(GtkCellLayout *);
+extern void setItemsModel(GtkTreeView *);
 extern void setItemsColumnLayout(GtkTreeView *);
 extern void loadItems(void);
 extern void saveItems(void);

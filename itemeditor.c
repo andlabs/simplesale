@@ -173,6 +173,7 @@ ItemEditor *newItemEditor(void)
 		GTK_POS_RIGHT, 1, 1);
 
 	e->list = gtk_tree_view_new();
+	setItemsModel(GTK_TREE_VIEW(e->list));
 	setItemsColumnLayout(GTK_TREE_VIEW(e->list));
 	e->listSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(e->list));
 	// TODO figure out how to make it so that clicking on blank space deselects

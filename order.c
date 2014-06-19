@@ -113,12 +113,6 @@ static Price total(Order *o)
 	return o->subtotal;
 }
 
-static void setOrderTableLayout(GtkTreeView *table)
-{
-	// they're identical
-	setItemsColumnLayout(table);
-}
-
 // GUI stuff
 
 static void updateTotalDisp(Order *o)
@@ -303,12 +297,11 @@ static void buildOrderGUI(Order *o)
 
 	// TODO rename to orderList or something?
 	o->order = gtk_tree_view_new_with_model(GTK_TREE_MODEL(o->store));
+	// the column layout of items and orders are identical, so just use that one
+	setItemsColumnLayout(GTK_TREE_VIEW(o->order));
 	o->orderSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(o->order));
 	// TODO figure out how to make it so that clicking on blank space deselects
 	g_signal_connect(o->orderSel, "changed", G_CALLBACK(adjustDeleteEnabled), o);
-	// TODO split apart setting model to a separate function from setItemTableLayout()
-	setOrderTableLayout(GTK_TREE_VIEW(o->order));
-	gtk_tree_view_set_model(GTK_TREE_VIEW(o->order), GTK_TREE_MODEL(o->store));
 	o->orderScroller = newListScroller(o->order);
 	gtk_grid_attach_next_to(GTK_GRID(o->leftside),
 		o->orderScroller, label,
