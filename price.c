@@ -10,6 +10,20 @@ gchar *priceToString(Price p, char *prefix)
 	return g_strdup_printf("%s%" PRICEFMT ".%02" PRICEFMT, prefix, dollars, cents);
 }
 
+// big-endian
+
+Price priceFromBytes(uint8_t out[8])
+{
+	Price p = 0;
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		p <<= 8;
+		p |= (Price) out[i];
+	}
+	return p;
+}
+
 void priceToBytes(Price price, uint8_t out[8])
 {
 	int i;

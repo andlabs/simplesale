@@ -8,4 +8,4 @@ future requirements:
 these should all be included with your distribution
 
 TODO
-- rename Account Editor to Accounts Editor?
+- ensure the Items keys are always unique in the Item Editor

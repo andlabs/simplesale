@@ -106,77 +106,54 @@ static void bindBlob(int i, int arg, const void *blob, int n, void (*f)(void *))
 		g_error("error binding blob argument %d of %s statement: %s", arg, stmts[i].query, SQLERR);
 }
 
-static GFileInputStream *opendb(char *filename)
+static const void *blob(int i, int col)
 {
-	GFile *f;
-	GFileInputStream *i;
-	GError *err = NULL;
-
-	f = g_file_new_for_path(filename);
-	i = g_file_read(f, NULL, &err);
-	g_object_unref(f);
-	if (i == NULL)
-		g_error("error opening database file %s: %s", filename, err->message);
-	return i;
+	return sqlite3_column_blob(stmts[i].stmt, col);
 }
 
-static GDataInputStream *dbToDataInStream(GInputStream *f)
+static int blobsize(int i, int col)
 {
-	GDataInputStream *r;
-
-	r = g_data_input_stream_new(f);
-	g_data_input_stream_set_byte_order(r, G_DATA_STREAM_BYTE_ORDER_BIG_ENDIAN);
-	g_data_input_stream_set_newline_type(r, G_DATA_STREAM_NEWLINE_TYPE_LF);
-	return r;
+	return sqlite3_column_bytes(stmts[i].stmt, col);
 }
 
 struct dbIn {
-	char *filename;
-	GFileInputStream *i;
-	GDataInputStream *r;
 };
 
-static dbIn *newdbIn(char *filename)
+static dbIn *newdbIn(void)
 {
-	dbIn *i;
-
-	i = (dbIn *) g_malloc0(sizeof (dbIn));
-	i->filename = filename;
-	i->i = opendb(filename);
-	i->r = dbToDataInStream(G_INPUT_STREAM(i->i));
-	return i;
+	return (dbIn *) g_malloc0(sizeof (dbIn));
 }
 
 dbIn *dbInOpenItems(void)
 {
-	return newdbIn(ITEMSNAME);
+	run(qBegin);
+	// TODO when to reset?
+	return newdbIn();
 }
 
 gboolean dbInReadItem(dbIn *i, char **name, Price *price)
 {
-	char *n;		// to avoid overwriting on error
-	Price p;
-	gsize len;		// because the docs don't say if this can be NULL or not
-	GError *err = NULL;
+	USED(i);
 
-	n = g_data_input_stream_read_line_utf8(i->r, &len, NULL, &err);
-	// gcc stop complainiing about if (...) if (...) ... else ... I know what I'm doing here
-	if (n == NULL && err == NULL)		// end of file
+	int n;
+	uint8_t pricebytes[8];
+
+	if (run(qGetItems) == FALSE) {
+		reset(qGetItems);
 		return FALSE;
-	else if (n == NULL)
-		g_error("error reading item name from database file %s: %s", i->filename, err->message);
-	*name = n;
-	p = (Price) PRICEREAD(i->r, NULL, &err);
-	if (err != NULL)
-		g_error("error reading item price from database file %s: %s", i->filename, err->message);
-	*price = p;
-	return TRUE;	
+	}
+	n = blobsize(qGetItems, 0);
+	*name = (char *) g_malloc0((n + 1) * sizeof (char));
+	memcpy(*name, blob(qGetItems, 0), n);
+	memcpy(pricebytes, blob(qGetItems, 1), 8);
+	*price = priceFromBytes(pricebytes);
+	return TRUE;
 }
 
-void dbInCloseAndFree(dbIn *i)
+void dbInCommitAndFree(dbIn *i)
 {
-	g_object_unref(i->r);
-	g_object_unref(i->i);
+	run(qCommit);
+	reset(qCommit);
 	g_free(i);
 }
 

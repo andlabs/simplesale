@@ -58,6 +58,7 @@ SCHEMA schemas[NVER] = {
 enum {
 	qBegin,
 	qCommit,
+	qGetItems,
 	qClearItems,
 	qAppendItem,
 };
@@ -68,6 +69,7 @@ static struct {
 } stmts[] = {
 	{ "BEGIN EXCLUSIVE TRANSACTION;", NULL },
 	{ "COMMIT;", NULL },
+	{ "SELECT * FROM items;", NULL },
 	{ "DELETE FROM items;", NULL },
 	{ "INSERT INTO items VALUES (?, ?);", NULL },
 	{ NULL, NULL },

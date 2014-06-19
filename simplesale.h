@@ -30,8 +30,8 @@ typedef guint64 Price;
 #define PRICEVALUE g_value_get_uint64
 #define PRICEMIN 0
 #define PRICEMAX G_MAXUINT64
-#define PRICEREAD g_data_input_stream_read_uint64
 extern gchar *priceToString(Price, char *);
+extern Price priceFromBytes(uint8_t[8]);
 extern void priceToBytes(Price, uint8_t[8]);
 
 #define PRICE_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), priceEntry_get_type(), PriceEntry))
@@ -112,7 +112,7 @@ extern void endDB(void);
 typedef struct dbIn dbIn;
 extern dbIn *dbInOpenItems(void);
 extern gboolean dbInReadItem(dbIn *, gchar **, Price *);
-extern void dbInCloseAndFree(dbIn *);
+extern void dbInCommitAndFree(dbIn *);
 typedef struct dbOut dbOut;
 extern dbOut *dbOutOpenAndResetItems(void);
 extern void dbOutWriteItemModel(GtkTreeModel *, dbOut *);

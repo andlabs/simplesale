@@ -109,7 +109,7 @@ void loadItems(void)
 		addItem(name, price);
 		g_free(name);
 	}
-	dbInCloseAndFree(i);
+	dbInCommitAndFree(i);
 }
 
 void saveItems(void)
