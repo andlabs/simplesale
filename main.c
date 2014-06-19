@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 			"gtk-theme-name", theme,
 			NULL);
 
+	initDB();
 	initAccounts();
 	initItems();
 
@@ -42,6 +43,7 @@ int main(int argc, char *argv[])
 		newLogin();
 	}
 	gtk_main();
+	endDB();
 	return 0;
 
 usage:

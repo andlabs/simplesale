@@ -1,18 +1,66 @@
 // 17 june 2014
 #include "simplesale.h"
+#include <sqlite3.h>
+#include "dbschema.h"
 
 // files:
 // - accounts: [ { "name": name, "password": [ bytes ] }, ... ]
 // - items: name\nprice\nname\nprice\n...
 // - orders: concatenation of { "time": unixtime, "customer": customerName, "amountPaid": price, "items": items }
 
+#define DBFILE "db.sqlite3"
+
+static sqlite3 *db;
+
 #define ACCOUNTSNAME "accounts"
 #define ITEMSNAME "items"
 #define ORDERSNAME "orders"
 
-void createDB(void)
+#define SQLERR (sqlite3_errmsg(db))
+
+void initDB(void)
 {
-	// TODO
+	int err;
+
+	err = sqlite3_open_v2(DBFILE, &db, SQLITE_OPEN_READWRITE, NULL);
+	if (err != SQLITE_OK) {		// may not exist; try creating
+		int i;
+
+		err = sqlite3_open_v2(DBFILE, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+		if (err != SQLITE_OK)		// real error
+			g_error("error opening database: %s", SQLERR);
+		// needs creation
+		for (i = 0; i < NVER; i++) {
+			const char *p;
+			const char *nextp;
+
+			p = schemas[i];
+			nextp = p;
+			while (nextp != NULL && *nextp != '\0') {
+				sqlite3_stmt *s;
+
+				p = nextp;
+				err = sqlite3_prepare(db, p, -1, &s, &nextp);
+				if (err != SQLITE_OK)
+					g_error("error preparing database initialization statement: %s", SQLERR);
+				err = sqlite3_step(s);
+				if (err != SQLITE_DONE)
+					g_error("error executing database initialization statement: %s", SQLERR);
+				err = sqlite3_finalize(s);
+				if (err != SQLITE_OK)
+					g_error("error finalizing database initialization statement: %s", SQLERR);
+			}
+		}
+	}
+}
+
+void endDB(void)
+{
+	int err;
+
+	err = sqlite3_close(db);
+	if (err != SQLITE_OK)
+		g_error("error closing database: %s\n", SQLERR);
 }
 
 static GFileInputStream *opendb(char *filename)

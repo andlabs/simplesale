@@ -107,7 +107,8 @@ typedef struct AccountEditor AccountEditor;
 extern AccountEditor *newAccountEditor(void);
 
 // db.c
-extern void createDB(void);
+extern void initDB(void);
+extern void endDB(void);
 typedef struct dbIn dbIn;
 extern dbIn *dbInOpenItems(void);
 extern gboolean dbInReadItem(dbIn *, gchar **, Price *);
