@@ -53,7 +53,6 @@ struct AccountEditor {
 	GtkWidget *passlevel;
 	GtkWidget *passleveltext;
 	GtkWidget *confirmpass;
-	GtkWidget *mismatch;
 
 	GtkTreeIter current;
 	gboolean selecting;
@@ -101,7 +100,6 @@ static void accountSelected(GtkTreeSelection *selection, gpointer data)
 	else {
 		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), 0);
 		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
-		gtk_label_set_text(GTK_LABEL(e->mismatch), "");
 	}
 	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
@@ -140,17 +138,15 @@ static void passwordChanged(GtkEditable *editable, gpointer data)
 	new = gtk_entry_get_text(GTK_ENTRY(e->newpass));
 	confirm = gtk_entry_get_text(GTK_ENTRY(e->newpass));
 	level = pwquality_check(pwquality_default_settings(), new, cur, name, NULL);
-	if (level >= 0) {
+	if (level >= 0)
 		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), (gdouble) level);
-		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
-	} else {
+	if (level < 0) {
 		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), 0);
 		gtk_label_set_text(GTK_LABEL(e->passleveltext), pwquality_strerror(NULL, 0, level, NULL));
-	}
-	if (strcmp(new, confirm) != 0)
-		gtk_label_set_text(GTK_LABEL(e->mismatch), "Passwords do not match.");
+	} else if (strcmp(new, confirm) != 0)
+		gtk_label_set_text(GTK_LABEL(e->passleveltext), "Passwords do not match.");
 	else
-		gtk_label_set_text(GTK_LABEL(e->mismatch), "");
+		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
 }
 
 // TODO change password clicked
@@ -219,36 +215,30 @@ AccountEditor *newAccountEditor(void)
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->newpass, e->curpass,
 		GTK_POS_BOTTOM, 1, 1);
+	e->confirmpass = gtk_entry_new();
+	gtk_entry_set_visibility(GTK_ENTRY(e->confirmpass), FALSE);
+	gtk_entry_set_placeholder_text(GTK_ENTRY(e->confirmpass), "Retype new password here");
+	g_signal_connect(e->confirmpass, "changed", G_CALLBACK(passwordChanged), e);
+	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
+		e->confirmpass, e->newpass,
+		GTK_POS_RIGHT, 1, 1);
 	attachLabel("New Password:", e->newpass, e->rightside);
 
 	e->passlevel = gtk_level_bar_new_for_interval(0, 100);
+	gtk_widget_set_vexpand(e->passlevel, FALSE);
+	gtk_widget_set_valign(e->passlevel, GTK_ALIGN_START);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->passlevel, e->newpass,
 		GTK_POS_BOTTOM, 1, 1);
 	e->passleveltext = gtk_label_new("");
 	alignLabel(e->passleveltext, 0);
-	// TODO word wrap
+	gtk_label_set_line_wrap(GTK_LABEL(e->passleveltext), TRUE);
 	gtk_widget_set_hexpand(e->passleveltext, TRUE);
-	gtk_widget_set_halign(e->passleveltext, GTK_ALIGN_START);
+	gtk_widget_set_halign(e->passleveltext, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->passleveltext, e->passlevel,
 		GTK_POS_RIGHT, 1, 1);
 	attachLabel("Password Strength:", e->passlevel, e->rightside);
-
-	e->confirmpass = gtk_entry_new();
-	gtk_entry_set_visibility(GTK_ENTRY(e->confirmpass), FALSE);
-	g_signal_connect(e->confirmpass, "changed", G_CALLBACK(passwordChanged), e);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->confirmpass, e->passlevel,
-		GTK_POS_BOTTOM, 1, 1);
-	e->mismatch = gtk_label_new("");
-	alignLabel(e->mismatch, 0);
-	gtk_widget_set_hexpand(e->mismatch, TRUE);
-	gtk_widget_set_halign(e->mismatch, GTK_ALIGN_START);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->mismatch, e->confirmpass,
-		GTK_POS_RIGHT, 1, 1);
-	attachLabel("Retype New Password:", e->confirmpass, e->rightside);
 
 	// TODO add an undo button?
 
