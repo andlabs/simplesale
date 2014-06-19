@@ -74,15 +74,9 @@ static void discardClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	AccountEditor *e = (AccountEditor *) data;
-	GtkWidget *alert;
-	gint response;
 
-	alert = gtk_message_dialog_new(GTK_WINDOW(e->win), GTK_DIALOG_MODAL,
-		GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
-		"Are you sure you want to discard all changes and leave the Account Editor? This will also discard password changes!");
-	response = gtk_dialog_run(GTK_DIALOG(alert));
-	gtk_widget_destroy(alert);
-	if (response != GTK_RESPONSE_YES)
+	if (!askConfirm(e->win, NULL,
+		"Are you sure you want to discard all changes and leave the Account Editor? This will also discard password changes!"))
 		return;
 	g_object_unref(accounts);
 //	initAccounts();		// TODO
@@ -163,13 +157,10 @@ static void passwordChanged(GtkEditable *editable, gpointer data)
 
 AccountEditor *newAccountEditor(void)
 {
-	gint width, height;
 	AccountEditor *e;
 	GtkWidget *topbar;
-	GtkWidget *button;
 	GtkCellRenderer *r;
 	GtkTreeViewColumn *col;
-	GtkWidget *label;
 
 	e = (AccountEditor *) g_malloc0(sizeof (AccountEditor));
 
@@ -179,25 +170,11 @@ AccountEditor *newAccountEditor(void)
 	g_signal_connect(e->win, "delete-event", gtk_main_quit, NULL);
 
 	// the initail height is too small
-	gtk_window_get_default_size(GTK_WINDOW(e->win), &width, &height);
-	if (height == -1)
-		gtk_window_get_size(GTK_WINDOW(e->win), NULL, &height);
-	gtk_window_set_default_size(GTK_WINDOW(e->win), width, height * 2);
+	expandWindowHeight(GTK_WINDOW(e->win), 2);
 
-	topbar = gtk_header_bar_new();
-	gtk_header_bar_set_title(GTK_HEADER_BAR(topbar), "Account Editor");
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(topbar), FALSE);
-	gtk_window_set_titlebar(GTK_WINDOW(e->win), topbar);
-
-	button = gtk_button_new_with_label("Save and Close");
-	gtk_style_context_add_class(gtk_widget_get_style_context(button), "suggested-action");
-	g_signal_connect(button, "clicked", G_CALLBACK(saveClicked), e);
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(topbar), button);
-
-	button = gtk_button_new_with_label("Discard and Close");
-	gtk_style_context_add_class(gtk_widget_get_style_context(button), "destructive-action");
-	g_signal_connect(button, "clicked", G_CALLBACK(discardClicked), e);
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(topbar), button);
+	topbar = newHeaderBar("Account Editor", e->win);
+	newConfirmHeaderButton("Save and Close", G_CALLBACK(saveClicked), e, topbar);
+	newCancelHeaderButton("Discard and Close", G_CALLBACK(discardClicked), e, topbar);
 
 	e->layout = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(e->layout), TRUE);
@@ -210,86 +187,60 @@ AccountEditor *newAccountEditor(void)
 	col = gtk_tree_view_column_new_with_attributes("", r, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(e->list), col);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(e->list), FALSE);
-	e->listScroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add(GTK_CONTAINER(e->listScroller), e->list);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(e->listScroller), GTK_SHADOW_IN);
-	gtk_widget_set_hexpand(e->listScroller, TRUE);
-	gtk_widget_set_halign(e->listScroller, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(e->listScroller, TRUE);
-	gtk_widget_set_valign(e->listScroller, GTK_ALIGN_FILL);
+	e->listScroller = newListScroller(e->list);
+	gtk_grid_attach_next_to(GTK_GRID(e->layout),
+		e->listScroller, NULL,
+		GTK_POS_TOP, 1, 1);
 
 	e->rightside = gtk_grid_new();
-	label = gtk_label_new("Name:");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, NULL,
-		GTK_POS_TOP, 1, 1);
+
 	e->name = gtk_entry_new();
 	g_signal_connect(e->name, "changed", G_CALLBACK(nameChanged), e);
 	gtk_widget_set_hexpand(e->name, TRUE);
 	gtk_widget_set_halign(e->name, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->name, label,
+		e->name, NULL,
 		GTK_POS_RIGHT, 2, 1);
-{GtkWidget *l2=label;
-	label = gtk_label_new("Current Password:\n(if changing)");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, l2,
-		GTK_POS_BOTTOM, 1, 1);
-}
+	attachLabel("Name:", e->name, e->rightside);
+
 	e->curpass = gtk_entry_new();
 	gtk_entry_set_visibility(GTK_ENTRY(e->curpass), FALSE);
 	g_signal_connect(e->curpass, "changed", G_CALLBACK(passwordChanged), e);
 	gtk_widget_set_vexpand(e->curpass, FALSE);
 	gtk_widget_set_valign(e->curpass, GTK_ALIGN_START);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->curpass, label,
-		GTK_POS_RIGHT, 1, 1);
-{GtkWidget *l2=label;
-	label = gtk_label_new("New Password:");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, l2,
+		e->curpass, e->name,
 		GTK_POS_BOTTOM, 1, 1);
-}
+	attachLabel("Current Password:\n(if changing)", e->curpass, e->rightside);
+
 	e->newpass = gtk_entry_new();
 	gtk_entry_set_visibility(GTK_ENTRY(e->newpass), FALSE);
 	g_signal_connect(e->newpass, "changed", G_CALLBACK(passwordChanged), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->newpass, label,
-		GTK_POS_RIGHT, 1, 1);
-{GtkWidget *l2=label;
-	label = gtk_label_new("Password Strength:");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, l2,
+		e->newpass, e->curpass,
 		GTK_POS_BOTTOM, 1, 1);
-}
+	attachLabel("New Password:", e->newpass, e->rightside);
+
 	e->passlevel = gtk_level_bar_new_for_interval(0, 100);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->passlevel, label,
-		GTK_POS_RIGHT, 1, 1);
+		e->passlevel, e->newpass,
+		GTK_POS_BOTTOM, 1, 1);
 	e->passleveltext = gtk_label_new("");
 	alignLabel(e->passleveltext, 0);
+	// TODO word wrap
 	gtk_widget_set_hexpand(e->passleveltext, TRUE);
 	gtk_widget_set_halign(e->passleveltext, GTK_ALIGN_START);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->passleveltext, e->passlevel,
 		GTK_POS_RIGHT, 1, 1);
-{GtkWidget *l2=label;
-	label = gtk_label_new("Retype New Password:");
-	alignLabel(label, 1);
-	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		label, l2,
-		GTK_POS_BOTTOM, 1, 1);
-}
+	attachLabel("Password Strength:", e->passlevel, e->rightside);
+
 	e->confirmpass = gtk_entry_new();
 	gtk_entry_set_visibility(GTK_ENTRY(e->confirmpass), FALSE);
 	g_signal_connect(e->confirmpass, "changed", G_CALLBACK(passwordChanged), e);
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
-		e->confirmpass, label,
-		GTK_POS_RIGHT, 1, 1);
+		e->confirmpass, e->passlevel,
+		GTK_POS_BOTTOM, 1, 1);
 	e->mismatch = gtk_label_new("");
 	alignLabel(e->mismatch, 0);
 	gtk_widget_set_hexpand(e->mismatch, TRUE);
@@ -297,12 +248,10 @@ AccountEditor *newAccountEditor(void)
 	gtk_grid_attach_next_to(GTK_GRID(e->rightside),
 		e->mismatch, e->confirmpass,
 		GTK_POS_RIGHT, 1, 1);
+	attachLabel("Retype New Password:", e->confirmpass, e->rightside);
 
 	// TODO add an undo button?
 
-	gtk_grid_attach_next_to(GTK_GRID(e->layout),
-		e->listScroller, NULL,
-		GTK_POS_TOP, 1, 1);
 	gtk_grid_attach_next_to(GTK_GRID(e->layout),
 		e->rightside, e->listScroller,
 		GTK_POS_RIGHT, 2, 1);
