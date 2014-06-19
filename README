@@ -3,7 +3,7 @@ requirements:
 future requirements:
 - libscrypt xxxx (1.what? Ubuntu doesn't say)
 - libpwquality 1.2.3 (actually needed now, but) (ships with Ubuntu 14.04 LTS)
-- libarchive 3.1.2 (ships with Ubuntu 14.04 LTS)
+- libsqlite3 3.8.2 (ships with Ubuntu 14.04 LTS)
 
 these should all be included with your distribution
 
