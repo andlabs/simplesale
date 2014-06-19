@@ -9,3 +9,4 @@ these should all be included with your distribution
 
 TODO
 - ensure the Items keys are always unique in the Item Editor
+- use http://www.sqlite.org/c3ref/extended_result_codes.html; ask them to document that the return (an error code that is now always SQLITE_OK) doesn't matter first
