@@ -42,7 +42,7 @@ static void loginClicked(GtkButton *button, gpointer data)
 	shiftShowWindow(s);
 }
 
-static void settingsClicked(GtkButton *button, gpointer data)
+static void managerClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
@@ -64,7 +64,7 @@ Login *newLogin(void)
 	g_signal_connect(l->win, "delete-event", gtk_main_quit, NULL);
 
 	topbar = newHeaderBar("Log In", l->win);
-	newRegularHeaderButton("Settings", G_CALLBACK(settingsClicked), l, topbar);
+	newRegularHeaderButton("Manager", G_CALLBACK(managerClicked), l, topbar);
 
 	l->layout = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(l->layout), TRUE);
