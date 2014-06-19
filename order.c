@@ -328,7 +328,7 @@ static void buildOrderGUI(Order *o)
 		GTK_POS_TOP, 1, 1);
 
 	// TODO rename items to itemsGrid?
-	o->itemsFiltered = gtk_tree_model_filter_new(itemsModel(), NULL);
+	o->itemsFiltered = newItemsFiltered();
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(o->itemsFiltered), filter, o, NULL);
 	o->items = gtk_icon_view_new_with_model(o->itemsFiltered);
 	g_signal_connect(o->items, "item-activated", G_CALLBACK(itemClicked), o);

@@ -60,9 +60,9 @@ void setItemPrice(GtkTreeIter *which, Price price)
 	gtk_list_store_set(items, which, 1, price, -1);
 }
 
-GtkTreeModel *itemsModel(void)
+GtkTreeModel *newItemsFiltered(void)
 {
-	return GTK_TREE_MODEL(items);
+	return gtk_tree_model_filter_new(GTK_TREE_MODEL(items), NULL);
 }
 
 void setItemsIconLayout(GtkCellLayout *layout)
