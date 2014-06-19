@@ -94,11 +94,13 @@ extern gint runPayDialog(PayDialog *);
 extern gboolean payDialogAmountPaid(PayDialog *, Price *);
 
 // login.c
-extern void initAccounts(void);
-extern void addAccount(char *, char *);
-
 typedef struct Login Login;
 extern Login *newLogin(void);
+
+// accounts.c
+extern void initAccounts(void);
+extern void addAccount(char *, char *);
+extern void setAccountsModelAndIconLayout(GtkIconView *);
 
 typedef struct AccountEditor AccountEditor;
 extern AccountEditor *newAccountEditor(void);

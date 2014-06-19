@@ -1,4 +1,5 @@
-CFILES = db.c \
+CFILES = accounts.c \
+	db.c \
 	items.c \
 	itemeditor.c \
 	main.c \
