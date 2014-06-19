@@ -47,8 +47,29 @@ static void managerClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	Login *l = (Login *) data;
+	GtkWidget *pwprompt;
+	GtkWidget *pwentry;
+	GtkBox *box;
+	gint response;
+	char *pw;
 
-	USED(l);
+	pwprompt = gtk_message_dialog_new(GTK_WINDOW(l->win), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
+		"Enter the Manager's password and click OK to access the [TODO]");
+	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(pwprompt),
+		gtk_image_new_from_icon_name("dialog-password", GTK_ICON_SIZE_DIALOG));			// size used by GtkMessageDialog already, so eh
+	box = GTK_BOX(gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(pwprompt)));
+	pwentry = gtk_entry_new();
+	gtk_entry_set_visibility(GTK_ENTRY(pwentry), FALSE);
+	gtk_box_pack_end(box, pwentry, TRUE, TRUE, 0);
+	gtk_widget_show_all(pwprompt);		// both the icon and the entry are hidden by default
+	response = gtk_dialog_run(GTK_DIALOG(pwprompt));
+	pw = g_strdup(gtk_entry_get_text(GTK_ENTRY(pwentry)));
+	gtk_widget_destroy(pwprompt);
+
+	USED(response);
+
+	g_free(pw);
 }
 
 Login *newLogin(void)
