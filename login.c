@@ -71,8 +71,7 @@ Login *newLogin(void)
 
 	l->list = gtk_icon_view_new();
 	setAccountsModelAndIconLayout(GTK_ICON_VIEW(l->list));
-	// TODO sometimes the items are too wide and this doesn't work
-	gtk_icon_view_set_item_width(GTK_ICON_VIEW(l->list), -1);
+	// TODO the default icon size is somehow making each item on the list have a lot of padding
 	l->listScroller = newListScroller(l->list);
 	gtk_grid_attach_next_to(GTK_GRID(l->layout),
 		l->listScroller, NULL,
