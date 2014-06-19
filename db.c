@@ -127,7 +127,7 @@ static dbIn *newdbIn(void)
 dbIn *dbInOpenItems(void)
 {
 	run(qBegin);
-	// TODO when to reset?
+	reset(qBegin);
 	return newdbIn();
 }
 
@@ -171,7 +171,7 @@ dbOut *dbOutOpenAndResetItems(void)
 	dbOut *o;
 
 	run(qBegin);
-	// TODO when do we reset?
+	reset(qBegin);
 	run(qClearItems);
 	reset(qClearItems);
 	o = newdbOut();
