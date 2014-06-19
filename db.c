@@ -12,6 +12,9 @@
 
 static sqlite3 *db;
 
+static sqlite3_stmt *begin;
+static sqlite3_stmt *commit;
+
 #define ACCOUNTSNAME "accounts"
 #define ITEMSNAME "items"
 #define ORDERSNAME "orders"
@@ -52,12 +55,24 @@ void initDB(void)
 			}
 		}
 	}
+	err = sqlite3_prepare(db, "BEGIN EXCLUSIVE TRANSACTION;", -1, &begin, NULL);
+	if (err != SQLITE_OK)
+		g_error("error preparing BEGIN EXCLUSIVE TRANSACTION statement: %s", SQLERR);
+	err = sqlite3_prepare(db, "COMMIT;", -1, &commit, NULL);
+	if (err != SQLITE_OK)
+		g_error("error preparing COMMIT statement: %s", SQLERR);
 }
 
 void endDB(void)
 {
 	int err;
 
+	err = sqlite3_finalize(commit);
+	if (err != SQLITE_OK)
+		g_error("error finalizing COMMIT statement: %s", SQLERR);
+	err = sqlite3_finalize(begin);
+	if (err != SQLITE_OK)
+		g_error("error finalizing BEGIN EXCLUSIVE TRANSACTION statement: %s", SQLERR);
 	err = sqlite3_close(db);
 	if (err != SQLITE_OK)
 		g_error("error closing database: %s\n", SQLERR);
@@ -178,27 +193,10 @@ static dbOut *newdbOut(char *filename)
 	return o;
 }
 
-void dbOutCreateAndFree(dbOut *o)
+dbOut *dbOutOpenItems(void)
 {
-	GFileOutputStream *f;
-	GMemoryOutputStream *m;
-	gsize n;
-	GError *err = NULL;
-
-	f = createdb(o->filename);
-	m = G_MEMORY_OUTPUT_STREAM(o->o);
-	if (g_output_stream_write_all(G_OUTPUT_STREAM(f),
-		g_memory_output_stream_get_data(m),
-		g_memory_output_stream_get_data_size(m),
-		&n, NULL, &err) == FALSE)
-		g_error("error saving database file %s: %s", o->filename, err->message);
-	g_object_unref(f);
-	g_object_unref(o->w);
-	g_object_unref(o->o);
-	g_free(o);
+	return newdbOut(ITEMSNAME);
 }
-
-// TODO dbOutAppendAndFree
 
 static gboolean writeItem(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
@@ -225,7 +223,24 @@ void dbOutWriteItemModel(GtkTreeModel *model, dbOut *o)
 	gtk_tree_model_foreach(model, writeItem, o->w);
 }
 
-dbOut *dbOutOpenItems(void)
+void dbOutCreateAndFree(dbOut *o)
 {
-	return newdbOut(ITEMSNAME);
+	GFileOutputStream *f;
+	GMemoryOutputStream *m;
+	gsize n;
+	GError *err = NULL;
+
+	f = createdb(o->filename);
+	m = G_MEMORY_OUTPUT_STREAM(o->o);
+	if (g_output_stream_write_all(G_OUTPUT_STREAM(f),
+		g_memory_output_stream_get_data(m),
+		g_memory_output_stream_get_data_size(m),
+		&n, NULL, &err) == FALSE)
+		g_error("error saving database file %s: %s", o->filename, err->message);
+	g_object_unref(f);
+	g_object_unref(o->w);
+	g_object_unref(o->o);
+	g_free(o);
 }
+
+// TODO dbOutAppendAndFree

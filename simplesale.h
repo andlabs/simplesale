@@ -114,7 +114,6 @@ extern dbIn *dbInOpenItems(void);
 extern gboolean dbInReadItem(dbIn *, gchar **, Price *);
 extern void dbInCloseAndFree(dbIn *);
 typedef struct dbOut dbOut;
-extern void dbOutCreateAndFree(dbOut *);
-extern void dbOutWriteItemModel(GtkTreeModel *, dbOut *);
 extern dbOut *dbOutOpenItems(void);
-// TODO rearrange the above
+extern void dbOutWriteItemModel(GtkTreeModel *, dbOut *);
+extern void dbOutCreateAndFree(dbOut *);
