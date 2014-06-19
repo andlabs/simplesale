@@ -2,7 +2,8 @@ requirements:
 - GTK+ 3.10 / GLib 2.40 (ships with Ubuntu 14.04 LTS)
 future requirements:
 - libscrypt xxxx (1.what? Ubuntu doesn't say)
-- libpwquality 1.2.3 (actually needed now, but)
+- libpwquality 1.2.3 (actually needed now, but) (ships with Ubuntu 14.04 LTS)
+- libgsf 1.14.27 (ships with Ubuntu 14.04 LTS)
 
 these should all be included with your distribution
 
