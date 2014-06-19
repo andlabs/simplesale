@@ -194,8 +194,9 @@ dbOut *dbOutOpenAndResetItems(void)
 	dbOut *o;
 
 	run(qBegin);
+	// TODO when do we reset?
 	run(qClearItems);
-	// TODO when do we reset these two?
+	reset(qClearItems);
 	o = newdbOut();
 	o->append = qAppendItem;
 	return o;
