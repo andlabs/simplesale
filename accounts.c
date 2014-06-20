@@ -10,7 +10,7 @@ void initAccounts(void)
 {
 	accounts = gtk_list_store_new(3,
 		G_TYPE_STRING,		// name
-		G_TYPE_STRING,		// encrypted password
+		G_TYPE_BYTES,		// encrypted password
 		GDK_TYPE_PIXBUF);		// icon - TODO correct type?
 	accountIcon = gtk_icon_theme_load_icon(
 		gtk_icon_theme_get_default(),
@@ -27,7 +27,7 @@ void addAccount(char *name, char *password)
 	gtk_list_store_append(accounts, &iter);
 	gtk_list_store_set(accounts, &iter,
 		0, name,
-		1, password,		// TODO bcrypt
+		1, NULL,//password,		// TODO bcrypt
 		2, accountIcon,
 		-1);
 }
@@ -40,17 +40,41 @@ void setAccountsModelAndIconLayout(GtkIconView *list)
 }
 
 #define HASHED(name) char name[SCRYPT_MCF_LEN]
+#define HASHGBYTES(hashed) (g_bytes_new((hashed), SCRYPT_MCF_LEN))
+#define NHASH (SCRYPT_MCF_LEN)
 
 static void hash(const char *password, HASHED(out))
 {
 	char *x;
+	int result;
 
-	x = g_strdup(password);
-	if (libscrypt_hash(out, x, SCRYPT_N, SCRYPT_r, SCRYPT_p) == 0) {
-		g_free(x);		// just in case (TODO see if this zeroes out)
-		g_error("error hashing password");
-	}
+	x = g_strdup(password);		// because const
+	result = libscrypt_hash(out, x, SCRYPT_N, SCRYPT_r, SCRYPT_p);
+	memset(x, 0, strlen(x));		// to be safe
 	g_free(x);
+	if (result == 0)
+		g_error("error hashing password");
+}
+
+static gboolean matches(const char *password, GtkTreeIter *iter)
+{
+	GBytes *bytes;
+	char *x, *y;
+	int result;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(accounts), iter, 1, &bytes, -1);
+if(bytes==NULL)return TRUE;//TODO
+	x = g_strdup(password);						// because const
+	y = (char *) malloc(g_bytes_get_size(bytes));		// because libscrypt_check() expects to be able to scribble over the hash (because it uses strtok())
+	memcpy(y, g_bytes_get_data(bytes, NULL), g_bytes_get_size(bytes));
+	result = libscrypt_check(y, x);
+	memset(y, 0, g_bytes_get_size(bytes));		// to be safe
+	g_free(y);
+	memset(x, 0, strlen(x));
+	g_free(x);
+	if (result < 0)
+		g_error("error checking password");
+	return result > 0;
 }
 
 // this is the GUI for editing accounts
@@ -175,13 +199,22 @@ static void changeClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	AccountEditor *e = (AccountEditor *) data;
+	GtkTreeIter iter;
+	const char *curpass;
 	HASHED(hashed);
 
+	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
+		g_error("change password clicked without any account selected (button should be disabled)");
 	// TODO do sanity checks
+	curpass = gtk_entry_get_text(GTK_ENTRY(e->curpass));
+	if (!matches(curpass, &iter)) {
+		printf("password mismatch\n");
+		return;
+	}
 	hash(gtk_entry_get_text(GTK_ENTRY(e->newpass)), hashed);
-	for (int i = 0; i < SCRYPT_MCF_LEN; i++)
-		printf("%02x ", hashed[i]);
-	printf("\n");
+	gtk_list_store_set(accounts, &iter, 1, HASHGBYTES(hashed), -1);
+	memset(hashed, 0, NHASH);		// to be safe
+	printf("password changed\n");
 }
 
 AccountEditor *newAccountEditor(void)
