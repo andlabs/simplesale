@@ -1,5 +1,6 @@
 // 18 june 2014
 #include "simplesale.h"
+#include <libscrypt.h>
 #include <pwquality.h>
 
 static GtkListStore *accounts;
@@ -9,7 +10,7 @@ void initAccounts(void)
 {
 	accounts = gtk_list_store_new(3,
 		G_TYPE_STRING,		// name
-		G_TYPE_STRING,		// password
+		G_TYPE_STRING,		// encrypted password
 		GDK_TYPE_PIXBUF);		// icon - TODO correct type?
 	accountIcon = gtk_icon_theme_load_icon(
 		gtk_icon_theme_get_default(),
@@ -36,6 +37,20 @@ void setAccountsModelAndIconLayout(GtkIconView *list)
 	gtk_icon_view_set_model(list, GTK_TREE_MODEL(accounts));
 	gtk_icon_view_set_text_column(list, 0);
 	gtk_icon_view_set_pixbuf_column(list, 2);
+}
+
+#define HASHED(name) char name[SCRYPT_MCF_LEN]
+
+static void hash(const char *password, HASHED(out))
+{
+	char *x;
+
+	x = g_strdup(password);
+	if (libscrypt_hash(out, x, SCRYPT_N, SCRYPT_r, SCRYPT_p) == 0) {
+		g_free(x);		// just in case (TODO see if this zeroes out)
+		g_error("error hashing password");
+	}
+	g_free(x);
 }
 
 // this is the GUI for editing accounts
@@ -155,7 +170,19 @@ static void passwordChanged(GtkEditable *editable, gpointer data)
 	}
 }
 
-// TODO change password clicked
+static void changeClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	AccountEditor *e = (AccountEditor *) data;
+	HASHED(hashed);
+
+	// TODO do sanity checks
+	hash(gtk_entry_get_text(GTK_ENTRY(e->newpass)), hashed);
+	for (int i = 0; i < SCRYPT_MCF_LEN; i++)
+		printf("%02x ", hashed[i]);
+	printf("\n");
+}
 
 AccountEditor *newAccountEditor(void)
 {
@@ -265,7 +292,7 @@ AccountEditor *newAccountEditor(void)
 	attachLabel("Password Strength:", e->passlevel, groupgrid);
 
 	e->change = gtk_button_new_with_label("Change");
-	// TODO connect
+	g_signal_connect(e->change, "clicked", G_CALLBACK(changeClicked), e);
 	gtk_widget_set_hexpand(e->change, FALSE);
 	gtk_widget_set_halign(e->change, GTK_ALIGN_START);
 	gtk_grid_attach_next_to(GTK_GRID(groupgrid),
