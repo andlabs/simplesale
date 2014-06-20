@@ -137,7 +137,7 @@ static void passwordChanged(GtkEditable *editable, gpointer data)
 	name = gtk_entry_get_text(GTK_ENTRY(e->name));
 	cur = gtk_entry_get_text(GTK_ENTRY(e->curpass));
 	new = gtk_entry_get_text(GTK_ENTRY(e->newpass));
-	confirm = gtk_entry_get_text(GTK_ENTRY(e->newpass));
+	confirm = gtk_entry_get_text(GTK_ENTRY(e->confirmpass));
 	level = pwquality_check(pwquality_default_settings(), new, cur, name, NULL);
 	if (level >= 0)
 		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), (gdouble) level);
