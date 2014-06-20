@@ -2,9 +2,10 @@ CFILES = accounts.c \
 	db.c \
 	items.c \
 	itemeditor.c \
-	main.c \
 	login.c \
+	main.c \
 	order.c \
+	ow-crypt.c \
 	paydialog.c \
 	price.c \
 	shift.c \
@@ -18,7 +19,6 @@ ALLFILES = $(CFILES) $(HFILES)
 # note that -lm is needed for -lscrypt
 LIBS = \
 	`pkg-config --cflags --libs gtk+-3.0` \
-	-lscrypt -lm \
 	-lpwquality \
 	-lsqlite3
 
