@@ -110,6 +110,7 @@ static void accountSelected(GtkTreeSelection *selection, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(e->confirmpass), "");
 	gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), 0);
 	gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
+	gtk_widget_set_sensitive(e->change, FALSE);
 }
 
 static void nameChanged(GtkEditable *editable, gpointer data)
@@ -144,10 +145,14 @@ static void passwordChanged(GtkEditable *editable, gpointer data)
 	if (level < 0) {
 		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), 0);
 		gtk_label_set_text(GTK_LABEL(e->passleveltext), pwquality_strerror(NULL, 0, level, NULL));
-	} else if (strcmp(new, confirm) != 0)
+		gtk_widget_set_sensitive(e->change, FALSE);
+	} else if (strcmp(new, confirm) != 0) {
 		gtk_label_set_text(GTK_LABEL(e->passleveltext), "Passwords do not match.");
-	else
+		gtk_widget_set_sensitive(e->change, FALSE);
+	} else {
 		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
+		gtk_widget_set_sensitive(e->change, TRUE);
+	}
 }
 
 // TODO change password clicked
