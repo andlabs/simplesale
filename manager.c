@@ -5,6 +5,28 @@ struct Manager {
 	GtkWidget *win;
 };
 
+// TODO make ItemEditor, et al. subclass something for this
+static void returnToManager(GObject *obj, gpointer data)
+{
+	Manager *m = (Manager *) data;
+
+	g_object_unref(obj);
+	gtk_widget_show_all(m->win);
+}
+
+static void itemEditorClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	Manager *m = (Manager *) data;
+	ItemEditor *e;
+
+	gtk_widget_hide(m->win);
+	e = newItemEditor();
+	g_signal_connect(e, "done", G_CALLBACK(returnToManager), m);
+	itemEditorShow(e);
+}
+
 Manager *newManager(void)
 {
 	Manager *m;
@@ -30,7 +52,7 @@ Manager *newManager(void)
 #define A(x, y) gtk_grid_attach(GTK_GRID(layout), button, y, x, 1, 1)
 #define BUTTON(icon, label, sig, x, y) B(icon); L(label); C(sig); A(x, y)
 
-	BUTTON("insert-object", "Item Editor", gtk_main_quit, 0, 0);
+	BUTTON("insert-object", "Item Editor", itemEditorClicked, 0, 0);
 	BUTTON("contact-new", "Account Editor", gtk_main_quit, 0, 1);
 	BUTTON("printer", "Device Editor", gtk_main_quit, 0, 2);
 	BUTTON("preferences-other", "Other Settings", gtk_main_quit, 0, 3);

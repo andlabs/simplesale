@@ -67,6 +67,7 @@ extern void saveItems(void);
 // itemeditor.c
 typedef struct ItemEditor ItemEditor;
 extern ItemEditor *newItemEditor(void);
+extern void itemEditorShow(ItemEditor *);
 
 // order.c
 enum {

@@ -25,12 +25,50 @@ struct ItemEditorClass {
 	GObjectClass parent_class;
 };
 
-//G_DEFINE_TYPE(ItemEditor, itemEditor, G_TYPE_OBJECT)
+G_DEFINE_TYPE(ItemEditor, itemEditor, G_TYPE_OBJECT)
 
 static void buildItemEditorGUI(ItemEditor *);
 static void disposeItemEditorGUI(ItemEditor *);
 
+static void itemEditor_init(ItemEditor *e)
+{
+	buildItemEditorGUI(e);
+}
 
+static void itemEditor_dispose(GObject *obj)
+{
+	ItemEditor *e = (ItemEditor *) obj;
+
+	disposeItemEditorGUI(e);
+	G_OBJECT_CLASS(itemEditor_parent_class)->dispose(obj);
+}
+
+static void itemEditor_finalize(GObject *obj)
+{
+	G_OBJECT_CLASS(itemEditor_parent_class)->finalize(obj);
+}
+
+static guint itemEditorSignals[1];
+
+static void itemEditor_class_init(ItemEditorClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = itemEditor_dispose;
+	G_OBJECT_CLASS(class)->finalize = itemEditor_finalize;
+
+	itemEditorSignals[0] = g_signal_new(
+		"done", itemEditor_get_type(),
+		G_SIGNAL_RUN_LAST,
+		0,				// no class method slot
+		NULL, NULL,		// no accumulator
+		NULL,			// no marshaller
+		G_TYPE_NONE,		// void clockOut(Shift *s, gpointer data);
+		0);				// only specify the middle parameters; thanks larsu in irc.gimp.net/#gtk+
+}
+
+ItemEditor *newItemEditor(void)
+{
+	return (ItemEditor *) g_object_new(itemEditor_get_type(), NULL);
+}
 
 static void saveClicked(GtkButton *button, gpointer data)
 {
@@ -39,7 +77,7 @@ static void saveClicked(GtkButton *button, gpointer data)
 	ItemEditor *e = (ItemEditor *) data;
 
 	saveItems();
-	gtk_main_quit();USED(e);// TODO signal completion
+	g_signal_emit(e, itemEditorSignals[0], 0);
 }
 
 static void discardClicked(GtkButton *button, gpointer data)
@@ -51,7 +89,7 @@ static void discardClicked(GtkButton *button, gpointer data)
 	if (!askConfirm(e->win, NULL, "Are you sure you want to discard all changes and leave the Item Editor?"))
 		return;
 	initItems();
-	gtk_main_quit();USED(e);// TODO signal completion
+	g_signal_emit(e, itemEditorSignals[0], 0);
 }
 
 static void addItemClicked(GtkButton *button, gpointer data)
@@ -143,13 +181,10 @@ static void priceChanged(GtkEditable *editable, gpointer data)
 		setItemPrice(&iter, price);
 }
 
-ItemEditor *newItemEditor(void)
+static void buildItemEditorGUI(ItemEditor *e)
 {
-	ItemEditor *e;
 	GtkWidget *topbar;
 	GtkWidget *button;
-
-	e = (ItemEditor *) g_malloc0(sizeof (ItemEditor));
 
 	e->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(e->win), "simplesale");
@@ -232,6 +267,14 @@ ItemEditor *newItemEditor(void)
 	gtk_widget_show_all(e->win);
 
 	itemSelected(NULL, e);		// set up initial state
+}
 
-	return e;
+static void disposeItemEditorGUI(ItemEditor *e)
+{
+	gtk_widget_destroy(e->win);		// TODO does this destroy AND dispose win and children?
+}
+
+void itemEditorShow(ItemEditor *e)
+{
+	gtk_widget_show_all(e->win);
 }

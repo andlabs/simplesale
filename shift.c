@@ -38,7 +38,7 @@ static void shift_dispose(GObject *obj)
 {
 	Shift *s = (Shift *) obj;
 
-	freeShiftGUI(s);
+	freeShiftGUI(s);		// TODO change to dispose
 	g_hash_table_unref(s->orders);
 	G_OBJECT_CLASS(shift_parent_class)->dispose(obj);
 }
