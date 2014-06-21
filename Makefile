@@ -12,7 +12,7 @@ CFILES = accounts.c \
 	shift.c \
 	util.c
 
-HFILES = simplesale.h
+HFILES = dbschema.h simplesale.h
 
 ALLFILES = $(CFILES) $(HFILES)
 
