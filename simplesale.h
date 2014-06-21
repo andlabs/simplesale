@@ -116,6 +116,7 @@ extern GType passEntry_get_type(void);
 extern void resetPassEntry(PassEntry *);
 extern const char *passEntryCurrentPassword(PassEntry *);
 extern const char *passEntryNewPassword(PassEntry *);
+extern char *askNewPassword(GtkWidget *, char *, char *);
 
 // db.c
 extern void initDB(void);

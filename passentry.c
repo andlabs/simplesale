@@ -29,10 +29,12 @@ static void passwordChanged(GtkEditable *editable, gpointer data)
 	USED(editable);
 
 	PassEntry *e = (PassEntry *) data;
-	const char *cur, *new, *confirm;
+	const char *cur = NULL;
+	const char *new, *confirm;
 	int level;
 
-	cur = gtk_entry_get_text(GTK_ENTRY(e->curpass));
+	if (e->curpass != NULL)
+		cur = gtk_entry_get_text(GTK_ENTRY(e->curpass));
 	new = gtk_entry_get_text(GTK_ENTRY(e->newpass));
 	confirm = gtk_entry_get_text(GTK_ENTRY(e->confirmpass));
 	level = pwquality_check(pwquality_default_settings(), new, cur, e->name, NULL);
@@ -246,4 +248,33 @@ const char *passEntryNewPassword(PassEntry *e)
 	if (!shouldEnable(e))
 		g_error("passEntryNewPassword() called when it should not be; control that triggered it should be disabled");
 	return gtk_entry_get_text(GTK_ENTRY(e->newpass));
+}
+
+char *askNewPassword(GtkWidget *parent, char *message, char *action)
+{
+	GtkWidget *pwprompt;
+	GtkWidget *passentry;
+	GtkBox *area;
+	gint response;
+	char *pw = NULL;
+
+	pwprompt = gtk_message_dialog_new(GTK_WINDOW(parent), GTK_DIALOG_MODAL,
+		GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
+		"%s", message);
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(pwprompt),
+		"Enter a password below and press OK to %s.", action);
+	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(pwprompt),
+		gtk_image_new_from_icon_name("dialog-password", GTK_ICON_SIZE_DIALOG));			// size used by GtkMessageDialog already, so eh
+	passentry = newPassEntry(FALSE, NULL);
+	area = GTK_BOX(gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(pwprompt)));
+	gtk_box_pack_end(area, passentry, TRUE, TRUE, 0);
+	g_object_bind_property(passentry, "child-sensitive",
+		gtk_dialog_get_widget_for_response(GTK_DIALOG(pwprompt), GTK_RESPONSE_OK), "sensitive",
+		G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
+	gtk_widget_show_all(pwprompt);
+	response = gtk_dialog_run(GTK_DIALOG(pwprompt));
+	if (response == GTK_RESPONSE_OK)
+		pw = g_strdup(passEntryNewPassword(PASS_ENTRY(passentry)));
+	gtk_widget_destroy(pwprompt);
+	return pw;
 }

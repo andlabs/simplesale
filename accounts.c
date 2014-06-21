@@ -125,6 +125,8 @@ static void saveClicked(GtkButton *button, gpointer data)
 
 	AccountEditor *e = (AccountEditor *) data;
 
+askNewPassword(e->win, "Enter a password for this new user. (TODO user name)", "create the new user");
+
 //	saveAccounts();		// TODO
 	gtk_main_quit();USED(e);// TODO signal completion
 }
