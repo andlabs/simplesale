@@ -16,8 +16,6 @@ HFILES = dbschema.h simplesale.h
 
 ALLFILES = $(CFILES) $(HFILES)
 
-# the order here is specifically calculated
-# note that -lm is needed for -lscrypt
 LIBS = \
 	`pkg-config --cflags --libs gtk+-3.0` \
 	-lpwquality \
