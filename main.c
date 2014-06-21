@@ -30,9 +30,7 @@ int main(int argc, char *argv[])
 	initItems();
 
 	if (argc > 1) {
-		if (strcmp(argv[1], "account") == 0)
-			newAccountEditor();
-		else if (strcmp(argv[1], "manager") == 0)
+		if (strcmp(argv[1], "manager") == 0)
 			newManager();
 	} else
 		newLogin();

@@ -109,8 +109,7 @@ extern void setAccountsModelAndColumnLayout(GtkTreeView *);
 extern void saveAccounts(void);
 
 // accounteditor.c
-typedef struct AccountEditor AccountEditor;
-extern AccountEditor *newAccountEditor(void);
+extern GtkWidget *newAccountEditor(void);
 
 // passentry.c
 #define PASS_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), passEntry_get_type(), PassEntry))

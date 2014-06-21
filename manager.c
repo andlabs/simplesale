@@ -13,18 +13,20 @@ static void returnToManager(ManagerEditor *obj, gpointer data)
 	gtk_widget_show_all(m->win);
 }
 
-static void itemEditorClicked(GtkButton *button, gpointer data)
-{
-	USED(button);
+#define EDITORCLICKED(name, InitName) \
+	static void name ## Clicked(GtkButton *button, gpointer data) \
+	{ \
+		USED(button); \
+		Manager *m = (Manager *) data; \
+		GtkWidget *e; \
+		gtk_widget_hide(m->win); \
+		e = new ## InitName(); \
+		g_signal_connect(e, "done", G_CALLBACK(returnToManager), m); \
+		gtk_widget_show_all(e); \
+	}
 
-	Manager *m = (Manager *) data;
-	GtkWidget *e;
-
-	gtk_widget_hide(m->win);
-	e = newItemEditor();
-	g_signal_connect(e, "done", G_CALLBACK(returnToManager), m);
-	gtk_widget_show_all(e);
-}
+EDITORCLICKED(itemEditor, ItemEditor)
+EDITORCLICKED(accountEditor, AccountEditor)
 
 Manager *newManager(void)
 {
@@ -52,7 +54,7 @@ Manager *newManager(void)
 #define BUTTON(icon, label, sig, x, y) B(icon); L(label); C(sig); A(x, y)
 
 	BUTTON("insert-object", "Item Editor", itemEditorClicked, 0, 0);
-	BUTTON("contact-new", "Account Editor", gtk_main_quit, 0, 1);
+	BUTTON("contact-new", "Account Editor", accountEditorClicked, 0, 1);
 	BUTTON("printer", "Device Editor", gtk_main_quit, 0, 2);
 	BUTTON("preferences-other", "Other Settings", gtk_main_quit, 0, 3);
 	BUTTON("list-remove", "Withdraw Money", gtk_main_quit, 1, 0);

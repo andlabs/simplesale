@@ -249,7 +249,6 @@ static void buildItemEditorGUI(ItemEditor *e)
 		GTK_POS_RIGHT, 2, 1);
 
 	gtk_container_add(GTK_CONTAINER(e), e->layout);
-	gtk_widget_show_all(GTK_WIDGET(e));
 
 	itemSelected(NULL, e);		// set up initial state
 }

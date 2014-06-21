@@ -1,8 +1,12 @@
 // 21 june 2014
 #include "simplesale.h"
 
+typedef struct AccountEditor AccountEditor;
+typedef struct AccountEditorClass AccountEditorClass;
+
 struct AccountEditor {
-	GtkWidget *win;
+	ManagerEditor parent_instance;
+
 	GtkWidget *layout;
 	GtkWidget *leftside;
 	GtkWidget *add;
@@ -17,6 +21,41 @@ struct AccountEditor {
 	gboolean selecting;
 };
 
+struct AccountEditorClass {
+	ManagerEditorClass parent_class;
+};
+
+G_DEFINE_TYPE(AccountEditor, accountEditor, managerEditor_get_type())
+
+static void buildAccountEditorGUI(AccountEditor *);
+
+static void accountEditor_init(AccountEditor *e)
+{
+	buildAccountEditorGUI(e);
+}
+
+static void accountEditor_dispose(GObject *obj)
+{
+	// no need to explicitly gtk_widget_destroy() anything
+	G_OBJECT_CLASS(accountEditor_parent_class)->dispose(obj);
+}
+
+static void accountEditor_finalize(GObject *obj)
+{
+	G_OBJECT_CLASS(accountEditor_parent_class)->finalize(obj);
+}
+
+static void accountEditor_class_init(AccountEditorClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = accountEditor_dispose;
+	G_OBJECT_CLASS(class)->finalize = accountEditor_finalize;
+}
+
+GtkWidget *newAccountEditor(void)
+{
+	return (GtkWidget *) g_object_new(accountEditor_get_type(), "type", GTK_WINDOW_TOPLEVEL, NULL);
+}
+
 static void saveClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
@@ -24,7 +63,7 @@ static void saveClicked(GtkButton *button, gpointer data)
 	AccountEditor *e = (AccountEditor *) data;
 
 	saveAccounts();
-	gtk_main_quit();USED(e);// TODO signal completion
+	managerEditorDone(MANAGER_EDITOR(e));
 }
 
 static void discardClicked(GtkButton *button, gpointer data)
@@ -33,11 +72,11 @@ static void discardClicked(GtkButton *button, gpointer data)
 
 	AccountEditor *e = (AccountEditor *) data;
 
-	if (!askConfirm(e->win, NULL,
+	if (!askConfirm(GTK_WIDGET(e), NULL,
 		"Are you sure you want to discard all changes and leave the Account Editor? This will also discard password changes!"))
 		return;
 	initAccounts();
-	gtk_main_quit();USED(e);// TODO signal completion
+	managerEditorDone(MANAGER_EDITOR(e));
 }
 
 static void addClicked(GtkButton *button, gpointer data)
@@ -48,7 +87,7 @@ static void addClicked(GtkButton *button, gpointer data)
 	char *newpass;
 	GtkTreeIter iter;
 
-	newpass = askNewPassword(e->win,
+	newpass = askNewPassword(GTK_WIDGET(e),
 		"Enter a password for this new account. You can set the account's name and other properties afterward.",
 		"create the new account");
 	// TODO ask the person himself to enter the password
@@ -111,24 +150,20 @@ static void changeClicked(GtkButton *button, gpointer data)
 	printf("password changed\n");
 }
 
-AccountEditor *newAccountEditor(void)
+void buildAccountEditorGUI(AccountEditor *e)
 {
-	AccountEditor *e;
 	GtkWidget *topbar;
 	GtkWidget *groupbox;
 	GtkWidget *groupgrid;
 
-	e = (AccountEditor *) g_malloc0(sizeof (AccountEditor));
-
-	e->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(e->win), "simplesale");
+	gtk_window_set_title(GTK_WINDOW(e), "simplesale");
 	// TODO remove the following
-	g_signal_connect(e->win, "delete-event", gtk_main_quit, NULL);
+	g_signal_connect(e, "delete-event", gtk_main_quit, NULL);
 
 	// the initail height is too small
-	expandWindowHeight(GTK_WINDOW(e->win), 2);
+	expandWindowHeight(GTK_WINDOW(e), 2);
 
-	topbar = newHeaderBar("Account Editor", e->win);
+	topbar = newHeaderBar("Account Editor", GTK_WIDGET(e));
 	newConfirmHeaderButton("Save and Close", G_CALLBACK(saveClicked), e, topbar);
 	newCancelHeaderButton("Discard and Close", G_CALLBACK(discardClicked), e, topbar);
 
@@ -210,10 +245,7 @@ AccountEditor *newAccountEditor(void)
 		e->rightside, e->leftside,
 		GTK_POS_RIGHT, 2, 1);
 
-	gtk_container_add(GTK_CONTAINER(e->win), e->layout);
-	gtk_widget_show_all(e->win);
+	gtk_container_add(GTK_CONTAINER(e), e->layout);
 
 	accountSelected(NULL, e);		// set up initial state
-
-	return e;
 }
