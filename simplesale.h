@@ -100,12 +100,14 @@ extern Login *newLogin(void);
 
 // accounts.c
 extern void initAccounts(void);
+extern char *hash(const char *, GtkTreeIter *);
 extern gboolean matches(const char *, GtkTreeIter *);
 extern GtkTreeIter addAccount(char *, char *);
 extern void setAccountsModelAndIconLayout(GtkIconView *);
 extern void loadAccounts(void);
 extern void saveAccounts(void);
 
+// accounteditor.c
 typedef struct AccountEditor AccountEditor;
 extern AccountEditor *newAccountEditor(void);
 
