@@ -6,24 +6,6 @@
 static GtkListStore *accounts = NULL;
 static GdkPixbuf *accountIcon = NULL;
 
-void initAccounts(void)
-{
-	if (accounts != NULL)
-		g_object_unref(accounts);
-	accounts = gtk_list_store_new(3,
-		G_TYPE_STRING,		// name
-		G_TYPE_STRING,		// hashed password
-		GDK_TYPE_PIXBUF);		// icon - TODO correct type?
-	if (accountIcon == NULL)
-		accountIcon = gtk_icon_theme_load_icon(
-			gtk_icon_theme_get_default(),
-			"face-smile",	// just a placeholder face for now; thanks Lumpio- in irc.freenode.net/#freedesktop
-			48,
-			0,			// no custom flags
-			NULL);		// TODO handle error
-	loadAccounts();
-}
-
 #define BCRYPT_PREFIX ("$2y$")
 #define BCRYPT_COUNT (10)		/* 2^10; must pass base-2 logarithm */
 #define BCRYPT_N (256)
@@ -48,7 +30,7 @@ static char *gensalt(void)
 	return salt;
 }
 
-char *hash(const char *password, GtkTreeIter *iter)
+static char *hash(const char *password)
 {
 	char *salt;
 	char *hashed;
@@ -63,13 +45,9 @@ char *hash(const char *password, GtkTreeIter *iter)
 		free(private);
 		g_error("error hashing password");
 	}
-	if (iter != NULL) {	// change
-		gtk_list_store_set(accounts, iter, 1, hashed, -1);
-		hashed = NULL;
-	} else				// new
-		hashed = g_strdup(hashed);
+	hashed = g_strdup(hashed);
 	free(private);
-	// no need to free hashed as that's part of private
+	// no need to free old hashed as that's part of private
 	return hashed;
 }
 
@@ -83,7 +61,6 @@ gboolean matches(const char *password, GtkTreeIter *iter)
 	int result;
 
 	gtk_tree_model_get(GTK_TREE_MODEL(accounts), iter, 1, &stored, -1);
-if(stored==NULL)return TRUE;//TODO
 	size = strlen(stored);
 	input = crypt_ra(password, stored, &private, &n);
 	result = memcmp(stored, input, size);
@@ -92,7 +69,7 @@ if(stored==NULL)return TRUE;//TODO
 	return result == 0;
 }
 
-GtkTreeIter addAccount(char *name, char *hashed)
+static GtkTreeIter appendAccount(char *name, char *hashed)
 {
 	GtkTreeIter iter;
 
@@ -105,6 +82,71 @@ GtkTreeIter addAccount(char *name, char *hashed)
 	return iter;
 }
 
+static void loadAccounts(void)
+{
+	dbIn *i;
+	char *name, *password;
+
+	i = dbInOpenAccounts();
+	while (dbInReadAccount(i, &name, &password) == TRUE) {
+		appendAccount(name, password);		// already hashed
+		g_free(name);
+		g_free(password);
+	}
+	dbInCommitAndFree(i);
+}
+
+void initAccounts(void)
+{
+	if (accounts != NULL)
+		g_object_unref(accounts);
+	accounts = gtk_list_store_new(3,
+		G_TYPE_STRING,		// name
+		G_TYPE_STRING,		// hashed password
+		GDK_TYPE_PIXBUF);		// icon - TODO correct type?
+	if (accountIcon == NULL)
+		accountIcon = gtk_icon_theme_load_icon(
+			gtk_icon_theme_get_default(),
+			"face-smile",	// just a placeholder face for now; thanks Lumpio- in irc.freenode.net/#freedesktop
+			48,
+			0,			// no custom flags
+			NULL);		// TODO handle error
+	loadAccounts();
+}
+
+GtkTreeIter addAccount(char *name, char *password)
+{
+	GtkTreeIter iter;
+	char *hashed;
+
+	hashed = hash(password);
+	iter = appendAccount(name, hashed);
+	g_free(hashed);
+	return iter;
+}
+
+char *accountName(GtkTreeIter *which)
+{
+	char *ret;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(accounts), which, 0, &ret, -1);
+	return ret;
+}
+
+void setAccountName(GtkTreeIter *which, const char *name)
+{
+	gtk_list_store_set(accounts, which, 0, name, -1);
+}
+
+void setAccountPassword(GtkTreeIter *which, const char *password)
+{
+	char *hashed;
+
+	hashed = hash(password);
+	gtk_list_store_set(accounts, which, 1, hashed, -1);
+	g_free(hashed);
+}
+
 void setAccountsModelAndIconLayout(GtkIconView *list)
 {
 	gtk_icon_view_set_model(list, GTK_TREE_MODEL(accounts));
@@ -112,26 +154,16 @@ void setAccountsModelAndIconLayout(GtkIconView *list)
 	gtk_icon_view_set_pixbuf_column(list, 2);
 }
 
-void loadAccounts(void)
+void setAccountsModelAndColumnLayout(GtkTreeView *list)
 {
-	dbIn *i;
-	char *name, *password;
+	GtkCellRenderer *r;
+	GtkTreeViewColumn *col;
 
-	i = dbInOpenAccounts();
-	while (dbInReadAccount(i, &name, &password) == TRUE) {
-		//TODO
-		GtkTreeIter iter;
-
-		gtk_list_store_append(accounts, &iter);
-		gtk_list_store_set(accounts, &iter,
-			0, name,
-			1, password,		// already hashed
-			2, accountIcon,
-			-1);
-		g_free(name);
-		g_free(password);
-	}
-	dbInCommitAndFree(i);
+	gtk_tree_view_set_model(list, GTK_TREE_MODEL(accounts));
+	r = gtk_cell_renderer_text_new();
+	col = gtk_tree_view_column_new_with_attributes("", r, "text", 0, NULL);
+	gtk_tree_view_append_column(list, col);
+	gtk_tree_view_set_headers_visible(list, FALSE);
 }
 
 void saveAccounts(void)

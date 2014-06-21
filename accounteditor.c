@@ -55,8 +55,6 @@ static void addClicked(GtkButton *button, gpointer data)
 	// TODO ask the person himself to enter the password
 	if (newpass == NULL)
 		return;
-	// TODO I really don't like this approach...
-	newpass = hash(newpass, NULL);
 	iter = addAccount("New Account", newpass);
 	gtk_tree_selection_select_iter(e->listSel, &iter);
 }
@@ -68,14 +66,12 @@ static void accountSelected(GtkTreeSelection *selection, gpointer data)
 	AccountEditor *e = (AccountEditor *) data;
 	gboolean selected;
 	char *name = "";
-	GtkTreeModel *model;
 
-	selected = gtk_tree_selection_get_selected(e->listSel, &model, &e->current);
+	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &e->current);
 	gtk_widget_set_sensitive(e->name, selected);
 	gtk_widget_set_sensitive(e->passentry, selected);
 	if (selected)
-		// TODO make separate function
-		gtk_tree_model_get(model, &e->current, 0, &name, -1);
+		name = accountName(&e->current);
 	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
 	e->selecting = FALSE;
@@ -88,14 +84,12 @@ static void nameChanged(GtkEditable *editable, gpointer data)
 
 	AccountEditor *e = (AccountEditor *) data;
 	GtkTreeIter iter;
-	GtkTreeModel *model;
 
 	if (e->selecting)	// prevent spurious g_error() during selection changed
 		return;
-	if (gtk_tree_selection_get_selected(e->listSel, &model, &iter) == FALSE)
+	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("account name changed without any account selected (textbox should be disabled)");
-	// TODO make separate function
-	gtk_list_store_set(model, &iter, 0, gtk_entry_get_text(GTK_ENTRY(e->name)), -1);
+	setAccountName(&iter, gtk_entry_get_text(GTK_ENTRY(e->name)));
 }
 
 static void changeClicked(GtkButton *button, gpointer data)
@@ -113,7 +107,7 @@ static void changeClicked(GtkButton *button, gpointer data)
 		printf("password mismatch\n");
 		return;
 	}
-	hash(passEntryNewPassword(PASS_ENTRY(e->passentry)), &iter);
+	setAccountPassword(&iter, passEntryNewPassword(PASS_ENTRY(e->passentry)));
 	printf("password changed\n");
 }
 
@@ -121,8 +115,6 @@ AccountEditor *newAccountEditor(void)
 {
 	AccountEditor *e;
 	GtkWidget *topbar;
-	GtkCellRenderer *r;
-	GtkTreeViewColumn *col;
 	GtkWidget *groupbox;
 	GtkWidget *groupgrid;
 
@@ -153,14 +145,11 @@ AccountEditor *newAccountEditor(void)
 		e->add, NULL,
 		GTK_POS_TOP, 1, 1);
 
-	e->list = gtk_tree_view_new();//_with_model(GTK_TREE_MODEL(accounts));
+	e->list = gtk_tree_view_new();
+	setAccountsModelAndColumnLayout(GTK_TREE_VIEW(e->list));
 	e->listSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(e->list));
 	// TODO figure out how to make it so that clicking on blank space deselects
 	g_signal_connect(e->listSel, "changed", G_CALLBACK(accountSelected), e);
-	r = gtk_cell_renderer_text_new();
-	col = gtk_tree_view_column_new_with_attributes("", r, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(e->list), col);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(e->list), FALSE);
 	e->listScroller = newListScroller(e->list);
 	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
 		e->listScroller, e->add,
