@@ -4,6 +4,7 @@ CFILES = accounts.c \
 	itemeditor.c \
 	login.c \
 	main.c \
+	manager.c \
 	order.c \
 	ow-crypt.c \
 	passentry.c \

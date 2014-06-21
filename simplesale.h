@@ -121,6 +121,10 @@ extern const char *passEntryCurrentPassword(PassEntry *);
 extern const char *passEntryNewPassword(PassEntry *);
 extern char *askNewPassword(GtkWidget *, char *, char *);
 
+// manager.c
+typedef struct Manager Manager;
+extern Manager *newManager(void);
+
 // db.c
 extern void initDB(void);
 extern void endDB(void);

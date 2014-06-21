@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
 			newItemEditor();
 		else if (strcmp(argv[1], "account") == 0)
 			newAccountEditor();
+		else if (strcmp(argv[1], "manager") == 0)
+			newManager();
 	} else
 		newLogin();
 	gtk_main();
