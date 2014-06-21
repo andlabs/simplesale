@@ -102,6 +102,7 @@ extern Login *newLogin(void);
 extern void initAccounts(void);
 extern GtkTreeIter addAccount(char *, char *);
 extern void setAccountsModelAndIconLayout(GtkIconView *);
+extern void loadAccounts(void);
 extern void saveAccounts(void);
 
 typedef struct AccountEditor AccountEditor;
@@ -124,7 +125,9 @@ extern void initDB(void);
 extern void endDB(void);
 typedef struct dbIn dbIn;
 extern dbIn *dbInOpenItems(void);
+extern dbIn *dbInOpenAccounts(void);
 extern gboolean dbInReadItem(dbIn *, gchar **, Price *);
+extern gboolean dbInReadAccount(dbIn *, gchar **, gchar **);
 extern void dbInCommitAndFree(dbIn *);
 typedef struct dbOut dbOut;
 extern dbOut *dbOutOpenAndResetItems(void);

@@ -145,6 +145,13 @@ dbIn *dbInOpenItems(void)
 	return newdbIn();
 }
 
+dbIn *dbInOpenAccounts(void)
+{
+	run(qBegin);
+	reset(qBegin);
+	return newdbIn();
+}
+
 gboolean dbInReadItem(dbIn *i, char **name, Price *price)
 {
 	USED(i);
@@ -161,6 +168,25 @@ gboolean dbInReadItem(dbIn *i, char **name, Price *price)
 	memcpy(*name, blob(qGetItems, 0), n);
 	memcpy(pricebytes, blob(qGetItems, 1), 8);
 	*price = priceFromBytes(pricebytes);
+	return TRUE;
+}
+
+gboolean dbInReadAccount(dbIn *i, char **name, char **password)
+{
+	USED(i);
+
+	int n;
+
+	if (run(qGetAccounts) == FALSE) {
+		reset(qGetAccounts);
+		return FALSE;
+	}
+	n = blobsize(qGetAccounts, 0);
+	*name = (char *) g_malloc0((n + 1) * sizeof (char));
+	memcpy(*name, blob(qGetAccounts, 0), n);
+	n = blobsize(qGetAccounts, 1);
+	*password = (char *) g_malloc0((n + 1) * sizeof (char));
+	memcpy(*password, blob(qGetAccounts, 1), n);
 	return TRUE;
 }
 

@@ -3,21 +3,25 @@
 #define _OW_SOURCE
 #include "ow-crypt.h"
 
-static GtkListStore *accounts;
-static GdkPixbuf *accountIcon;
+static GtkListStore *accounts = NULL;
+static GdkPixbuf *accountIcon = NULL;
 
 void initAccounts(void)
 {
+	if (accounts != NULL)
+		g_object_unref(accounts);
 	accounts = gtk_list_store_new(3,
 		G_TYPE_STRING,		// name
 		G_TYPE_STRING,		// hashed password
 		GDK_TYPE_PIXBUF);		// icon - TODO correct type?
-	accountIcon = gtk_icon_theme_load_icon(
-		gtk_icon_theme_get_default(),
-		"face-smile",	// just a placeholder face for now; thanks Lumpio- in irc.freenode.net/#freedesktop
-		48,
-		0,			// no custom flags
-		NULL);		// TODO handle error
+	if (accountIcon == NULL)
+		accountIcon = gtk_icon_theme_load_icon(
+			gtk_icon_theme_get_default(),
+			"face-smile",	// just a placeholder face for now; thanks Lumpio- in irc.freenode.net/#freedesktop
+			48,
+			0,			// no custom flags
+			NULL);		// TODO handle error
+	loadAccounts();
 }
 
 #define BCRYPT_PREFIX ("$2y$")
@@ -103,7 +107,27 @@ void setAccountsModelAndIconLayout(GtkIconView *list)
 	gtk_icon_view_set_pixbuf_column(list, 2);
 }
 
-// TODO loadAccounts
+void loadAccounts(void)
+{
+	dbIn *i;
+	char *name, *password;
+
+	i = dbInOpenAccounts();
+	while (dbInReadAccount(i, &name, &password) == TRUE) {
+		//TODO
+		GtkTreeIter iter;
+
+		gtk_list_store_append(accounts, &iter);
+		gtk_list_store_set(accounts, &iter,
+			0, name,
+			1, password,		// already hashed
+			2, accountIcon,
+			-1);
+		g_free(name);
+		g_free(password);
+	}
+	dbInCommitAndFree(i);
+}
 
 void saveAccounts(void)
 {
@@ -153,7 +177,7 @@ static void discardClicked(GtkButton *button, gpointer data)
 		"Are you sure you want to discard all changes and leave the Account Editor? This will also discard password changes!"))
 		return;
 	g_object_unref(accounts);
-//	initAccounts();		// TODO
+	initAccounts();
 	gtk_main_quit();USED(e);// TODO signal completion
 }
 
