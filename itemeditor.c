@@ -5,7 +5,7 @@ typedef struct ItemEditor ItemEditor;
 typedef struct ItemEditorClass ItemEditorClass;
 
 struct ItemEditor {
-	GtkWindow parent_instance;
+	ManagerEditor parent_instance;
 
 	GtkWidget *layout;
 	GtkWidget *leftside;
@@ -22,10 +22,10 @@ struct ItemEditor {
 };
 
 struct ItemEditorClass {
-	GtkWindowClass parent_class;
+	ManagerEditorClass parent_class;
 };
 
-G_DEFINE_TYPE(ItemEditor, itemEditor, GTK_TYPE_WINDOW)
+G_DEFINE_TYPE(ItemEditor, itemEditor, managerEditor_get_type())
 
 static void buildItemEditorGUI(ItemEditor *);
 
@@ -36,7 +36,7 @@ static void itemEditor_init(ItemEditor *e)
 
 static void itemEditor_dispose(GObject *obj)
 {
-	// no need to explicitly dispose ourselves
+	// no need to explicitly gtk_widget_destroy() anything
 	G_OBJECT_CLASS(itemEditor_parent_class)->dispose(obj);
 }
 
@@ -45,21 +45,10 @@ static void itemEditor_finalize(GObject *obj)
 	G_OBJECT_CLASS(itemEditor_parent_class)->finalize(obj);
 }
 
-static guint itemEditorSignals[1];
-
 static void itemEditor_class_init(ItemEditorClass *class)
 {
 	G_OBJECT_CLASS(class)->dispose = itemEditor_dispose;
 	G_OBJECT_CLASS(class)->finalize = itemEditor_finalize;
-
-	itemEditorSignals[0] = g_signal_new(
-		"done", itemEditor_get_type(),
-		G_SIGNAL_RUN_LAST,
-		0,				// no class method slot
-		NULL, NULL,		// no accumulator
-		NULL,			// no marshaller
-		G_TYPE_NONE,		// void clockOut(Shift *s, gpointer data);
-		0);				// only specify the middle parameters; thanks larsu in irc.gimp.net/#gtk+
 }
 
 GtkWidget *newItemEditor(void)
@@ -74,7 +63,7 @@ static void saveClicked(GtkButton *button, gpointer data)
 	ItemEditor *e = (ItemEditor *) data;
 
 	saveItems();
-	g_signal_emit(e, itemEditorSignals[0], 0);
+	managerEditorDone(MANAGER_EDITOR(e));
 }
 
 static void discardClicked(GtkButton *button, gpointer data)
@@ -86,7 +75,7 @@ static void discardClicked(GtkButton *button, gpointer data)
 	if (!askConfirm(GTK_WIDGET(e), NULL, "Are you sure you want to discard all changes and leave the Item Editor?"))
 		return;
 	initItems();
-	g_signal_emit(e, itemEditorSignals[0], 0);
+	managerEditorDone(MANAGER_EDITOR(e));
 }
 
 static void addItemClicked(GtkButton *button, gpointer data)

@@ -5,12 +5,11 @@ struct Manager {
 	GtkWidget *win;
 };
 
-// TODO make ItemEditor, et al. subclass something for this
-static void returnToManager(GtkWidget *obj, gpointer data)
+static void returnToManager(ManagerEditor *obj, gpointer data)
 {
 	Manager *m = (Manager *) data;
 
-	gtk_widget_destroy(obj);
+	gtk_widget_destroy(GTK_WIDGET(obj));
 	gtk_widget_show_all(m->win);
 }
 
@@ -65,4 +64,49 @@ Manager *newManager(void)
 	gtk_widget_show_all(m->win);
 
 	return m;
+}
+
+// this is the shared class that the other Manager editors derive from
+// it solely exists to provide the "done" signal
+
+G_DEFINE_TYPE(ManagerEditor, managerEditor, GTK_TYPE_WINDOW)
+
+static void managerEditor_init(ManagerEditor *e)
+{
+	USED(e);
+
+	// do nothing here
+}
+
+static void managerEditor_dispose(GObject *obj)
+{
+	// no need to explicitly gtk_widget_destroy() anything
+	G_OBJECT_CLASS(managerEditor_parent_class)->dispose(obj);
+}
+
+static void managerEditor_finalize(GObject *obj)
+{
+	G_OBJECT_CLASS(managerEditor_parent_class)->finalize(obj);
+}
+
+static guint managerEditorSignals[1];
+
+static void managerEditor_class_init(ManagerEditorClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = managerEditor_dispose;
+	G_OBJECT_CLASS(class)->finalize = managerEditor_finalize;
+
+	managerEditorSignals[0] = g_signal_new(
+		"done", managerEditor_get_type(),
+		G_SIGNAL_RUN_LAST,
+		0,				// no class method slot
+		NULL, NULL,		// no accumulator
+		NULL,			// no marshaller
+		G_TYPE_NONE,		// void clockOut(Shift *s, gpointer data);
+		0);				// only specify the middle parameters; thanks larsu in irc.gimp.net/#gtk+
+}
+
+void managerEditorDone(ManagerEditor *e)
+{
+	g_signal_emit(e, managerEditorSignals[0], 0);
 }

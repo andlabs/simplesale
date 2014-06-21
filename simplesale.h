@@ -128,6 +128,19 @@ extern char *askNewPassword(GtkWidget *, char *, char *);
 typedef struct Manager Manager;
 extern Manager *newManager(void);
 
+#define MANAGER_EDITOR(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), managerEditor_get_type(), ManagerEditor))
+#define MANAGER_EDITOR_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), managerEditor_get_type(), ManagerEditorClass))
+typedef struct ManagerEditor ManagerEditor;
+typedef struct ManagerEditorClass ManagerEditorClass;
+struct ManagerEditor {
+	GtkWindow parent_instance;
+};
+struct ManagerEditorClass {
+	GtkWindowClass parent_class;
+};
+extern GType managerEditor_get_type(void);
+extern void managerEditorDone(ManagerEditor *);
+
 // db.c
 extern void initDB(void);
 extern void endDB(void);
