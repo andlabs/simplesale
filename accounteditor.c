@@ -14,7 +14,6 @@ struct AccountEditor {
 	GtkWidget *passentry;
 	GtkWidget *change;
 
-	GtkTreeIter current;
 	gboolean selecting;
 };
 
@@ -66,12 +65,13 @@ static void accountSelected(GtkTreeSelection *selection, gpointer data)
 	AccountEditor *e = (AccountEditor *) data;
 	gboolean selected;
 	char *name = "";
+	GtkTreeIter iter;
 
-	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &e->current);
+	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &iter);
 	gtk_widget_set_sensitive(e->name, selected);
 	gtk_widget_set_sensitive(e->passentry, selected);
 	if (selected)
-		name = accountName(&e->current);
+		name = accountName(&iter);
 	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
 	e->selecting = FALSE;
