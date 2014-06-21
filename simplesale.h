@@ -106,6 +106,17 @@ extern void setAccountsModelAndIconLayout(GtkIconView *);
 typedef struct AccountEditor AccountEditor;
 extern AccountEditor *newAccountEditor(void);
 
+// passentry.c
+#define PASS_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), passEntry_get_type(), PassEntry))
+#define PASS_ENTRY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), passEntry_get_type(), PassEntryClass))
+typedef struct PassEntry PassEntry;
+typedef struct PassEntryClass PassEntryClass;
+extern GtkWidget *newPassEntry(gboolean, GtkWidget *);
+extern GType passEntry_get_type(void);
+extern void resetPassEntry(PassEntry *);
+extern const char *passEntryCurrentPassword(PassEntry *);
+extern const char *passEntryNewPassword(PassEntry *);
+
 // db.c
 extern void initDB(void);
 extern void endDB(void);

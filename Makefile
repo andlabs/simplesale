@@ -6,6 +6,7 @@ CFILES = accounts.c \
 	main.c \
 	order.c \
 	ow-crypt.c \
+	passentry.c \
 	paydialog.c \
 	price.c \
 	shift.c \

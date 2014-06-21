@@ -325,7 +325,7 @@ static void priceRenderer_setProperty(GObject *obj, guint id, const GValue *valu
 	PriceRenderer *p = (PriceRenderer *) obj;
 	char *newText;
 
-	if (id == 1)			// price
+	if (id == 1)				// price
 		p->price = PRICEVALUE(value);
 	else if (id == 2) {		// prefix
 		g_free(p->prefix);

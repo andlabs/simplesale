@@ -2,7 +2,6 @@
 #include "simplesale.h"
 #define _OW_SOURCE
 #include "ow-crypt.h"
-#include <pwquality.h>
 
 static GtkListStore *accounts;
 static GdkPixbuf *accountIcon;
@@ -113,11 +112,7 @@ struct AccountEditor {
 	GtkWidget *listScroller;
 	GtkWidget *rightside;
 	GtkWidget *name;
-	GtkWidget *curpass;
-	GtkWidget *newpass;
-	GtkWidget *passlevel;
-	GtkWidget *passleveltext;
-	GtkWidget *confirmpass;
+	GtkWidget *passentry;
 	GtkWidget *change;
 
 	GtkTreeIter current;
@@ -158,24 +153,13 @@ static void accountSelected(GtkTreeSelection *selection, gpointer data)
 
 	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &e->current);
 	gtk_widget_set_sensitive(e->name, selected);
-	gtk_widget_set_sensitive(e->curpass, selected);
-	gtk_widget_set_sensitive(e->newpass, selected);
-	gtk_widget_set_sensitive(e->confirmpass, selected);
+	gtk_widget_set_sensitive(e->passentry, selected);
 	if (selected)
 		gtk_tree_model_get(GTK_TREE_MODEL(accounts), &e->current, 0, &name, -1);
-	else {
-		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), 0);
-		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
-	}
 	e->selecting = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(e->name), name);
 	e->selecting = FALSE;
-	gtk_entry_set_text(GTK_ENTRY(e->curpass), "");
-	gtk_entry_set_text(GTK_ENTRY(e->newpass), "");
-	gtk_entry_set_text(GTK_ENTRY(e->confirmpass), "");
-	gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), 0);
-	gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
-	gtk_widget_set_sensitive(e->change, FALSE);
+	resetPassEntry(PASS_ENTRY(e->passentry));
 }
 
 static void nameChanged(GtkEditable *editable, gpointer data)
@@ -192,34 +176,6 @@ static void nameChanged(GtkEditable *editable, gpointer data)
 	gtk_list_store_set(accounts, &iter, 0, gtk_entry_get_text(GTK_ENTRY(e->name)), -1);
 }
 
-static void passwordChanged(GtkEditable *editable, gpointer data)
-{
-	USED(editable);
-
-	AccountEditor *e = (AccountEditor *) data;
-	const char *name, *cur, *new, *confirm;
-	int level;
-
-	name = gtk_entry_get_text(GTK_ENTRY(e->name));
-	cur = gtk_entry_get_text(GTK_ENTRY(e->curpass));
-	new = gtk_entry_get_text(GTK_ENTRY(e->newpass));
-	confirm = gtk_entry_get_text(GTK_ENTRY(e->confirmpass));
-	level = pwquality_check(pwquality_default_settings(), new, cur, name, NULL);
-	if (level >= 0)
-		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), (gdouble) level);
-	if (level < 0) {
-		gtk_level_bar_set_value(GTK_LEVEL_BAR(e->passlevel), 0);
-		gtk_label_set_text(GTK_LABEL(e->passleveltext), pwquality_strerror(NULL, 0, level, NULL));
-		gtk_widget_set_sensitive(e->change, FALSE);
-	} else if (strcmp(new, confirm) != 0) {
-		gtk_label_set_text(GTK_LABEL(e->passleveltext), "Passwords do not match.");
-		gtk_widget_set_sensitive(e->change, FALSE);
-	} else {
-		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
-		gtk_widget_set_sensitive(e->change, TRUE);
-	}
-}
-
 static void changeClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
@@ -230,13 +186,12 @@ static void changeClicked(GtkButton *button, gpointer data)
 
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("change password clicked without any account selected (button should be disabled)");
-	// TODO do sanity checks
-	curpass = gtk_entry_get_text(GTK_ENTRY(e->curpass));
+	curpass = passEntryCurrentPassword(PASS_ENTRY(e->passentry));
 	if (!matches(curpass, &iter)) {
 		printf("password mismatch\n");
 		return;
 	}
-	hash(gtk_entry_get_text(GTK_ENTRY(e->newpass)), &iter);
+	hash(passEntryNewPassword(PASS_ENTRY(e->passentry)), &iter);
 	printf("password changed\n");
 }
 
@@ -304,56 +259,21 @@ AccountEditor *newAccountEditor(void)
 	groupgrid = gtk_grid_new();
 	gtk_container_add(GTK_CONTAINER(groupbox), groupgrid);
 
-	e->curpass = gtk_entry_new();
-	gtk_entry_set_visibility(GTK_ENTRY(e->curpass), FALSE);
-	g_signal_connect(e->curpass, "changed", G_CALLBACK(passwordChanged), e);
-	gtk_widget_set_vexpand(e->curpass, FALSE);
-	gtk_widget_set_valign(e->curpass, GTK_ALIGN_START);
-	gtk_grid_attach_next_to(GTK_GRID(groupgrid),
-		e->curpass, NULL,
-		GTK_POS_BOTTOM, 1, 1);
-	attachLabel("Current Password:\n(if changing)", e->curpass, groupgrid);
-
-	e->newpass = gtk_entry_new();
-	gtk_entry_set_visibility(GTK_ENTRY(e->newpass), FALSE);
-	g_signal_connect(e->newpass, "changed", G_CALLBACK(passwordChanged), e);
-	gtk_grid_attach_next_to(GTK_GRID(groupgrid),
-		e->newpass, e->curpass,
-		GTK_POS_BOTTOM, 1, 1);
-	e->confirmpass = gtk_entry_new();
-	gtk_entry_set_visibility(GTK_ENTRY(e->confirmpass), FALSE);
-	gtk_entry_set_placeholder_text(GTK_ENTRY(e->confirmpass), "Retype new password here");
-	g_signal_connect(e->confirmpass, "changed", G_CALLBACK(passwordChanged), e);
-	gtk_widget_set_hexpand(e->confirmpass, TRUE);
-	gtk_widget_set_halign(e->confirmpass, GTK_ALIGN_START);
-	gtk_grid_attach_next_to(GTK_GRID(groupgrid),
-		e->confirmpass, e->newpass,
-		GTK_POS_RIGHT, 1, 1);
-	attachLabel("New Password:", e->newpass, groupgrid);
-
-	e->passlevel = gtk_level_bar_new_for_interval(0, 100);
-	gtk_widget_set_vexpand(e->passlevel, FALSE);
-	gtk_widget_set_valign(e->passlevel, GTK_ALIGN_START);
-	gtk_grid_attach_next_to(GTK_GRID(groupgrid),
-		e->passlevel, e->newpass,
-		GTK_POS_BOTTOM, 1, 1);
-	e->passleveltext = gtk_label_new("");
-	alignLabel(e->passleveltext, 0);
-	gtk_label_set_line_wrap(GTK_LABEL(e->passleveltext), TRUE);
-	gtk_widget_set_hexpand(e->passleveltext, TRUE);
-	gtk_widget_set_halign(e->passleveltext, GTK_ALIGN_FILL);
-	gtk_grid_attach_next_to(GTK_GRID(groupgrid),
-		e->passleveltext, e->passlevel,
-		GTK_POS_RIGHT, 1, 1);
-	attachLabel("Password Strength:", e->passlevel, groupgrid);
-
 	e->change = gtk_button_new_with_label("Change");
 	g_signal_connect(e->change, "clicked", G_CALLBACK(changeClicked), e);
 	gtk_widget_set_hexpand(e->change, FALSE);
 	gtk_widget_set_halign(e->change, GTK_ALIGN_START);
+	// don't attach; see what we do next
+
+	e->passentry = newPassEntry(TRUE, e->change);
+	g_object_bind_property(e->name, "text",
+		e->passentry, "account-name",
+		G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
+	gtk_widget_set_hexpand(e->passentry, TRUE);
+	gtk_widget_set_halign(e->passentry, GTK_ALIGN_FILL);
 	gtk_grid_attach_next_to(GTK_GRID(groupgrid),
-		e->change, e->passlevel,
-		GTK_POS_BOTTOM, 1, 1);
+		e->passentry, NULL,
+		GTK_POS_TOP, 1, 1);
 
 	gtk_widget_set_hexpand(groupbox, TRUE);
 	gtk_widget_set_halign(groupbox, GTK_ALIGN_FILL);
