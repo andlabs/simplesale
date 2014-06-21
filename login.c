@@ -44,15 +44,17 @@ static void accountSelected(GtkIconView *iconview, gpointer data)
 	l->selected = TRUE;
 	gtk_tree_model_get_iter(gtk_icon_view_get_model(GTK_ICON_VIEW(l->list)),
 		&l->selection, (GtkTreePath *) selected->data);
-	// TODO enable widgets
 	goto done;
 
 nothing:
 	l->selected = FALSE;
-	// TODO disable widgets
 	// fall through
 
 done:
+	gtk_widget_set_sensitive(l->password, l->selected);
+	gtk_widget_set_sensitive(l->login, l->selected);
+	gtk_entry_set_text(GTK_ENTRY(l->password), "");
+	gtk_widget_hide(l->incorrect);
 	if (selected != NULL)
 		g_list_free_full(selected, (GDestroyNotify) gtk_tree_path_free);
 }
@@ -65,17 +67,17 @@ static void loginClicked(GtkButton *button, gpointer data)
 	const char *password;
 	Shift *s;
 
-	// TODO selection verificaiton
-//	gtk_widget_set_sensitive(l->login, FALSE);
+	if (!l->selected)
+		g_error("Login clicked with no item selected (should be disabled");
 	password = gtk_entry_get_text(GTK_ENTRY(l->password));
 	if (!matches(password, &l->selection)) {
 		// TODO delay?
-		gtk_entry_set_text(GTK_ENTRY(l->password), "");
+		gtk_icon_view_unselect_all(GTK_ICON_VIEW(l->list));
 		gtk_widget_show(l->incorrect);
 		return;
 	}
-	gtk_entry_set_text(GTK_ENTRY(l->password), "");
 	gtk_widget_hide(l->win);
+	gtk_icon_view_unselect_all(GTK_ICON_VIEW(l->list));
 	s = newShift("TODO");
 	g_signal_connect(s, "clock-out", G_CALLBACK(clockedOut), l);
 	shiftShowWindow(s);
@@ -164,6 +166,8 @@ Login *newLogin(void)
 	gtk_container_add(GTK_CONTAINER(l->win), l->layout);
 	gtk_widget_show_all(l->win);
 	gtk_widget_hide(l->incorrect);
+
+	accountSelected(NULL, l);		// initial state
 
 	return l;
 }
