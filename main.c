@@ -29,9 +29,6 @@ int main(int argc, char *argv[])
 	initAccounts();
 	initItems();
 
-	addAccount("Test Owner", "abcd");
-	addAccount("Test Cashier", "efgh");
-
 	if (argc > 1) {
 		if (strcmp(argv[1], "item") == 0)
 			newItemEditor();
