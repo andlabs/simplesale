@@ -6,11 +6,11 @@ struct Manager {
 };
 
 // TODO make ItemEditor, et al. subclass something for this
-static void returnToManager(GObject *obj, gpointer data)
+static void returnToManager(GtkWidget *obj, gpointer data)
 {
 	Manager *m = (Manager *) data;
 
-	g_object_unref(obj);
+	gtk_widget_destroy(obj);
 	gtk_widget_show_all(m->win);
 }
 
@@ -19,12 +19,12 @@ static void itemEditorClicked(GtkButton *button, gpointer data)
 	USED(button);
 
 	Manager *m = (Manager *) data;
-	ItemEditor *e;
+	GtkWidget *e;
 
 	gtk_widget_hide(m->win);
 	e = newItemEditor();
 	g_signal_connect(e, "done", G_CALLBACK(returnToManager), m);
-	itemEditorShow(e);
+	gtk_widget_show_all(e);
 }
 
 Manager *newManager(void)

@@ -1,10 +1,12 @@
 // 18 june 2014
 #include "simplesale.h"
 
-struct ItemEditor {
-	GObject parent_instance;
+typedef struct ItemEditor ItemEditor;
+typedef struct ItemEditorClass ItemEditorClass;
 
-	GtkWidget *win;
+struct ItemEditor {
+	GtkWindow parent_instance;
+
 	GtkWidget *layout;
 	GtkWidget *leftside;
 	GtkWidget *search;
@@ -19,16 +21,13 @@ struct ItemEditor {
 	gboolean selecting;
 };
 
-typedef struct ItemEditorClass ItemEditorClass;
-
 struct ItemEditorClass {
-	GObjectClass parent_class;
+	GtkWindowClass parent_class;
 };
 
-G_DEFINE_TYPE(ItemEditor, itemEditor, G_TYPE_OBJECT)
+G_DEFINE_TYPE(ItemEditor, itemEditor, GTK_TYPE_WINDOW)
 
 static void buildItemEditorGUI(ItemEditor *);
-static void disposeItemEditorGUI(ItemEditor *);
 
 static void itemEditor_init(ItemEditor *e)
 {
@@ -37,9 +36,7 @@ static void itemEditor_init(ItemEditor *e)
 
 static void itemEditor_dispose(GObject *obj)
 {
-	ItemEditor *e = (ItemEditor *) obj;
-
-	disposeItemEditorGUI(e);
+	// no need to explicitly dispose ourselves
 	G_OBJECT_CLASS(itemEditor_parent_class)->dispose(obj);
 }
 
@@ -65,9 +62,9 @@ static void itemEditor_class_init(ItemEditorClass *class)
 		0);				// only specify the middle parameters; thanks larsu in irc.gimp.net/#gtk+
 }
 
-ItemEditor *newItemEditor(void)
+GtkWidget *newItemEditor(void)
 {
-	return (ItemEditor *) g_object_new(itemEditor_get_type(), NULL);
+	return (GtkWidget *) g_object_new(itemEditor_get_type(), "type", GTK_WINDOW_TOPLEVEL, NULL);
 }
 
 static void saveClicked(GtkButton *button, gpointer data)
@@ -86,7 +83,7 @@ static void discardClicked(GtkButton *button, gpointer data)
 
 	ItemEditor *e = (ItemEditor *) data;
 
-	if (!askConfirm(e->win, NULL, "Are you sure you want to discard all changes and leave the Item Editor?"))
+	if (!askConfirm(GTK_WIDGET(e), NULL, "Are you sure you want to discard all changes and leave the Item Editor?"))
 		return;
 	initItems();
 	g_signal_emit(e, itemEditorSignals[0], 0);
@@ -114,7 +111,7 @@ static void removeItemClicked(GtkButton *button, gpointer data)
 	if (gtk_tree_selection_get_selected(e->listSel, NULL, &iter) == FALSE)
 		g_error("Delete Item button clicked without any item selected (button should be disabled)");
 	getItem(&iter, &name, NULL);
-	if (!askConfirm(e->win,
+	if (!askConfirm(GTK_WIDGET(e),
 		"Once you click Save and Close in the Item Editor window, the item will be permanently deleted and cannot be recovered later.",
 		"Are you sure you want to delete \"%s\"?", name))
 		return;
@@ -186,15 +183,14 @@ static void buildItemEditorGUI(ItemEditor *e)
 	GtkWidget *topbar;
 	GtkWidget *button;
 
-	e->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(e->win), "simplesale");
+	gtk_window_set_title(GTK_WINDOW(e), "simplesale");
 	// TODO remove the following
-	g_signal_connect(e->win, "delete-event", gtk_main_quit, NULL);
+	g_signal_connect(e, "delete-event", gtk_main_quit, NULL);
 
 	// the initail height is too small
-	expandWindowHeight(GTK_WINDOW(e->win), 2);
+	expandWindowHeight(GTK_WINDOW(e), 2);
 
-	topbar = newHeaderBar("Item Editor", e->win);
+	topbar = newHeaderBar("Item Editor", GTK_WIDGET(e));
 	newConfirmHeaderButton("Save and Close", G_CALLBACK(saveClicked), e, topbar);
 	newCancelHeaderButton("Discard and Close", G_CALLBACK(discardClicked), e, topbar);
 
@@ -263,18 +259,13 @@ static void buildItemEditorGUI(ItemEditor *e)
 		e->rightside, e->leftside,
 		GTK_POS_RIGHT, 2, 1);
 
-	gtk_container_add(GTK_CONTAINER(e->win), e->layout);
-	gtk_widget_show_all(e->win);
+	gtk_container_add(GTK_CONTAINER(e), e->layout);
+	gtk_widget_show_all(GTK_WIDGET(e));
 
 	itemSelected(NULL, e);		// set up initial state
 }
 
-static void disposeItemEditorGUI(ItemEditor *e)
-{
-	gtk_widget_destroy(e->win);		// TODO does this destroy AND dispose win and children?
-}
-
 void itemEditorShow(ItemEditor *e)
 {
-	gtk_widget_show_all(e->win);
+	gtk_widget_show_all(GTK_WIDGET(e));
 }

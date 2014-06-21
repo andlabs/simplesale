@@ -65,9 +65,7 @@ extern void loadItems(void);
 extern void saveItems(void);
 
 // itemeditor.c
-typedef struct ItemEditor ItemEditor;
-extern ItemEditor *newItemEditor(void);
-extern void itemEditorShow(ItemEditor *);
+extern GtkWidget *newItemEditor(void);
 
 // order.c
 enum {
