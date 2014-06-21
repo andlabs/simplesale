@@ -34,11 +34,8 @@ int main(int argc, char *argv[])
 			newItemEditor();
 		else if (strcmp(argv[1], "account") == 0)
 			newAccountEditor();
-	} else {
-		addAccount("Test Owner", "abcd");
-		addAccount("Test Cashier", "efgh");
+	} else
 		newLogin();
-	}
 	gtk_main();
 	endDB();
 	return 0;
