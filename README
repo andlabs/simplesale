@@ -6,5 +6,6 @@ requirements:
 these should all be included with your distribution
 
 TODO
-- ensure the Items keys are always unique in the Item Editor
+- ensure the item names are always unique in the Item Editor
+	- same for Accounts
 - use http://www.sqlite.org/c3ref/extended_result_codes.html; ask them to document that the return (an error code that is now always SQLITE_OK) doesn't matter first
