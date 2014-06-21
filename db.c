@@ -106,6 +106,15 @@ static void bindBlob(int i, int arg, const void *blob, int n, void (*f)(void *))
 		g_error("error binding blob argument %d of %s statement: %s", arg, stmts[i].query, SQLERR);
 }
 
+static void bindInt(int i, int arg, int n)
+{
+	int err;
+
+	err = sqlite3_bind_int(stmts[i].stmt, arg, n);
+	if (err != SQLITE_OK)
+		g_error("error binding int argument %d of %s statement: %s", arg, stmts[i].query, SQLERR);
+}
+
 static const void *blob(int i, int col)
 {
 	return sqlite3_column_blob(stmts[i].stmt, col);
@@ -114,6 +123,11 @@ static const void *blob(int i, int col)
 static int blobsize(int i, int col)
 {
 	return sqlite3_column_bytes(stmts[i].stmt, col);
+}
+
+static int sqlint(int i, int col)
+{
+	return sqlite3_column_int(stmts[i].stmt, col);
 }
 
 struct dbIn {
@@ -159,6 +173,8 @@ void dbInCommitAndFree(dbIn *i)
 
 struct dbOut {
 	int append;
+	int count;
+	int cur;
 };
 
 static dbOut *newdbOut(void)
@@ -176,6 +192,20 @@ dbOut *dbOutOpenAndResetItems(void)
 	reset(qClearItems);
 	o = newdbOut();
 	o->append = qAppendItem;
+	return o;
+}
+
+dbOut *dbOutOpenForWritingAccounts(void)
+{
+	dbOut *o;
+
+	run(qBegin);
+	reset(qBegin);
+	o = newdbOut();
+	run(qGetAccountCount);
+	o->count = sqlint(qGetAccountCount, 0);
+	reset(qGetAccountCount);
+	o->cur = 0;
 	return o;
 }
 
@@ -202,6 +232,35 @@ static gboolean writeItem(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *i
 void dbOutWriteItemModel(GtkTreeModel *model, dbOut *o)
 {
 	gtk_tree_model_foreach(model, writeItem, o);
+}
+
+static gboolean writeAccount(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+{
+	USED(path);
+
+	dbOut *o = (dbOut *) data;
+	char *name, *password;
+
+	gtk_tree_model_get(model, iter, 0, &name, 1, &password, -1);
+	if (o->cur < o->count) {
+		bindBlob(qChangeAccountInfo, 1, name, strlen(name), SQLITE_TRANSIENT);
+		bindBlob(qChangeAccountInfo, 2, password, strlen(password), SQLITE_TRANSIENT);
+		bindInt(qChangeAccountInfo, 3, o->cur + 1);		// rowid starts with 1
+		run(qChangeAccountInfo);
+		reset(qChangeAccountInfo);
+	} else {
+		bindBlob(qAddAccount, 1, name, strlen(name), SQLITE_TRANSIENT);
+		bindBlob(qAddAccount, 2, password, strlen(password), SQLITE_TRANSIENT);
+		run(qAddAccount);
+		reset(qAddAccount);
+	}
+	o->cur++;
+	return FALSE;
+}
+
+void dbOutWriteAccountsModel(GtkTreeModel *model, dbOut *o)
+{
+	gtk_tree_model_foreach(model, writeAccount, o);
 }
 
 void dbOutCommitAndFree(dbOut *o)

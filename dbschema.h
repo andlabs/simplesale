@@ -61,6 +61,9 @@ enum {
 	qGetItems,
 	qClearItems,
 	qAppendItem,
+	qGetAccountCount,
+	qChangeAccountInfo,
+	qAddAccount,
 };
 
 static struct {
@@ -72,6 +75,9 @@ static struct {
 	{ "SELECT * FROM items;", NULL },
 	{ "DELETE FROM items;", NULL },
 	{ "INSERT INTO items VALUES (?, ?);", NULL },
+	{ "SELECT COUNT(*) FROM accounts;", NULL },
+	{ "UPDATE accounts SET name = ?, password = ? WHERE rowid = ?;", NULL },
+	{ "INSERT INTO accounts VALUES (?, ?);", NULL },
 	{ NULL, NULL },
 };
 

@@ -103,6 +103,17 @@ void setAccountsModelAndIconLayout(GtkIconView *list)
 	gtk_icon_view_set_pixbuf_column(list, 2);
 }
 
+// TODO loadAccounts
+
+void saveAccounts(void)
+{
+	dbOut *o;
+
+	o = dbOutOpenForWritingAccounts();
+	dbOutWriteAccountsModel(GTK_TREE_MODEL(accounts), o);
+	dbOutCommitAndFree(o);
+}
+
 // this is the GUI for editing accounts
 
 struct AccountEditor {
@@ -128,7 +139,7 @@ static void saveClicked(GtkButton *button, gpointer data)
 
 	AccountEditor *e = (AccountEditor *) data;
 
-//	saveAccounts();		// TODO
+	saveAccounts();
 	gtk_main_quit();USED(e);// TODO signal completion
 }
 
