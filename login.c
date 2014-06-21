@@ -9,6 +9,9 @@ struct Login {
 	GtkWidget *password;
 	GtkWidget *incorrect;
 	GtkWidget *login;
+
+	gboolean selected;
+	GtkTreeIter selection;
 };
 
 static void clockedOut(Shift *s, gpointer data)
@@ -21,21 +24,57 @@ static void clockedOut(Shift *s, gpointer data)
 	gtk_widget_set_sensitive(l->login, TRUE);
 }
 
+// all because GtkIconView doesn't use GtkTreeSelection...
+static void accountSelected(GtkIconView *iconview, gpointer data)
+{
+	USED(iconview);
+
+	Login *l = (Login *) data;
+	GList *selected;
+	guint n;
+
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(l->list));
+	if (selected == NULL)
+		goto nothing;
+	n = g_list_length(selected);
+	if (n == 0)
+		goto nothing;
+	if (n > 1)
+		g_error("multiple accounts selected (icon view should have been set to single-selection)");
+	l->selected = TRUE;
+	gtk_tree_model_get_iter(gtk_icon_view_get_model(GTK_ICON_VIEW(l->list)),
+		&l->selection, (GtkTreePath *) selected->data);
+	// TODO enable widgets
+	goto done;
+
+nothing:
+	l->selected = FALSE;
+	// TODO disable widgets
+	// fall through
+
+done:
+	if (selected != NULL)
+		g_list_free_full(selected, (GDestroyNotify) gtk_tree_path_free);
+}
+
 static void loginClicked(GtkButton *button, gpointer data)
 {
 	USED(button);
 
 	Login *l = (Login *) data;
-//	char *password;
+	const char *password;
 	Shift *s;
 
-	gtk_widget_set_sensitive(l->login, FALSE);
-//	password = gtk_entry_get_text(GTK_ENTRY(l->password));
-//	gtk_entry_set_text(GTK_ENTRY(l->password), "");
-//	sleep(5);
-//	gtk_widget_show(l->incorrect);
-//	gtk_widget_set_sensitive(l->login, TRUE);
-
+	// TODO selection verificaiton
+//	gtk_widget_set_sensitive(l->login, FALSE);
+	password = gtk_entry_get_text(GTK_ENTRY(l->password));
+	if (!matches(password, &l->selection)) {
+		// TODO delay?
+		gtk_entry_set_text(GTK_ENTRY(l->password), "");
+		gtk_widget_show(l->incorrect);
+		return;
+	}
+	gtk_entry_set_text(GTK_ENTRY(l->password), "");
 	gtk_widget_hide(l->win);
 	s = newShift("TODO");
 	g_signal_connect(s, "clock-out", G_CALLBACK(clockedOut), l);
@@ -92,6 +131,7 @@ Login *newLogin(void)
 
 	l->list = gtk_icon_view_new();
 	setAccountsModelAndIconLayout(GTK_ICON_VIEW(l->list));
+	g_signal_connect(l->list, "selection-changed", G_CALLBACK(accountSelected), l);
 	// TODO the default icon size is somehow making each item on the list have a lot of padding
 	l->listScroller = newListScroller(l->list);
 	gtk_grid_attach_next_to(GTK_GRID(l->layout),

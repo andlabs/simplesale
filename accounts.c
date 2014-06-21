@@ -68,7 +68,7 @@ static void hash(const char *password, GtkTreeIter *iter)
 	// no need to free hashed as that's part of private
 }
 
-static gboolean matches(const char *password, GtkTreeIter *iter)
+gboolean matches(const char *password, GtkTreeIter *iter)
 {
 	char *stored;
 	char *input;

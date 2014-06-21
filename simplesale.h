@@ -100,6 +100,7 @@ extern Login *newLogin(void);
 
 // accounts.c
 extern void initAccounts(void);
+extern gboolean matches(const char *, GtkTreeIter *);
 extern GtkTreeIter addAccount(char *, char *);
 extern void setAccountsModelAndIconLayout(GtkIconView *);
 extern void loadAccounts(void);
