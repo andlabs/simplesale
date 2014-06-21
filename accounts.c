@@ -20,25 +20,6 @@ void initAccounts(void)
 		NULL);		// TODO handle error
 }
 
-void addAccount(char *name, char *password)
-{
-	GtkTreeIter iter;
-
-	gtk_list_store_append(accounts, &iter);
-	gtk_list_store_set(accounts, &iter,
-		0, name,
-		1, NULL,//password,		// TODO bcrypt
-		2, accountIcon,
-		-1);
-}
-
-void setAccountsModelAndIconLayout(GtkIconView *list)
-{
-	gtk_icon_view_set_model(list, GTK_TREE_MODEL(accounts));
-	gtk_icon_view_set_text_column(list, 0);
-	gtk_icon_view_set_pixbuf_column(list, 2);
-}
-
 #define BCRYPT_PREFIX ("$2y$")
 #define BCRYPT_COUNT (10)		/* 2^10; must pass base-2 logarithm */
 #define BCRYPT_N (256)
@@ -102,11 +83,33 @@ if(stored==NULL)return TRUE;//TODO
 	return result == 0;
 }
 
+GtkTreeIter addAccount(char *name, char *password)
+{
+	GtkTreeIter iter;
+
+	gtk_list_store_append(accounts, &iter);
+	gtk_list_store_set(accounts, &iter,
+		0, name,
+		2, accountIcon,
+		-1);
+	hash(password, &iter);
+	return iter;
+}
+
+void setAccountsModelAndIconLayout(GtkIconView *list)
+{
+	gtk_icon_view_set_model(list, GTK_TREE_MODEL(accounts));
+	gtk_icon_view_set_text_column(list, 0);
+	gtk_icon_view_set_pixbuf_column(list, 2);
+}
+
 // this is the GUI for editing accounts
 
 struct AccountEditor {
 	GtkWidget *win;
 	GtkWidget *layout;
+	GtkWidget *leftside;
+	GtkWidget *add;
 	GtkWidget *list;
 	GtkTreeSelection *listSel;		// convenience
 	GtkWidget *listScroller;
@@ -125,8 +128,6 @@ static void saveClicked(GtkButton *button, gpointer data)
 
 	AccountEditor *e = (AccountEditor *) data;
 
-askNewPassword(e->win, "Enter a password for this new user. (TODO user name)", "create the new user");
-
 //	saveAccounts();		// TODO
 	gtk_main_quit();USED(e);// TODO signal completion
 }
@@ -143,6 +144,24 @@ static void discardClicked(GtkButton *button, gpointer data)
 	g_object_unref(accounts);
 //	initAccounts();		// TODO
 	gtk_main_quit();USED(e);// TODO signal completion
+}
+
+static void addClicked(GtkButton *button, gpointer data)
+{
+	USED(button);
+
+	AccountEditor *e = (AccountEditor *) data;
+	char *newpass;
+	GtkTreeIter iter;
+
+	newpass = askNewPassword(e->win,
+		"Enter a password for this new account. You can set the account's name and other properties afterward.",
+		"create the new account");
+	// TODO ask the person himself to enter the password
+	if (newpass == NULL)
+		return;
+	iter = addAccount("New Account", newpass);
+	gtk_tree_selection_select_iter(e->listSel, &iter);
 }
 
 static void accountSelected(GtkTreeSelection *selection, gpointer data)
@@ -223,6 +242,16 @@ AccountEditor *newAccountEditor(void)
 	e->layout = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(e->layout), TRUE);
 
+	e->leftside = gtk_grid_new();
+
+	e->add = gtk_button_new_with_label("Add Account");
+	g_signal_connect(e->add, "clicked", G_CALLBACK(addClicked), e);
+	gtk_widget_set_hexpand(e->add, TRUE);
+	gtk_widget_set_halign(e->add, GTK_ALIGN_END);
+	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
+		e->add, NULL,
+		GTK_POS_TOP, 1, 1);
+
 	e->list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(accounts));
 	e->listSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(e->list));
 	// TODO figure out how to make it so that clicking on blank space deselects
@@ -232,8 +261,12 @@ AccountEditor *newAccountEditor(void)
 	gtk_tree_view_append_column(GTK_TREE_VIEW(e->list), col);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(e->list), FALSE);
 	e->listScroller = newListScroller(e->list);
+	gtk_grid_attach_next_to(GTK_GRID(e->leftside),
+		e->listScroller, e->add,
+		GTK_POS_BOTTOM, 1, 1);
+
 	gtk_grid_attach_next_to(GTK_GRID(e->layout),
-		e->listScroller, NULL,
+		e->leftside, NULL,
 		GTK_POS_TOP, 1, 1);
 
 	e->rightside = gtk_grid_new();
@@ -284,7 +317,7 @@ AccountEditor *newAccountEditor(void)
 		GTK_POS_BOTTOM, 1, 1);
 
 	gtk_grid_attach_next_to(GTK_GRID(e->layout),
-		e->rightside, e->listScroller,
+		e->rightside, e->leftside,
 		GTK_POS_RIGHT, 2, 1);
 
 	gtk_container_add(GTK_CONTAINER(e->win), e->layout);

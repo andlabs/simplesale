@@ -100,7 +100,7 @@ extern Login *newLogin(void);
 
 // accounts.c
 extern void initAccounts(void);
-extern void addAccount(char *, char *);
+extern GtkTreeIter addAccount(char *, char *);
 extern void setAccountsModelAndIconLayout(GtkIconView *);
 
 typedef struct AccountEditor AccountEditor;
