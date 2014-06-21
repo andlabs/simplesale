@@ -2,6 +2,8 @@
 #include "simplesale.h"
 
 struct ItemEditor {
+	GObject parent_instance;
+
 	GtkWidget *win;
 	GtkWidget *layout;
 	GtkWidget *leftside;
@@ -14,9 +16,21 @@ struct ItemEditor {
 	GtkWidget *name;
 	GtkWidget *price;
 
-	GtkTreeIter current;
 	gboolean selecting;
 };
+
+typedef struct ItemEditorClass ItemEditorClass;
+
+struct ItemEditorClass {
+	GObjectClass parent_class;
+};
+
+//G_DEFINE_TYPE(ItemEditor, itemEditor, G_TYPE_OBJECT)
+
+static void buildItemEditorGUI(ItemEditor *);
+static void disposeItemEditorGUI(ItemEditor *);
+
+
 
 static void saveClicked(GtkButton *button, gpointer data)
 {
@@ -77,14 +91,15 @@ static void itemSelected(GtkTreeSelection *selection, gpointer data)
 	gboolean selected;
 	char *name = "";
 	Price price;
+	GtkTreeIter iter;
 
-	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &e->current);
+	selected = gtk_tree_selection_get_selected(e->listSel, NULL, &iter);
 	gtk_widget_set_sensitive(e->remove, selected);
 	gtk_widget_set_sensitive(e->name, selected);
 	gtk_widget_set_sensitive(e->price, selected);
 	e->selecting = TRUE;
 	if (selected) {
-		getItem(&e->current, &name, &price);
+		getItem(&iter, &name, &price);
 		priceEntrySetPrice(PRICE_ENTRY(e->price), price);
 	} else
 		priceEntryClear(PRICE_ENTRY(e->price));
