@@ -90,33 +90,38 @@ static void managerClicked(GtkButton *button, gpointer data)
 	Login *l = (Login *) data;
 	GtkWidget *pwprompt;
 	GtkWidget *pwentry;
+	GtkWidget *incorrectLabel;
 	GtkBox *box;
 	gint response;
-	char *pw;
-	gboolean good;
 
 	pwprompt = gtk_message_dialog_new(GTK_WINDOW(l->win), GTK_DIALOG_MODAL,
 		GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
-		"Enter the Manager's password and click OK to access the [TODO]");
+		"Enter the Manager's password and click OK to access the Manager Control Panel.");
 	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(pwprompt),
 		gtk_image_new_from_icon_name("dialog-password", GTK_ICON_SIZE_DIALOG));			// size used by GtkMessageDialog already, so eh
 	box = GTK_BOX(gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(pwprompt)));
 	pwentry = gtk_entry_new();
 	gtk_entry_set_visibility(GTK_ENTRY(pwentry), FALSE);
-	gtk_box_pack_end(box, pwentry, TRUE, TRUE, 0);
+	gtk_box_pack_start(box, pwentry, TRUE, TRUE, 0);
+	incorrectLabel = gtk_label_new("Password incorrect.");
+	alignLabel(incorrectLabel, 0);
+	// TODO format?
+	gtk_box_pack_start(box, incorrectLabel, TRUE, TRUE, 0);
 	gtk_widget_show_all(pwprompt);		// both the icon and the entry are hidden by default
-	response = gtk_dialog_run(GTK_DIALOG(pwprompt));
-	gtk_widget_hide(pwprompt);
-	if (response != GTK_RESPONSE_OK) {
-		printf("cancelled\n");
-		gtk_widget_destroy(pwprompt);
-		return;
+	gtk_widget_hide(incorrectLabel);		// but hide the label
+	for (;;) {
+		response = gtk_dialog_run(GTK_DIALOG(pwprompt));
+		if (response != GTK_RESPONSE_OK) {
+			printf("cancelled\n");
+			gtk_widget_destroy(pwprompt);
+			return;
+		}
+		if (matchesManagerPassword(gtk_entry_get_text(GTK_ENTRY(pwentry))))
+			break;
+		gtk_widget_show(incorrectLabel);
 	}
-	pw = g_strdup(gtk_entry_get_text(GTK_ENTRY(pwentry)));
 	gtk_widget_destroy(pwprompt);
-	good = matchesManagerPassword(pw);
-	g_free(pw);
-	printf("%d\n", good);
+	printf("pass\n");
 }
 
 Login *newLogin(void)
