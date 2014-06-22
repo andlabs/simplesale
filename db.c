@@ -115,6 +115,15 @@ static void bindInt(int i, int arg, int n)
 		g_error("error binding int argument %d of %s statement: %s", arg, stmts[i].query, SQLERR);
 }
 
+static void bindText(int i, int arg, const char *s, void (*f)(void *))
+{
+	int err;
+
+	err = sqlite3_bind_text(stmts[i].stmt, arg, s, -1, f);
+	if (err != SQLITE_OK)
+		g_error("error binding text argument %d of %s statement: %s", arg, stmts[i].query, SQLERR);
+}
+
 static const void *blob(int i, int col)
 {
 	return sqlite3_column_blob(stmts[i].stmt, col);
@@ -128,6 +137,38 @@ static int blobsize(int i, int col)
 static int sqlint(int i, int col)
 {
 	return sqlite3_column_int(stmts[i].stmt, col);
+}
+
+void *dbGetSetting(const char *setting, int *len)
+{
+	void *out;
+	int size;
+
+	run(qBegin);
+	reset(qBegin);
+	bindText(qGetSetting, 1, setting, SQLITE_TRANSIENT);
+	run(qGetSetting);
+	size = blobsize(qGetSetting, 0);
+	out = g_malloc0(size);
+	memcpy(out, blob(qGetSetting, 0), size);
+	if (len != NULL)
+		*len = size;
+	reset(qGetSetting);
+	run(qCommit);
+	reset(qCommit);
+	return out;
+}
+
+void dbSetSetting(const char *setting, void *in, int size)
+{
+	run(qBegin);
+	reset(qBegin);
+	bindText(qSetSetting, 1, setting, SQLITE_TRANSIENT);
+	bindBlob(qSetSetting, 2, in, size, SQLITE_TRANSIENT);
+	run(qSetSetting);
+	reset(qSetSetting);
+	run(qCommit);
+	reset(qCommit);
 }
 
 struct dbIn {

@@ -107,6 +107,8 @@ extern void setAccountPassword(GtkTreeIter *, const char *);
 extern void setAccountsModelAndIconLayout(GtkIconView *);
 extern void setAccountsModelAndColumnLayout(GtkTreeView *);
 extern void saveAccounts(void);
+extern gboolean matchesManagerPassword(const char *);
+//extern void setManagerPassword(const char *);
 
 // accounteditor.c
 extern GtkWidget *newAccountEditor(void);
@@ -143,6 +145,8 @@ extern void managerEditorDone(ManagerEditor *);
 // db.c
 extern void initDB(void);
 extern void endDB(void);
+extern void *dbGetSetting(const char *, int *);
+extern void dbSetSetting(const char *, void *, int);
 typedef struct dbIn dbIn;
 extern dbIn *dbInOpenItems(void);
 extern dbIn *dbInOpenAccounts(void);

@@ -6,6 +6,8 @@
 static GtkListStore *accounts = NULL;
 static GdkPixbuf *accountIcon = NULL;
 
+#define SETTING_MANAGER_PASSWORD "manager-password"
+
 #define BCRYPT_PREFIX ("$2y$")
 #define BCRYPT_COUNT (10)		/* 2^10; must pass base-2 logarithm */
 #define BCRYPT_N (256)
@@ -51,22 +53,27 @@ static char *hash(const char *password)
 	return hashed;
 }
 
-gboolean matches(const char *password, GtkTreeIter *iter)
+static gboolean matchesStored(const char *password, char *stored, size_t size)
 {
-	char *stored;
 	char *input;
-	size_t size;
 	void *private = NULL;
 	int n = 0;
 	int result;
 
-	gtk_tree_model_get(GTK_TREE_MODEL(accounts), iter, 1, &stored, -1);
-	size = strlen(stored);
 	input = crypt_ra(password, stored, &private, &n);
 	result = memcmp(stored, input, size);
 	free(private);
 	// no need to free input as that's part of private
 	return result == 0;
+}
+
+
+gboolean matches(const char *password, GtkTreeIter *iter)
+{
+	char *stored;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(accounts), iter, 1, &stored, -1);
+	return matchesStored(password, stored, strlen(stored));
 }
 
 static GtkTreeIter appendAccount(char *name, char *hashed)
@@ -175,3 +182,14 @@ void saveAccounts(void)
 	dbOutCommitAndFree(o);
 }
 
+gboolean matchesManagerPassword(const char *password)
+{
+	char *stored;
+	gboolean result;
+	int n;
+
+	stored = (char *) dbGetSetting(SETTING_MANAGER_PASSWORD, &n);
+	result = matchesStored(password, stored, (size_t) n);
+	g_free(stored);
+	return result;
+}

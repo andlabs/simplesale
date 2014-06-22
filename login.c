@@ -93,6 +93,7 @@ static void managerClicked(GtkButton *button, gpointer data)
 	GtkBox *box;
 	gint response;
 	char *pw;
+	gboolean good;
 
 	pwprompt = gtk_message_dialog_new(GTK_WINDOW(l->win), GTK_DIALOG_MODAL,
 		GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
@@ -105,12 +106,17 @@ static void managerClicked(GtkButton *button, gpointer data)
 	gtk_box_pack_end(box, pwentry, TRUE, TRUE, 0);
 	gtk_widget_show_all(pwprompt);		// both the icon and the entry are hidden by default
 	response = gtk_dialog_run(GTK_DIALOG(pwprompt));
+	gtk_widget_hide(pwprompt);
+	if (response != GTK_RESPONSE_OK) {
+		printf("cancelled\n");
+		gtk_widget_destroy(pwprompt);
+		return;
+	}
 	pw = g_strdup(gtk_entry_get_text(GTK_ENTRY(pwentry)));
 	gtk_widget_destroy(pwprompt);
-
-	USED(response);
-
+	good = matchesManagerPassword(pw);
 	g_free(pw);
+	printf("%d\n", good);
 }
 
 Login *newLogin(void)
