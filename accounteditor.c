@@ -143,11 +143,11 @@ static void changeClicked(GtkButton *button, gpointer data)
 		g_error("change password clicked without any account selected (button should be disabled)");
 	curpass = passEntryCurrentPassword(PASS_ENTRY(e->passentry));
 	if (!matches(curpass, &iter)) {
-		printf("password mismatch\n");
+		passEntryNotifyFailure(PASS_ENTRY(e->passentry));
 		return;
 	}
 	setAccountPassword(&iter, passEntryNewPassword(PASS_ENTRY(e->passentry)));
-	printf("password changed\n");
+	passEntryNotifyChanged(PASS_ENTRY(e->passentry));
 }
 
 void buildAccountEditorGUI(AccountEditor *e)

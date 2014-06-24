@@ -123,6 +123,8 @@ extern GType passEntry_get_type(void);
 extern void resetPassEntry(PassEntry *);
 extern const char *passEntryCurrentPassword(PassEntry *);
 extern const char *passEntryNewPassword(PassEntry *);
+extern void passEntryNotifyChanged(PassEntry *);
+extern void passEntryNotifyFailure(PassEntry *);
 extern char *askNewPassword(GtkWidget *, char *, char *);
 
 // manager.c

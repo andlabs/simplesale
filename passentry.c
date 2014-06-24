@@ -11,6 +11,7 @@ struct PassEntry {
 	GtkWidget *passleveltext;
 	GtkWidget *confirmpass;
 	GtkWidget *child;
+	GtkWidget *result;
 
 	gboolean askCurrent;
 	char *name;
@@ -48,6 +49,16 @@ static void passwordChanged(GtkEditable *editable, gpointer data)
 	else
 		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
 	refresh(e, FALSE);
+}
+
+static void resetResult(GObject *obj, GParamSpec *spec, gpointer data)
+{
+	USED(obj);
+	USED(spec);
+
+	PassEntry *e = (PassEntry *) data;
+
+	gtk_label_set_text(GTK_LABEL(e->result), "");
 }
 
 static void passEntry_init(PassEntry *e)
@@ -91,6 +102,14 @@ static void passEntry_init(PassEntry *e)
 		e->passleveltext, e->passlevel,
 		GTK_POS_RIGHT, 1, 2);
 
+	e->result = gtk_label_new("");
+	alignLabel(e->result, 0);
+	// note the target of this connection
+	g_signal_connect(e, "notify::sensitive", G_CALLBACK(resetResult), e);
+	gtk_grid_attach_next_to(GTK_GRID(e),
+		e->result, e->passleveltext,
+		GTK_POS_BOTTOM, 1, 1);
+
 	// child is handled below in setProperty
 }
 
@@ -133,9 +152,16 @@ static void passEntry_setProperty(GObject *obj, guint id, const GValue *value, G
 	case 2:		// child
 		e->child = (GtkWidget *) g_value_get_object(value);
 		if (e->child != NULL) {
+			// move the result below the child
+			g_object_ref_sink(e->result);		// keep alive; there will be no floating reference by this point
+			gtk_container_remove(GTK_CONTAINER(e), e->result);
 			gtk_grid_attach_next_to(GTK_GRID(e),
 				e->child, e->passlevel,
 				GTK_POS_BOTTOM, 1, 1);
+			gtk_grid_attach_next_to(GTK_GRID(e),
+				e->result, e->child,
+				GTK_POS_BOTTOM, 1, 1);
+			g_object_unref(e->result);		// we kept it alive now and the latest gtk_grid_attach() incremented the reference count; we're done
 			g_object_bind_property(e, "child-sensitive",
 				e->child, "sensitive",
 				G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
@@ -234,6 +260,7 @@ void resetPassEntry(PassEntry *e)
 	// look nice if disabled
 	if (gtk_widget_get_sensitive(GTK_WIDGET(e)) == FALSE)
 		gtk_label_set_text(GTK_LABEL(e->passleveltext), "");
+	gtk_label_set_text(GTK_LABEL(e->result), "");
 }
 
 const char *passEntryCurrentPassword(PassEntry *e)
@@ -248,6 +275,16 @@ const char *passEntryNewPassword(PassEntry *e)
 	if (!shouldEnable(e))
 		g_error("passEntryNewPassword() called when it should not be; control that triggered it should be disabled");
 	return gtk_entry_get_text(GTK_ENTRY(e->newpass));
+}
+
+void passEntryNotifyChanged(PassEntry *e)
+{
+	gtk_label_set_text(GTK_LABEL(e->result), "Password changed.");
+}
+
+void passEntryNotifyFailure(PassEntry *e)
+{
+	gtk_label_set_text(GTK_LABEL(e->result), "Current password incorrect.");
 }
 
 char *askNewPassword(GtkWidget *parent, char *message, char *action)
