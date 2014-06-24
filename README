@@ -9,3 +9,4 @@ TODO
 - ensure the item names are always unique in the Item Editor
 	- same for Accounts
 - use http://www.sqlite.org/c3ref/extended_result_codes.html; ask them to document that the return (an error code that is now always SQLITE_OK) doesn't matter first
+- the description of password changes is /very/ misleading; it should be changed to say Request Change and that changes are actually applied when you click Save
