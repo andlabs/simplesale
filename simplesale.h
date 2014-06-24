@@ -113,6 +113,9 @@ extern gboolean matchesManagerPassword(const char *);
 // accounteditor.c
 extern GtkWidget *newAccountEditor(void);
 
+// othersettings.c
+extern GtkWidget *newOtherSettings(void);
+
 // passentry.c
 #define PASS_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), passEntry_get_type(), PassEntry))
 #define PASS_ENTRY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), passEntry_get_type(), PassEntryClass))

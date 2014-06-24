@@ -27,6 +27,8 @@ static void returnToManager(ManagerEditor *obj, gpointer data)
 
 EDITORCLICKED(itemEditor, ItemEditor)
 EDITORCLICKED(accountEditor, AccountEditor)
+// TODO deviceEditor
+EDITORCLICKED(otherSettings, OtherSettings)
 
 Manager *newManager(void)
 {
@@ -56,7 +58,7 @@ Manager *newManager(void)
 	BUTTON("insert-object", "Item Editor", itemEditorClicked, 0, 0);
 	BUTTON("contact-new", "Account Editor", accountEditorClicked, 0, 1);
 	BUTTON("printer", "Device Editor", gtk_main_quit, 0, 2);
-	BUTTON("preferences-other", "Other Settings", gtk_main_quit, 0, 3);
+	BUTTON("preferences-other", "Other Settings", otherSettingsClicked, 0, 3);
 	BUTTON("list-remove", "Withdraw Money", gtk_main_quit, 1, 0);
 	BUTTON("utilities-system-monitor", "View Log", gtk_main_quit, 1, 1);
 	BUTTON("system-log-out", "Return to Login Screen", gtk_main_quit, 1, 2);

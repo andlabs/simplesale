@@ -7,6 +7,7 @@ CFILES = accounteditor.c \
 	main.c \
 	manager.c \
 	order.c \
+	othersettings.c \
 	ow-crypt.c \
 	passentry.c \
 	paydialog.c \
