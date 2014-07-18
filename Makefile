@@ -3,6 +3,7 @@ CFILES = accounteditor.c \
 	db.c \
 	items.c \
 	itemeditor.c \
+	language.c \
 	login.c \
 	main.c \
 	manager.c \

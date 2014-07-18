@@ -164,3 +164,13 @@ extern dbOut *dbOutOpenForWritingAccounts(void);
 extern void dbOutWriteItemModel(GtkTreeModel *, dbOut *);
 extern void dbOutWriteAccountsModel(GtkTreeModel *, dbOut *);
 extern void dbOutCommitAndFree(dbOut *);
+
+// language.c
+enum {
+	English,
+};
+enum {
+	PayNow,
+	PayLater,
+};
+const char *localstr(int, int);
