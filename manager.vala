@@ -40,7 +40,7 @@ public class Manager : GLib.Object {
 		// TODO remove the following
 		this.win.destroy.connect(Gtk.main_quit);
 
-//		newHeaderBar("Manager Control Panel", this.win);
+//TODO		newHeaderBar("Manager Control Panel", this.win);
 
 		this.layout = new Gtk.Grid();
 		this.layout.row_homogeneous = true;
