@@ -87,7 +87,7 @@ private void reset(int i)
 		GLib.error("error resetting %s statement for next execution: %s", stmts[i].query, db.errmsg());
 }
 
-private void bindBlob(int i, int arg, const void *blob, int n, GLib.DestroyNotify f)
+private void bindBlob(int i, int arg, const void *blob, int n)
 {
 	int err;
 
@@ -105,7 +105,7 @@ private void bindInt(int i, int arg, int n)
 		GLib.error("error binding int argument %d of %s statement: %s", arg, stmts[i].query, db.errmsg());
 }
 
-private void bindText(int i, int arg, owned string s, GLib.DestroyNotify f)
+private void bindText(int i, int arg, owned string s)
 {
 	int err;
 
@@ -114,14 +114,31 @@ private void bindText(int i, int arg, owned string s, GLib.DestroyNotify f)
 		GLib.error("error binding text argument %d of %s statement: %s", arg, stmts[i].query, db.errmsg());
 }
 
-private const void *blob(int i, int col)
+// thanks to Lethalman and flo in irc.gimp.net/#vala
+private const uint8[] blob(int i, int col)
 {
-	return stmts[i].stmt.column_blob(col);
+	uint8[] out;
+	unowned uint8[] trampoline;
+	int n;
+
+	n = stmts[i].stmt.column_bytes(col);
+	trampoline = (unowned uint8[]) stmts[i].stmt.column_blob(col);
+	trampoline.length = n;
+	out = trampoline;		// copies
+	return out;
 }
 
-private int blobsize(int i, int col)
+private const string blobstr(int i, int col)
 {
-	return stmts[i].stmt.column_bytes(col);
+	uint8[] out;
+	unowned string trampoline;
+	int n;
+
+	n = stmts[i].stmt.column_bytes(col);
+	trampoline.data = (uint8[]) stmts[i].stmt.column_blob(col);
+	trampoline.length = n;
+	out = trampoline;		// copies
+	return out;
 }
 
 private int sqlint(int i, int col)
@@ -129,40 +146,32 @@ private int sqlint(int i, int col)
 	return stmts[i].stmt.column_int(col);
 }
 
-/*
-TODO
-public void *dbGetSetting(string setting, int *len)
+public byte[] dbGetSetting(string setting)
 {
-	void *out;
-	int size;
+	byte[] out;
 
 	run(qBegin);
 	reset(qBegin);
-	bindText(qGetSetting, 1, setting, Sqlite3.TRANSIENT);
+	bindText(qGetSetting, 1, setting);
 	run(qGetSetting);
-	size = blobsize(qGetSetting, 0);
-	out = g_malloc0(size);
-	memcpy(out, blob(qGetSetting, 0), size);
-	if (len != NULL)
-		*len = size;
+	out = blob(qGetSetting, 0);
 	reset(qGetSetting);
 	run(qCommit);
 	reset(qCommit);
 	return out;
 }
 
-void dbSetSetting(const char *setting, void *in, int size)
+void dbSetSetting(const char *setting, byte[] in)
 {
 	run(qBegin);
 	reset(qBegin);
-	bindText(qSetSetting, 1, setting, SQLITE_TRANSIENT);
-	bindBlob(qSetSetting, 2, in, size, SQLITE_TRANSIENT);
+	bindText(qSetSetting, 1, setting);
+	bindBlob(qSetSetting, 2, (void *) in, in.length);
 	run(qSetSetting);
 	reset(qSetSetting);
 	run(qCommit);
 	reset(qCommit);
 }
-*/
 
 public struct dbIn {
 	public dbIn.OpenItems()
@@ -177,42 +186,33 @@ public struct dbIn {
 		reset(qBegin);
 	}
 
-	/*
-	TODO
-	public bool ReadItem(char **name, Price *price)
+	public bool ReadItem(out string name, out Price price)
 	{
+		byte[] bytes;
 		int n;
-		uint8_t pricebytes[8];
 
-		if (run(qGetItems) == FALSE) {
+		if (run(qGetItems) == false) {
 			reset(qGetItems);
-			return FALSE;
+			return false;
 		}
-		n = blobsize(qGetItems, 0);
-		*name = (char *) g_malloc0((n + 1) * sizeof (char));
-		memcpy(*name, blob(qGetItems, 0), n);
-		memcpy(pricebytes, blob(qGetItems, 1), 8);
-		*price = priceFromBytes(pricebytes);
-		return TRUE;
+		out = blobstr(qGetItems, 0);
+		bytes = blob(qGetItems, 1);
+//TODO		price = priceFromBytes(pricebytes);
+		return true;
 	}
 
-	public bool dbInReadAccount(char **name, char **password)
+	public bool dbInReadAccount(out string name, out string password)
 	{
 		int n;
 
-		if (run(qGetAccounts) == FALSE) {
+		if (run(qGetAccounts) == false) {
 			reset(qGetAccounts);
-			return FALSE;
+			return false;
 		}
-		n = blobsize(qGetAccounts, 0);
-		*name = (char *) g_malloc0((n + 1) * sizeof (char));
-		memcpy(*name, blob(qGetAccounts, 0), n);
-		n = blobsize(qGetAccounts, 1);
-		*password = (char *) g_malloc0((n + 1) * sizeof (char));
-		memcpy(*password, blob(qGetAccounts, 1), n);
-		return TRUE;
+		name = blobstr(qGetAccounts, 0);
+		password = blobstr(qGetAccounts, 1);
+		return true;
 	}
-	*/
 
 	public void Commit()
 	{
