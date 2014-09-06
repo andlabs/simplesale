@@ -798,8 +798,7 @@ namespace GCrypt {
 			SALTED_S2K,
 			ITERSALTED_S2K,
 			PBKDF1,
-			PBKDF2,
-			SCRYPT
+			PBKDF2
 		}
 
 		public GCrypt.Error derive ([CCode (type = "const void*", array_length_type = "size_t")] uint8[] passphrasse, GCrypt.KeyDerivation.Algorithm algo, GCrypt.Hash.Algorithm subalgo, [CCode (type = "const void*", array_length_type = "size_t")] uint8[] salt, ulong iterations, [CCode (type = "void*", array_length_type = "size_t", array_length_pos = 5.5)] uint8[] keybuffer);
