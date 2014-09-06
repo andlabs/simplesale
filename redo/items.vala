@@ -12,13 +12,13 @@ public void initItems()
 	Gtk.TreeIter iter;
 
 	items.append(out iter);
-	items.set(iter, 0, "Cheese Pizza", 1000);
+	items.set(iter, 0, "Cheese Pizza", 1, 1000);
 	items.append(out iter);
-	items.set(iter, 0, "Cheese Slice", 0200);
+	items.set(iter, 0, "Cheese Slice", 1, 200);
 	items.append(out iter);
-	items.set(iter, 0, "Soda", 125);
+	items.set(iter, 0, "Soda", 1, 125);
 	items.append(out iter);
-	items.set(iter, 0, "Cookie", 100);
+	items.set(iter, 0, "Cookie", 1, 100);
 }
 
 public void itemsSetupIconView(Gtk.IconView iv)

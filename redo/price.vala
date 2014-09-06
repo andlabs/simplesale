@@ -1,6 +1,8 @@
 // 6 september 2014
 
 [SimpleType]
+[IntegerType]
+[CCode(has_type_id = false)]		// https://mail.gnome.org/archives/vala-list/2012-January/msg00105.html
 public struct Price : uint64 {
 	// weird scenario with vala here
 	// static members are not inherited

@@ -68,6 +68,7 @@ public class OrderEditor : Gtk.Window {
 public int main(string[] args)
 {
 	Gtk.init(ref args);
+	initItems();
 	(new OrderEditor()).show_all();
 	Gtk.main();
 	return 0;
