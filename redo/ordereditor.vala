@@ -8,6 +8,7 @@ public class OrderEditor : Gtk.Window {
 	Gtk.HeaderBar hbright;
 	Gtk.Button payNow;
 	Gtk.Button payLater;
+	Gtk.SearchEntry search;
 	Gtk.Button cancel;
 
 	Gtk.Paned body;
@@ -40,6 +41,9 @@ public class OrderEditor : Gtk.Window {
 		this.payLater = new Gtk.Button.with_label("Pay Later");
 		this.payLater.get_style_context().add_class("suggested-action");
 		this.hbright.pack_start(this.payLater);
+		this.search = new Gtk.SearchEntry();
+		this.search.placeholder_text = "Find/filter items";
+		this.hbright.custom_title = this.search;
 		this.cancel = new Gtk.Button.with_label("Cancel Order");
 		this.cancel.get_style_context().add_class("destructive-action");
 		this.hbright.pack_end(this.cancel);
@@ -50,10 +54,12 @@ public class OrderEditor : Gtk.Window {
 		this.body = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
 		this.order = new Gtk.TreeView();
 		this.orderScroller = new Gtk.ScrolledWindow(null, null);
+		this.orderScroller.shadow_type = Gtk.ShadowType.IN;
 		this.orderScroller.add(this.order);
 		this.items = new Gtk.IconView();
 		itemsSetupIconView(this.items);
 		this.itemsScroller = new Gtk.ScrolledWindow(null, null);
+		this.itemsScroller.shadow_type = Gtk.ShadowType.IN;
 		this.itemsScroller.add(this.items);
 		this.body.add1(this.orderScroller);
 		this.body.add2(this.itemsScroller);

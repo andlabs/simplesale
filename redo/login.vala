@@ -34,6 +34,7 @@ public class Login : Gtk.Window {
 		accountsSetupIconView(this.list);
 		this.list.activate_on_single_click = true;
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
+		this.listScroller.shadow_type = Gtk.ShadowType.IN;
 		this.listScroller.add(this.list);
 
 		this.popover = new Gtk.Popover(this.list);
