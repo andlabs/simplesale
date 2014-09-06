@@ -52,6 +52,7 @@ public class OrderEditor : Gtk.Window {
 		this.orderScroller = new Gtk.ScrolledWindow(null, null);
 		this.orderScroller.add(this.order);
 		this.items = new Gtk.IconView();
+		itemsSetupIconView(this.items);
 		this.itemsScroller = new Gtk.ScrolledWindow(null, null);
 		this.itemsScroller.add(this.items);
 		this.body.add1(this.orderScroller);

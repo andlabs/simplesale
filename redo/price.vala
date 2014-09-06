@@ -2,6 +2,12 @@
 
 [SimpleType]
 public struct Price : uint64 {
+	// weird scenario with vala here
+	// static members are not inherited
+	// but overriding throws up a warning about masking
+	// probably an error in the spec?
+	public new const string FORMAT = uint64.FORMAT;
+
 	public string to_string()
 	{
 		Price dollars, cents;
@@ -25,16 +31,18 @@ public struct Price : uint64 {
 	}
 
 	// big-endian
-	public byte[] ToBytes()
+	public uint8[] ToBytes()
 	{
-		byte[] out;
+		uint8[] out;
 		int i;
+		Price p;
 
-		out = new byte[8];
+		out = new uint8[8];
+		p = this;
 		for (i = 7; i >= 0; i--) {
-			out[i] = (uint8_t) (price & 0xFF);
-			price >>= 8;
+			out[i] = (uint8) (p & 0xFF);
+			p >>= 8;
 		}
-		return out
+		return out;
 	}
 }
