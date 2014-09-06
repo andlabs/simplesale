@@ -17,6 +17,8 @@ public class OrderEditor : Gtk.Window {
 	Gtk.IconView items;
 	Gtk.ScrolledWindow itemsScroller;
 
+	Gtk.ListStore o;
+
 	public OrderEditor() {
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
@@ -63,6 +65,9 @@ public class OrderEditor : Gtk.Window {
 		this.itemsScroller.add(this.items);
 		this.body.add1(this.orderScroller);
 		this.body.add2(this.itemsScroller);
+
+		this.o = newOrder();
+		orderSetupTreeView(this.o, this.order);
 
 		this.add(this.body);
 		this.header.bind_property("position",
