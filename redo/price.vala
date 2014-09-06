@@ -48,3 +48,16 @@ public struct Price : uint64 {
 		return out;
 	}
 }
+
+public class PriceRenderer : Gtk.CellRendererText {
+	private Price _price;
+	public Price price {
+		get {
+			return _price;
+		}
+		set {
+			_price = value;
+			this.text = _price.to_string();
+		}
+	}
+}

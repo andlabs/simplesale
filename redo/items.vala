@@ -30,5 +30,7 @@ public void itemsSetupIconView(Gtk.IconView iv)
 	r = new Gtk.CellRendererText();
 	iv.pack_start(r, true);
 	iv.set_attributes(r, "text", 0);
-	// TODO price renderer
+	r = new PriceRenderer();
+	iv.pack_start(r, true);
+	iv.set_attributes(r, "price", 1);
 }
