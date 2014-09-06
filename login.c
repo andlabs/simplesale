@@ -36,10 +36,7 @@ static void accountSelected(GtkIconView *iconview, gpointer data)
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(l->list));
 	if (selected == NULL)
 		goto nothing;
-	n = g_list_length(selected);
-	if (n == 0)
-		goto nothing;
-	if (n > 1)
+	if (selected->prev != NULL || selected->next != NULL)		// more than one element
 		g_error("multiple accounts selected (icon view should have been set to single-selection)");
 	l->selected = TRUE;
 	gtk_tree_model_get_iter(gtk_icon_view_get_model(GTK_ICON_VIEW(l->list)),
