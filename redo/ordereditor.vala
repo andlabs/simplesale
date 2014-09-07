@@ -67,6 +67,9 @@ public class OrderEditor : Gtk.Window {
 
 		this.o = new Order();
 		o.SetupTreeView(this.order);
+		this.o.bind_property("Customer",
+			this.name, "text",
+			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.BIDIRECTIONAL | GLib.BindingFlags.SYNC_CREATE);
 		this.o.bind_property("TotalString",
 			this.hbleft, "title",
 			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);

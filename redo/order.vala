@@ -4,6 +4,11 @@ public class Order : GLib.Object {
 	private Gtk.ListStore list;
 	private Price subtotal;
 
+	public string Customer {
+		get;
+		set;
+	}
+
 	public string TotalString {
 		owned get {
 			return "Total: " + this.subtotal.to_string();
@@ -28,6 +33,7 @@ public class Order : GLib.Object {
 			typeof (string),			// item name
 			typeof (Price));			// price
 		this.subtotal = 0;
+		this.Customer = "";
 	}
 
 	public void SetupTreeView(Gtk.TreeView tv)
