@@ -23,14 +23,22 @@ public void initItems()
 
 public void itemsSetupIconView(Gtk.IconView iv)
 {
-	Gtk.CellRenderer r;
+	Gtk.CellRendererText r;
+	PriceRenderer r2;
 
 	iv.model = items;
 	iv.clear();
 	r = new Gtk.CellRendererText();
 	iv.pack_start(r, true);
-	iv.set_attributes(r, "text", 0);
-	r = new PriceRenderer();
-	iv.pack_start(r, true);
-	iv.set_attributes(r, "price", 1);
+	iv.set_cell_data_func(r, (layout, cell, model, iter) => {
+		string name;
+
+		items.get(iter, 0, out name);
+		r.text = name;
+		r.weight = Pango.Weight.BOLD;
+	});
+	// r2 is important here; if we reuse r the above gets applied to the below (yay not-really-closures)
+	r2 = new PriceRenderer();
+	iv.pack_start(r2, true);
+	iv.set_attributes(r2, "price", 1);
 }
