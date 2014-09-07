@@ -38,6 +38,7 @@ public class Order : GLib.Object {
 		tv.model = this.list;
 		r = new Gtk.CellRendererText();
 		col = new Gtk.TreeViewColumn.with_attributes("Item", r, "text", 0);
+		col.expand = true;		// make this one stretch out as wide as possible
 		tv.append_column(col);
 		r = new PriceRenderer();
 		col = new Gtk.TreeViewColumn.with_attributes("Price", r, "price", 1);
