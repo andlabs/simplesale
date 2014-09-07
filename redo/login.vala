@@ -64,12 +64,14 @@ public class Login : Gtk.Window {
 			this.popover.relative_to = this.list;
 			this.popover.pointing_to = rect;
 			this.incorrect.hide();
+			this.password.text = "";
 			this.popover.show_all();
 		});
 		this.manager.clicked.connect(() => {
 			current = null;
 			this.popover.relative_to = this.manager;
 			this.incorrect.hide();
+			this.password.text = "";
 			this.popover.show_all();
 		});
 
