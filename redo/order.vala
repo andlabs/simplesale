@@ -16,6 +16,12 @@ public class Order : GLib.Object {
 		}
 	}
 
+	private void updateTotals()
+	{
+		this.notify_property("TotalString");
+		this.notify_property("SubtotalString");
+	}
+
 	public Order()
 	{
 		this.list = new Gtk.ListStore(2,
@@ -39,14 +45,27 @@ public class Order : GLib.Object {
 		tv.headers_visible = true;
 	}
 
-	public void Add(Gtk.TreeIter item)
+	public void Append(Gtk.TreePath path)
 	{
 		string name;
 		Price price;
 		Gtk.TreeIter iter;
 
-		items.get(item, 0, out name, 1, out price);
+		items.get_iter(out iter, path);
+		items.get(iter, 0, out name, 1, out price);
 		this.list.append(out iter);
 		this.list.set(iter, 0, name, 1, price);
+		this.subtotal += price;
+		this.updateTotals();
+	}
+
+	public void Delete(Gtk.TreeIter iter)
+	{
+		Price price;
+
+		this.list.get(iter, 1, out price);
+		this.list.remove(iter);
+		this.subtotal -= price;
+		this.updateTotals();
 	}
 }

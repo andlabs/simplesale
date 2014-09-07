@@ -58,6 +58,7 @@ public class OrderEditor : Gtk.Window {
 		this.orderScroller.add(this.order);
 		this.items = new Gtk.IconView();
 		itemsSetupIconView(this.items);
+		this.items.activate_on_single_click = true;
 		this.itemsScroller = new Gtk.ScrolledWindow(null, null);
 		this.itemsScroller.shadow_type = Gtk.ShadowType.IN;
 		this.itemsScroller.add(this.items);
@@ -72,6 +73,24 @@ public class OrderEditor : Gtk.Window {
 		this.o.bind_property("SubtotalString",
 			this.hbleft, "subtitle",
 			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
+
+		this.items.item_activated.connect((path) => {
+			this.o.Append(path);
+		});
+
+		// unfortunately this isn't bindable
+		this.order.get_selection().changed.connect(() => {
+			this.deleteItem.sensitive = this.order.get_selection().get_selected(null, null);
+		});
+		// and set initial value
+		this.order.get_selection().changed();
+		this.deleteItem.clicked.connect(() => {
+			Gtk.TreeIter iter;
+
+			if (this.order.get_selection().get_selected(null, out iter) == false)
+				GLib.error("delete item button clicked with no item selected (should be disabled)");
+			this.o.Delete(iter);
+		});
 
 		this.add(this.body);
 		this.header.bind_property("position",
