@@ -17,7 +17,7 @@ public class OrderEditor : Gtk.Window {
 	Gtk.IconView items;
 	Gtk.ScrolledWindow itemsScroller;
 
-	Gtk.ListStore o;
+	Order o;
 
 	public OrderEditor() {
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
@@ -30,8 +30,6 @@ public class OrderEditor : Gtk.Window {
 		this.hbleft.show_close_button = false;
 		this.name = new Gtk.Entry();
 		this.name.placeholder_text = "Enter customer's name";
-		this.name.hexpand = true;
-		this.name.halign = Gtk.Align.FILL;
 		this.hbleft.pack_start(this.name);
 		this.deleteItem = new Gtk.Button.from_icon_name("list-remove-symbolic", Gtk.IconSize.BUTTON);
 		this.hbleft.pack_end(this.deleteItem);
@@ -66,8 +64,14 @@ public class OrderEditor : Gtk.Window {
 		this.body.add1(this.orderScroller);
 		this.body.add2(this.itemsScroller);
 
-		this.o = newOrder();
-		orderSetupTreeView(this.o, this.order);
+		this.o = new Order();
+		o.SetupTreeView(this.order);
+		this.o.bind_property("TotalString",
+			this.hbleft, "title",
+			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
+		this.o.bind_property("SubtotalString",
+			this.hbleft, "subtitle",
+			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
 
 		this.add(this.body);
 		this.header.bind_property("position",
