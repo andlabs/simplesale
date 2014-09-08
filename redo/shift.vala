@@ -46,4 +46,12 @@ public class Shift : GLib.Object {
 			r2.text = o.TotalString;
 		});
 	}
+
+	public void AppendPending(Order o)
+	{
+		Gtk.TreeIter iter;
+
+		this.pending.append(out iter);
+		this.pending.set(iter, 0, o);
+	}
 }

@@ -22,8 +22,6 @@ public class OrderWindow : Gtk.Window {
 	public OrderWindow() {
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
-		// TODO get rid fo this
-		this.destroy.connect(Gtk.main_quit);
 
 		this.header = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
 		this.hbleft = new Gtk.HeaderBar();
@@ -95,18 +93,22 @@ public class OrderWindow : Gtk.Window {
 			this.o.Delete(iter);
 		});
 
+		this.payNow.clicked.connect(() => {
+			this.PayNow(this.o);
+			this.destroy();
+		});
+		this.payLater.clicked.connect(() => {
+			// TODO warn of empty customer name
+			this.PayLater(this.o);
+			this.destroy();
+		});
+
 		this.add(this.body);
 		this.header.bind_property("position",
 			this.body, "position",
 			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.BIDIRECTIONAL | GLib.BindingFlags.SYNC_CREATE);
 	}
-}
 
-public int main(string[] args)
-{
-	Gtk.init(ref args);
-	initItems();
-	(new OrderWindow()).show_all();
-	Gtk.main();
-	return 0;
+	public signal void PayNow(Order o);
+	public signal void PayLater(Order o);
 }
