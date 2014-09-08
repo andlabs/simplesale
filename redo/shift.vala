@@ -37,7 +37,7 @@ public class Shift : GLib.Object {
 			r.weight = Pango.Weight.BOLD;
 		});
 		// r2 is important here; if we reuse r the above gets applied to the below (yay not-really-closures)
-		r2 = new PriceRenderer();
+		r2 = new Gtk.CellRendererText();
 		iv.pack_start(r2, true);
 		iv.set_cell_data_func(r2, (layout, cell, model, iter) => {
 			Order o;

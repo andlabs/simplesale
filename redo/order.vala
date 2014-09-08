@@ -47,7 +47,7 @@ public class Order : GLib.Object {
 		col.expand = true;		// make this one stretch out as wide as possible
 		tv.append_column(col);
 		r = new PriceRenderer();
-		col = new Gtk.TreeViewColumn.with_attributes("Price", r, "price", 1);
+		col = new Gtk.TreeViewColumn.with_attributes("Price", r, "Price", 1);
 		tv.append_column(col);
 		tv.headers_visible = true;
 	}

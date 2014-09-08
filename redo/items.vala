@@ -40,5 +40,5 @@ public void itemsSetupIconView(Gtk.IconView iv)
 	// r2 is important here; if we reuse r the above gets applied to the below (yay not-really-closures)
 	r2 = new PriceRenderer();
 	iv.pack_start(r2, true);
-	iv.set_attributes(r2, "price", 1);
+	iv.set_attributes(r2, "Price", 1);
 }

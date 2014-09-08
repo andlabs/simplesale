@@ -21,7 +21,7 @@ public struct Price : uint64 {
 
 	public string SignString()
 	{
-		return "$" + this.to_string()
+		return "$" + this.to_string();
 	}
 
 	// big-endian
@@ -141,15 +141,15 @@ public class PriceEntry : Gtk.Entry {
 }
 
 public class PriceRenderer : Gtk.CellRendererText {
-	private Price _price;
-	// TODO rename to Price
-	public Price price {
+	private Price price;
+
+	public Price Price {
 		get {
-			return _price;
+			return price;
 		}
 		set {
-			_price = value;
-			this.text = _price.SignString();
+			price = value;
+			this.text = price.SignString();
 		}
 	}
 }
