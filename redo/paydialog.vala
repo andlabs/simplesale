@@ -16,6 +16,8 @@ public class PayDialog : Gtk.Dialog {
 
 	private Gtk.Grid numgrid;
 	private Gtk.Button numbuttons[10];
+	private static int[] numxpos = { 1, 0, 1, 2, 0, 1, 2, 0, 1, 2 };
+	private static int[] numypos = { 3, 0, 0, 0, 1, 1, 1, 2, 2, 2 };
 
 	private Gtk.Button payButton;
 
@@ -44,8 +46,25 @@ public class PayDialog : Gtk.Dialog {
 		this.maingrid.attach_next_to(new Gtk.Label("Amount Paid"), this.paid,
 			Gtk.PositionType.LEFT, 1, 1);
 
+		int i;
+
+		this.numgrid = new Gtk.Grid();
+		this.numgrid.row_homogeneous = true;
+		this.numgrid.column_homogeneous = true;
+		for (i = 0; i < 10; i++) {
+			this.numbuttons[i] = new Gtk.Button.with_label("%d".printf(i));
+			this.numgrid.attach(this.numbuttons[i],
+				PayDialog.numxpos[i], PayDialog.numypos[i],
+				1, 1);
+		}
+		this.maingrid.attach_next_to(this.numgrid, this.paid,
+			Gtk.PositionType.BOTTOM, 1, 1);
+
 		this.paid.bind_property("Valid",
 			this.payButton, "sensitive",
+			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
+		this.paid.bind_property("Price",
+			this, "AmountPaid",
 			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
 
 		this.maingrid.show_all();		// make the content visible
