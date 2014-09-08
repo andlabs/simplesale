@@ -24,6 +24,8 @@ public class OrderWindow : Gtk.Window {
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
 
+		this.o = o;
+
 		this.header = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
 		this.hbleft = new Gtk.HeaderBar();
 		this.hbleft.show_close_button = false;
@@ -65,6 +67,7 @@ public class OrderWindow : Gtk.Window {
 		this.body.add1(this.orderScroller);
 		this.body.add2(this.itemsScroller);
 
+		// for this one, the this.o being the first object is important; otherwise, continuing a pending order wouldn't work right
 		this.o.bind_property("Customer",
 			this.name, "text",
 			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.BIDIRECTIONAL | GLib.BindingFlags.SYNC_CREATE);
