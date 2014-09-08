@@ -7,11 +7,7 @@ public class Login : Gtk.Window {
 	Gtk.IconView list;
 	Gtk.ScrolledWindow listScroller;
 
-	Gtk.Popover popover;
-	Gtk.Grid playout;
-	Gtk.Entry password;
-	Gtk.Button login;
-	Gtk.Label incorrect;
+	PasswordPopover popover;
 
 	Gtk.TreePath current;
 
@@ -37,42 +33,20 @@ public class Login : Gtk.Window {
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
 		this.listScroller.add(this.list);
 
-		this.popover = new Gtk.Popover(this.list);
-		this.playout = new Gtk.Grid();
-		this.password = new Gtk.Entry();
-		this.password.visibility = false;
-		this.password.caps_lock_warning = true;
-		this.password.placeholder_text = "Enter password";
-		this.playout.attach_next_to(this.password, null,
-			Gtk.PositionType.RIGHT, 1, 1);
-		this.login = new Gtk.Button.with_label("Log In");
-		this.login.get_style_context().add_class("suggested-action");
-		this.playout.attach_next_to(this.login, this.password,
-			Gtk.PositionType.RIGHT, 1, 1);
-		this.incorrect = new Gtk.Label("Password incorrect.");
-		this.incorrect.no_show_all = true;
-		this.playout.attach_next_to(this.incorrect, this.password,
-			Gtk.PositionType.BOTTOM, 1, 1);
-		this.popover.add(this.playout);
-
 		this.list.item_activated.connect((path) => {
 			Gdk.Rectangle rect;
 
 			current = path;
 			if (this.list.get_cell_rect(path, null, out rect) == false)
 				GLib.error("Gtk.IconView.get_cell_area() returned false on a Gtk.TreePath that it gave us");
-			this.popover.relative_to = this.list;
+			this.popover = new PasswordPopover(this.list);
 			this.popover.pointing_to = rect;
-			this.incorrect.hide();
-			this.password.text = "";
-			this.popover.show_all();
+			this.popover.Open();
 		});
 		this.manager.clicked.connect(() => {
 			current = null;
-			this.popover.relative_to = this.manager;
-			this.incorrect.hide();
-			this.password.text = "";
-			this.popover.show_all();
+			this.popover = new PasswordPopover(this.manager);
+			this.popover.Open();
 		});
 
 		this.add(this.listScroller);
