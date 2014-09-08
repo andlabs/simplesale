@@ -17,7 +17,7 @@ public class ShiftWindow : Gtk.Window {
 		this.destroy.connect(Gtk.main_quit);
 
 		this.hb = new Gtk.HeaderBar();
-		// TODO set this.hb.title to employee name
+		this.hb.title = "Employee Name";
 		this.hb.show_close_button = false;
 		this.set_titlebar(this.hb);
 

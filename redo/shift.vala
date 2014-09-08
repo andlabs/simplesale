@@ -2,10 +2,15 @@
 
 public class Shift : GLib.Object {
 	private Gtk.ListStore pending;
+	private GLib.DateTime start;
+	private GLib.Timer shift;
 
 	public Shift()
 	{
 		this.pending = new Gtk.ListStore(1, typeof (Order));
+		this.start = new GLib.DateTime.now_utc();
+		this.shift = new GLib.Timer();
+		this.shift.start();
 
 		// add a sample order to test
 		var o = new Order();
