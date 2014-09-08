@@ -52,6 +52,7 @@ public struct Price : uint64 {
 public class PriceEntry : Gtk.Entry {
 	private Price price;
 	private bool valid;
+	private ulong changedHandler;
 
 	public Price Price {
 		get {
@@ -60,11 +61,14 @@ public class PriceEntry : Gtk.Entry {
 		set {
 			string s;
 
+			// temporarly kill the validation function; this is already valid
+			GLib.SignalHandler.block(this, this.changedHandler);
 			price = value;
 			s = price.to_string();
 			this.text = s[1:s.length];			// strip $
-			this.changed();					// and update
-			// TODO fast-track validation?
+			this.valid = true;
+			this.updateIcon();
+			GLib.SignalHandler.unblock(this, this.changedHandler);
 		}
 	}
 
@@ -114,16 +118,23 @@ public class PriceEntry : Gtk.Entry {
 	public PriceEntry()
 	{
 		this.width_chars = 10;		// not too long, not too short
-		this.alignment = 1;
+		this.xalign = 1;
 		this.changed.connect(() => {
-			string icon;
-
-			icon = null;
 			this.valid = this.validate();
-			if (!this.valid)
-				icon = "dialog-error";
-			this.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, name);
+			this.updateIcon();
 		});
+		// and get the ball rolling
+		this.Price = 0;
+	}
+
+	private void updateIcon()
+	{
+		string icon;
+
+		icon = null;
+		if (!this.valid)
+			icon = "dialog-error";
+		this.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, name);
 	}
 }
 
