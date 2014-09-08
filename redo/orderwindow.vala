@@ -1,6 +1,6 @@
 // 6 september 2014
 
-public class OrderEditor : Gtk.Window {
+public class OrderWindow : Gtk.Window {
 	Gtk.Paned header;
 	Gtk.HeaderBar hbleft;
 	Gtk.Entry name;
@@ -19,7 +19,7 @@ public class OrderEditor : Gtk.Window {
 
 	Order o;
 
-	public OrderEditor() {
+	public OrderWindow() {
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
 		// TODO get rid fo this
@@ -106,7 +106,7 @@ public int main(string[] args)
 {
 	Gtk.init(ref args);
 	initItems();
-	(new OrderEditor()).show_all();
+	(new OrderWindow()).show_all();
 	Gtk.main();
 	return 0;
 }
