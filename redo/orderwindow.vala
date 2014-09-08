@@ -98,13 +98,15 @@ public class OrderWindow : Gtk.Window {
 
 		this.payNow.clicked.connect(() => {
 			PayDialog d;
+			int response;
 
 			d = new PayDialog(this, 0);	// TODO
-			d.run();
+			response = d.run();
 			d.destroy();
-			// TODO check
-			this.PayNow(this.o);
-			this.destroy();
+			if (response == Gtk.ResponseType.ACCEPT) {
+				this.PayNow(this.o);
+				this.destroy();
+			}
 		});
 		this.payLater.clicked.connect(() => {
 			// TODO warn of empty customer name
