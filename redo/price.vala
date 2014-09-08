@@ -16,7 +16,12 @@ public struct Price : uint64 {
 
 		dollars = this / 100;
 		cents = this % 100;
-		return ("$%" + Price.FORMAT + ".%02" + Price.FORMAT).printf(dollars, cents);
+		return ("%" + Price.FORMAT + ".%02" + Price.FORMAT).printf(dollars, cents);
+	}
+
+	public string SignString()
+	{
+		return "$" + this.to_string()
 	}
 
 	// big-endian
@@ -59,13 +64,10 @@ public class PriceEntry : Gtk.Entry {
 			return price;
 		}
 		set {
-			string s;
-
 			// temporarly kill the validation function; this is already valid
 			GLib.SignalHandler.block(this, this.changedHandler);
 			price = value;
-			s = price.to_string();
-			this.text = s[1:s.length];			// strip $
+			this.text = price.to_string();		// no $
 			this.valid = true;
 			this.updateIcon();
 			GLib.SignalHandler.unblock(this, this.changedHandler);
@@ -140,13 +142,14 @@ public class PriceEntry : Gtk.Entry {
 
 public class PriceRenderer : Gtk.CellRendererText {
 	private Price _price;
+	// TODO rename to Price
 	public Price price {
 		get {
 			return _price;
 		}
 		set {
 			_price = value;
-			this.text = _price.to_string();
+			this.text = _price.SignString();
 		}
 	}
 }

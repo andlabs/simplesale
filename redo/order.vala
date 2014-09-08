@@ -11,13 +11,13 @@ public class Order : GLib.Object {
 
 	public string TotalString {
 		owned get {
-			return "Total: " + this.subtotal.to_string();
+			return "Total: " + this.subtotal.SignString();
 		}
 	}
 
 	public string SubtotalString {
 		owned get {
-			return "Subtotal: " + this.subtotal.to_string();
+			return "Subtotal: " + this.subtotal.SignString();
 		}
 	}
 
