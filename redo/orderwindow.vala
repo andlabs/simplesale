@@ -19,7 +19,8 @@ public class OrderWindow : Gtk.Window {
 
 	Order o;
 
-	public OrderWindow() {
+	public OrderWindow(Order o)
+	{
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
 
@@ -51,6 +52,7 @@ public class OrderWindow : Gtk.Window {
 
 		this.body = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
 		this.order = new Gtk.TreeView();
+		this.o.SetupTreeView(this.order);
 		this.orderScroller = new Gtk.ScrolledWindow(null, null);
 		this.orderScroller.shadow_type = Gtk.ShadowType.IN;
 		this.orderScroller.add(this.order);
@@ -63,8 +65,6 @@ public class OrderWindow : Gtk.Window {
 		this.body.add1(this.orderScroller);
 		this.body.add2(this.itemsScroller);
 
-		this.o = new Order();
-		o.SetupTreeView(this.order);
 		this.o.bind_property("Customer",
 			this.name, "text",
 			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.BIDIRECTIONAL | GLib.BindingFlags.SYNC_CREATE);

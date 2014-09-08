@@ -37,16 +37,21 @@ public class ShiftWindow : Gtk.Window {
 		this.s = new Shift();
 		this.s.SetupIconView(this.list);
 
-		this.newOrder.clicked.connect(this.doNewOrder);
+		this.newOrder.clicked.connect(() => {
+			this.continueOrder(new Order());
+		});
+		this.list.item_activated.connect((path) => {
+			this.continueOrder(this.s.ContinueOrder(path));
+		});
 
 		this.add(this.listScroller);
 	}
 
-	private void doNewOrder()
+	private void continueOrder(Order order)
 	{
 		OrderWindow ow;
 
-		ow = new OrderWindow();
+		ow = new OrderWindow(order);
 		ow.PayNow.connect((o) => {
 			// TODO
 		});

@@ -54,4 +54,16 @@ public class Shift : GLib.Object {
 		this.pending.append(out iter);
 		this.pending.set(iter, 0, o);
 	}
+
+	public Order ContinueOrder(Gtk.TreePath path)
+	{
+		Gtk.TreeIter iter;
+		Order o;
+
+		if (this.pending.get_iter(out iter, path) == false)
+			GLib.error("invalid path handed to Shift.ContinueOrder()");
+		this.pending.get(iter, 0, out o);
+		this.pending.remove(iter);
+		return o;
+	}
 }
