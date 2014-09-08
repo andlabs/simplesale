@@ -97,6 +97,12 @@ public class OrderWindow : Gtk.Window {
 		});
 
 		this.payNow.clicked.connect(() => {
+			PayDialog d;
+
+			d = new PayDialog(this, 0);	// TODO
+			d.run();
+			d.destroy();
+			// TODO check
 			this.PayNow(this.o);
 			this.destroy();
 		});

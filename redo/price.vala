@@ -69,7 +69,7 @@ public class PriceEntry : Gtk.Entry {
 			price = value;
 			this.text = price.to_string();		// no $
 			this.valid = true;
-			this.updateIcon();
+			this.updateIconAndNotify();
 			GLib.SignalHandler.unblock(this, this.changedHandler);
 		}
 	}
@@ -121,22 +121,23 @@ public class PriceEntry : Gtk.Entry {
 	{
 		this.width_chars = 10;		// not too long, not too short
 		this.xalign = 1;
-		this.changed.connect(() => {
+		this.changedHandler = this.changed.connect(() => {
 			this.valid = this.validate();
-			this.updateIcon();
+			this.updateIconAndNotify();
 		});
 		// and get the ball rolling
 		this.Price = 0;
 	}
 
-	private void updateIcon()
+	private void updateIconAndNotify()
 	{
 		string icon;
 
 		icon = null;
 		if (!this.valid)
 			icon = "dialog-error";
-		this.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, name);
+		this.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, icon);
+		this.notify_property("Valid");
 	}
 }
 
