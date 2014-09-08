@@ -113,6 +113,8 @@ public class PriceEntry : Gtk.Entry {
 
 	public PriceEntry()
 	{
+		this.width_chars = 10;		// not too long, not too short
+		this.alignment = 1;
 		this.changed.connect(() => {
 			string icon;
 
