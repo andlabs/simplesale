@@ -1,15 +1,6 @@
 // 8 september 2014
 
 public class PayDialog : Gtk.Dialog {
-	private Price amountDue;
-	private Price amountPaid;
-
-	public Price AmountPaid {
-		get {
-			return this.amountPaid;
-		}
-	}
-
 	private Gtk.Grid maingrid;
 	private PriceEntry due;
 	private PriceEntry paid;
@@ -30,11 +21,9 @@ public class PayDialog : Gtk.Dialog {
 		this.payButton = this.add_button("Pay", Gtk.ResponseType.ACCEPT) as Gtk.Button;
 		this.add_button("Cancel", Gtk.ResponseType.CANCEL);
 
-		this.amountDue = amountDue;
-
 		this.maingrid = new Gtk.Grid();
 		this.due = new PriceEntry();
-		this.due.Price = this.amountDue;
+		this.due.Price = amountDue;
 		this.due.sensitive = false;
 		this.maingrid.attach_next_to(this.due, null,
 			Gtk.PositionType.RIGHT, 1, 1);
@@ -78,5 +67,10 @@ public class PayDialog : Gtk.Dialog {
 
 		this.maingrid.show_all();		// make the content visible
 		this.get_content_area().add(this.maingrid);
+	}
+
+	public Price AmountPaid()
+	{
+		return this.paid.Price;
 	}
 }

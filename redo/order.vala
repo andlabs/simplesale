@@ -2,22 +2,33 @@
 
 public class Order : GLib.Object {
 	private Gtk.ListStore list;
-	private Price subtotal;
 
 	public string Customer {
 		get;
 		set;
 	}
 
+	public Price Total {
+		get {
+			// TODO
+			return this.Subtotal;
+		}
+	}
+
+	public Price Subtotal {
+		get;
+		private set;
+	}
+
 	public string TotalString {
 		owned get {
-			return "Total: " + this.subtotal.SignString();
+			return "Total: " + this.Subtotal.SignString();
 		}
 	}
 
 	public string SubtotalString {
 		owned get {
-			return "Subtotal: " + this.subtotal.SignString();
+			return "Subtotal: " + this.Subtotal.SignString();
 		}
 	}
 
@@ -32,7 +43,7 @@ public class Order : GLib.Object {
 		this.list = new Gtk.ListStore(2,
 			typeof (string),			// item name
 			typeof (Price));			// price
-		this.subtotal = 0;
+		this.Subtotal = 0;
 		this.Customer = "";
 	}
 
@@ -62,7 +73,7 @@ public class Order : GLib.Object {
 		items.get(iter, 0, out name, 1, out price);
 		this.list.append(out iter);
 		this.list.set(iter, 0, name, 1, price);
-		this.subtotal += price;
+		this.Subtotal += price;
 		this.updateTotals();
 	}
 
@@ -72,7 +83,7 @@ public class Order : GLib.Object {
 
 		this.list.get(iter, 1, out price);
 		this.list.remove(iter);
-		this.subtotal -= price;
+		this.Subtotal -= price;
 		this.updateTotals();
 	}
 }
