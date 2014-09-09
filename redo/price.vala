@@ -1,8 +1,14 @@
 // 6 september 2014
 
+// kludge workaround for vala bug 736210
+[CCode(name = "price_dup")]
+public void *price_dup(void *p) { return p; }
+[CCode(name = "price_free")]
+public void price_free(void *p) {}
+
 [SimpleType]
 [IntegerType]
-[CCode(has_type_id = false)]		// https://mail.gnome.org/archives/vala-list/2012-January/msg00105.html
+[CCode(type_id = "G_TYPE_UINT64", marshaller_type_name = "UINT64", get_value_function = "g_value_get_uint64", set_value_function = "g_value_set_uint64", default_value = "0ULL", type_signature = "t")]
 public struct Price : uint64 {
 	// weird scenario with vala here
 	// static members are not inherited
