@@ -21,10 +21,14 @@ public class PasswordPopover : Gtk.Popover {
 		this.layout.attach_next_to(this.login, this.password,
 			Gtk.PositionType.RIGHT, 1, 1);
 		this.incorrect = new Gtk.Label("Password incorrect.");
+		this.incorrect.halign = Gtk.Align.START;
 		this.incorrect.no_show_all = true;
 		this.layout.attach_next_to(this.incorrect, this.password,
 			Gtk.PositionType.BOTTOM, 1, 1);
+		this.layout.row_spacing = 6;
+		this.layout.column_spacing = 6;
 		this.add(this.layout);
+		this.border_width = 12;
 		this.position = Gtk.PositionType.BOTTOM;		// always below
 	}
 
