@@ -60,12 +60,21 @@ public class PayDialog : Gtk.Dialog {
 		this.maingrid.attach_next_to(this.numgrid, this.paid,
 			Gtk.PositionType.BOTTOM, 1, 1);
 
-		this.paid.bind_property("Valid",
-			this.payButton, "sensitive",
-			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
 		this.paid.bind_property("Price",
 			this, "AmountPaid",
 			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
+
+		this.paid.changed.connect_after(() => {
+			if (!this.paid.Valid) {
+				this.payButton.sensitive = false;
+				return;
+			}
+			if (this.paid.Price < this.due.Price) {
+				this.payButton.sensitive = false;
+				return;
+			}
+			this.payButton.sensitive = true;
+		});
 
 		this.maingrid.show_all();		// make the content visible
 		this.get_content_area().add(this.maingrid);
