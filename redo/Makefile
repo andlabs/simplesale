@@ -1,6 +1,9 @@
 VALAFILES= \
-	accounts.vala \
+	db.vala \
+	employees.vala \
 	items.vala \
+	login.vala \
+	main.vala \
 	order.vala \
 	orderwindow.vala \
 	passwordui.vala \

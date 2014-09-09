@@ -59,7 +59,8 @@ public class OrderWindow : Gtk.Window {
 		this.orderScroller.shadow_type = Gtk.ShadowType.IN;
 		this.orderScroller.add(this.order);
 		this.items = new Gtk.IconView();
-		itemsSetupIconView(this.items);
+		// I hate implicit this
+		global::items.SetupIconView(this.items);
 		this.items.activate_on_single_click = true;
 		this.itemsScroller = new Gtk.ScrolledWindow(null, null);
 		this.itemsScroller.shadow_type = Gtk.ShadowType.IN;

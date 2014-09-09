@@ -14,7 +14,7 @@ public class Items : Gtk.ListStore {
 	public Items.FromDB()
 	{
 		string name;
-		Price p;
+		Price price;
 		Gtk.TreeIter iter;
 
 		this();

@@ -27,7 +27,7 @@ public class Login : Gtk.Window {
 		this.hb.pack_end(this.manager);
 
 		this.list = new Gtk.IconView();
-		accountsSetupIconView(this.list);
+		employees.SetupIconView(this.list);
 		this.list.activate_on_single_click = true;
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
@@ -51,13 +51,4 @@ public class Login : Gtk.Window {
 
 		this.add(this.listScroller);
 	}
-}
-
-public int main(string[] args)
-{
-	Gtk.init(ref args);
-	initAccounts();
-	(new Login()).show_all();
-	Gtk.main();
-	return 0;
 }

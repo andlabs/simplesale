@@ -61,12 +61,3 @@ public class ShiftWindow : Gtk.Window {
 		ow.show_all();
 	}
 }
-
-public int main(string[] args)
-{
-	Gtk.init(ref args);
-	initItems();
-	(new ShiftWindow()).show_all();
-	Gtk.main();
-	return 0;
-}
