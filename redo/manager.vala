@@ -87,6 +87,24 @@ public class Manager : Gtk.Window {
 			}
 		}
 
+		this.about.clicked.connect(() => {
+			Gtk.AboutDialog about;
+
+			about = new Gtk.AboutDialog();
+			about.transient_for = this;
+			about.modal = true;
+			about.program_name = "simplesale";		// TODO
+			about.comments = "A dead-simple point of sale system.";
+			about.copyright = "Copyright ©2014 Pietro Gagliardi";
+			about.authors = { "Pietro Gagliardi" };
+			about.license_type = Gtk.License.MIT_X11;
+			about.response.connect((response) => {
+				if (response == Gtk.ResponseType.CANCEL || response == Gtk.ResponseType.DELETE_EVENT)
+					about.destroy();
+			});
+			about.present();
+		});
+
 		this.add(this.buttonGrid);
 	}
 }
