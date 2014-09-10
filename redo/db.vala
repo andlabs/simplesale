@@ -76,15 +76,15 @@ public class Database : GLib.Object {
 	{
 	}
 
-	public void LogShiftStart()
+	public void LogShiftStart(string name)
 	{
 	}
 
-	public void LogShiftEnd()
+	public void LogShiftEnd(string name)
 	{
 	}
 
-	public void LogOrder(Order o)
+	public void LogOrder(string name, Order o)
 	{
 	}
 }

@@ -36,16 +36,28 @@ public class Login : Gtk.Window {
 
 		this.list.item_activated.connect((path) => {
 			Gdk.Rectangle rect;
+			Gtk.TreeIter iter;
+			string name;
 
 			current = path;
 			if (this.list.get_cell_rect(path, null, out rect) == false)
 				GLib.error("Gtk.IconView.get_cell_area() returned false on a Gtk.TreePath that it gave us");
+			if (employees.get_iter(out iter, path) == false)
+				GLib.error("Gtk.IconView.activated() gave us an invalid GtkTreePath");
+			employees.get(iter, 0, out name);
 			this.popover = new PasswordPopover(this.list);
 			this.popover.pointing_to = rect;
 			this.popover.Entered.connect((password) => {
-				// TODO
+				ShiftWindow s;
+
+				// TODO confirm password
 				this.hide();
-				(new ShiftWindow()).show_all();
+				s = new ShiftWindow(name);
+				s.ClockedOut.connect(() => {
+					s.hide();
+					this.show_all();
+				});
+				s.show_all();
 				return true;
 			});
 			this.popover.Open();

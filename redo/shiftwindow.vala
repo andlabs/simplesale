@@ -10,15 +10,14 @@ public class ShiftWindow : Gtk.Window {
 
 	private Shift s;
 
-	public ShiftWindow() {
+	public ShiftWindow(string name)
+	{
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
-		// TODO get rid fo this
-		this.destroy.connect(Gtk.main_quit);
 		ScaleWindowUp(this, 1, 2);
 
 		this.hb = new Gtk.HeaderBar();
-		this.hb.title = "Employee Name";
+		this.hb.title = name;
 		this.hb.show_close_button = false;
 		this.set_titlebar(this.hb);
 
@@ -35,7 +34,7 @@ public class ShiftWindow : Gtk.Window {
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
 		this.listScroller.add(this.list);
 
-		this.s = new Shift();
+		this.s = new Shift(name);
 		this.s.SetupIconView(this.list);
 
 		this.newOrder.clicked.connect(() => {
@@ -43,6 +42,13 @@ public class ShiftWindow : Gtk.Window {
 		});
 		this.list.item_activated.connect((path) => {
 			this.continueOrder(this.s.ContinueOrder(path));
+		});
+
+		this.clockOut.clicked.connect(() => {
+			// TODO confirm
+			this.s.ClockOut();
+			this.ClockedOut();
+			this.destroy();
 		});
 
 		this.add(this.listScroller);
@@ -54,11 +60,14 @@ public class ShiftWindow : Gtk.Window {
 
 		ow = new OrderWindow(order);
 		ow.PayNow.connect((o) => {
-			// TODO
+			// TODO handle drawer
+			this.s.FinishOrder(o);
 		});
 		ow.PayLater.connect((o) => {
 			this.s.AppendPending(o);
 		});
 		ow.show_all();
 	}
+
+	public signal void ClockedOut();
 }

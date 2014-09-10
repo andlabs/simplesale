@@ -1,14 +1,17 @@
 // 7 september 2014
 
 public class Shift : GLib.Object {
+	private string name;
 	private Gtk.ListStore pending;
 	private GLib.DateTime start;
 	private GLib.Timer shift;
 
-	public Shift()
+	public Shift(string name)
 	{
+		this.name = name;
 		this.pending = new Gtk.ListStore(1, typeof (Order));
 		this.start = new GLib.DateTime.now_utc();
+		db.LogShiftStart(this.name);
 		this.shift = new GLib.Timer();
 		this.shift.start();
 
@@ -65,5 +68,16 @@ public class Shift : GLib.Object {
 		this.pending.get(iter, 0, out o);
 		this.pending.remove(iter);
 		return o;
+	}
+
+	public void FinishOrder(Order o)
+	{
+		db.LogOrder(this.name, o);
+	}
+
+	public void ClockOut()
+	{
+		// TODO make sure time didn't change
+		db.LogShiftEnd(this.name);
 	}
 }
