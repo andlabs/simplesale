@@ -47,4 +47,21 @@ public class Items : Gtk.ListStore {
 		iv.pack_start(r2, true);
 		iv.set_attributes(r2, "Price", 1);
 	}
+
+	// TODO split this out
+	public void SetupTreeView(Gtk.TreeView tv)
+	{
+		Gtk.CellRenderer r;
+		Gtk.TreeViewColumn col;
+
+		tv.model = this;
+		r = new Gtk.CellRendererText();
+		col = new Gtk.TreeViewColumn.with_attributes("Item", r, "text", 0);
+		col.expand = true;		// make this one stretch out as wide as possible
+		tv.append_column(col);
+		r = new PriceRenderer();
+		col = new Gtk.TreeViewColumn.with_attributes("Price", r, "Price", 1);
+		tv.append_column(col);
+		tv.headers_visible = true;
+	}
 }

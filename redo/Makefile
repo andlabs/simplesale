@@ -1,6 +1,7 @@
 VALAFILES= \
 	db.vala \
 	employees.vala \
+	itemeditor.vala \
 	items.vala \
 	login.vala \
 	main.vala \

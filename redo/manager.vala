@@ -1,13 +1,13 @@
 // 10 september 2014
 
-public enum ManagerResp {
+public enum ManagerTaskType {
 	Back,
 	ToLogin,
 	Quit
 }
 
 public abstract class ManagerTask : Gtk.Window {
-	public signal void Done(ManagerResp response);
+	public signal void Done();
 }
 
 public class Manager : Gtk.Window {
@@ -28,7 +28,7 @@ public class Manager : Gtk.Window {
 		}
 	}
 	private static mTaskButton[] buttonspec = {
-		mTaskButton(typeof (ManagerTask), "insert-object", "Manage Items"),
+		mTaskButton(typeof (ItemEditor), "insert-object", "Manage Items"),
 		mTaskButton(typeof (ManagerTask), "contact-new", "Manage Employees"),
 		mTaskButton(typeof (ManagerTask), "printer", "Device Settings"),
 		mTaskButton(typeof (ManagerTask), "preferences-other", "Other Settings"),
@@ -75,8 +75,11 @@ public class Manager : Gtk.Window {
 			this.buttons[i].clicked.connect(() => {
 				ManagerTask mt;
 
-				mt = GLib.Object.@new(tb.type) as ManagerTask;
+				// see comment in itemeditor.vala for details
+				mt = GLib.Object.@new(tb.type, type: Gtk.WindowType.TOPLEVEL) as ManagerTask;
 				// TODO
+				this.hide();
+				mt.show_all();
 			});
 			this.buttonGrid.attach(this.buttons[i],
 				x, y, 1, 1);
