@@ -4,6 +4,7 @@ VALAFILES= \
 	items.vala \
 	login.vala \
 	main.vala \
+	manager.vala \
 	order.vala \
 	orderwindow.vala \
 	passwordui.vala \
