@@ -25,9 +25,19 @@ public class PasswordPopover : Gtk.Popover {
 		this.incorrect.no_show_all = true;
 		this.layout.attach_next_to(this.incorrect, this.password,
 			Gtk.PositionType.BOTTOM, 1, 1);
+
+		this.login.clicked.connect(() => {
+			if (Entered(this.password.text) == false) {
+				this.password.text = "";
+				this.incorrect.show();
+				return;
+			}
+			this.destroy();
+		});
+
+		this.add(this.layout);
 		this.layout.row_spacing = 6;
 		this.layout.column_spacing = 6;
-		this.add(this.layout);
 		this.border_width = 12;
 		this.position = Gtk.PositionType.BOTTOM;		// always below
 	}
@@ -38,4 +48,6 @@ public class PasswordPopover : Gtk.Popover {
 		this.password.text = "";
 		this.show_all();
 	}
+
+	public signal bool Entered(string password);
 }

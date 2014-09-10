@@ -41,11 +41,21 @@ public class Login : Gtk.Window {
 				GLib.error("Gtk.IconView.get_cell_area() returned false on a Gtk.TreePath that it gave us");
 			this.popover = new PasswordPopover(this.list);
 			this.popover.pointing_to = rect;
+			this.popover.Entered.connect((password) => {
+				// TODO
+				this.hide();
+				(new ShiftWindow()).show_all();
+				return true;
+			});
 			this.popover.Open();
 		});
 		this.manager.clicked.connect(() => {
 			current = null;
 			this.popover = new PasswordPopover(this.manager);
+			this.popover.Entered.connect((password) => {
+				// TODO
+				return false;
+			});
 			this.popover.Open();
 		});
 
