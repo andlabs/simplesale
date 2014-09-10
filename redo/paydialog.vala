@@ -9,6 +9,7 @@ public class PayDialog : Gtk.Dialog {
 	private Gtk.Button numbuttons[10];
 	private static int[] numxpos = { 1, 0, 1, 2, 0, 1, 2, 0, 1, 2 };
 	private static int[] numypos = { 3, 0, 0, 0, 1, 1, 1, 2, 2, 2 };
+	private Gtk.Button dot;
 
 	private Gtk.Button payButton;
 
@@ -46,6 +47,9 @@ public class PayDialog : Gtk.Dialog {
 				PayDialog.numxpos[i], PayDialog.numypos[i],
 				1, 1);
 		}
+		dot = new Gtk.Button.with_label(".");
+		this.numgrid.attach_next_to(dot, this.numbuttons[0],
+			Gtk.PositionType.RIGHT, 1, 1);
 		this.maingrid.attach_next_to(this.numgrid, this.paid,
 			Gtk.PositionType.BOTTOM, 1, 1);
 
