@@ -17,6 +17,7 @@ public class Login : Gtk.Window {
 		this.title = "simplesale";
 		// TODO get rid fo this
 		this.destroy.connect(Gtk.main_quit);
+		ScaleWindowUp(this, 2, 1.5);
 
 		this.hb = new Gtk.HeaderBar();
 		this.hb.title = "Log In";

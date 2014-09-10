@@ -10,7 +10,8 @@ VALAFILES= \
 	paydialog.vala \
 	price.vala \
 	shift.vala \
-	shiftwindow.vala
+	shiftwindow.vala \
+	util.vala
 
 all:
 	jhbuild run valac -g --pkg gtk+-3.0 $(VALAFILES) -o simplesale $(VALAFLAGS)

@@ -23,6 +23,7 @@ public class OrderWindow : Gtk.Window {
 	{
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
+		ScaleWindowUp(this, 5, 3);
 
 		this.o = o;
 

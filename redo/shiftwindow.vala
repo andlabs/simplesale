@@ -15,6 +15,7 @@ public class ShiftWindow : Gtk.Window {
 		this.title = "simplesale";
 		// TODO get rid fo this
 		this.destroy.connect(Gtk.main_quit);
+		ScaleWindowUp(this, 1, 2);
 
 		this.hb = new Gtk.HeaderBar();
 		this.hb.title = "Employee Name";
