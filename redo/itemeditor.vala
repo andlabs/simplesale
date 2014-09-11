@@ -8,8 +8,9 @@ public class ItemEditor : ManagerTask {
 	private Gtk.Button save;
 	private Gtk.Button cancel;
 
-	private Gtk.TreeView items;
-	private Gtk.ScrolledWindow itemsScroller;
+	private Items items;
+	private Gtk.TreeView list;
+	private Gtk.ScrolledWindow listScroller;
 
 	private Gtk.Grid editorGrid;
 	private Gtk.Entry name;
@@ -45,12 +46,13 @@ public class ItemEditor : ManagerTask {
 		this.cancel.get_style_context().add_class("destructive-action");
 		this.dp.RightHeader.pack_end(this.cancel);
 
-		this.items = new Gtk.TreeView();
-		global::items.SetupTreeView(this.items);
-		this.itemsScroller = new Gtk.ScrolledWindow(null, null);
-		this.itemsScroller.shadow_type = Gtk.ShadowType.IN;
-		this.itemsScroller.add(this.items);
-		this.dp.Add1(this.itemsScroller);
+		this.items = new Items.FromDB();
+		this.list = new Gtk.TreeView();
+		this.items.SetupTreeView(this.list);
+		this.listScroller = new Gtk.ScrolledWindow(null, null);
+		this.listScroller.shadow_type = Gtk.ShadowType.IN;
+		this.listScroller.add(this.list);
+		this.dp.Add1(this.listScroller);
 
 		this.editorGrid = new Gtk.Grid();
 		this.editorGrid.border_width = 12;
@@ -75,5 +77,38 @@ public class ItemEditor : ManagerTask {
 		this.editorGrid.attach_next_to(label, this.price,
 			Gtk.PositionType.LEFT, 1, 1);
 		this.dp.Add2(this.editorGrid);
+
+		this.selected = false;
+		this.list.get_selection().changed.connect(() => {
+			this.selected = this.list.get_selection().get_selected(null, out this.selection);
+			this.name.sensitive = this.selected;
+			this.price.sensitive = this.selected;
+			if (this.selected) {
+				string n;
+				Price p;
+
+				this.items.get(this.selection, 0, out n, 1, out p);
+				this.name.text = n;
+				this.price.Price = p;
+			} else {
+				this.name.text = "";
+				this.price.Price = 0;
+			}
+		});
+		// and set initial value
+		this.list.get_selection().changed();
+
+		this.name.changed.connect(() => {
+			if (!this.selected)
+				GLib.error("item named changed with no item selected");
+			this.items.set(this.selection, 0, this.name.text);
+		});
+
+		this.price.changed.connect(() => {
+			if (!this.selected)
+				GLib.error("item named changed with no item selected");
+			if (this.price.Valid)
+				this.items.set(this.selection, 1, this.price.Price);
+		});
 	}
 }
