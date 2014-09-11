@@ -60,6 +60,11 @@ public class PasswordEditor : GLib.Object {
 	private Gtk.Label qualityMessage;
 	private Gtk.Button changePassword;
 
+	public Gtk.Grid Grid {
+		get;
+		private set;
+	}
+
 	public bool Valid {
 		get;
 		private set;
@@ -94,11 +99,22 @@ public class PasswordEditor : GLib.Object {
 
 	public PasswordEditor(Gtk.Grid grid, Gtk.Widget attachTo, bool changing)
 	{
+		this.Grid = null;
 		this.buildGrid(grid, attachTo, changing);
 		this.Reset();
 	}
 
-	private void buildGrid(Gtk.Grid grid, Gtk.Widget attachTo, bool changing)
+	public PasswordEditor.AndGrid(bool changing)
+	{
+		this.Grid = new Gtk.Grid();
+		this.Grid.row_spacing = 6;
+		this.Grid.column_spacing = 12;
+		this.buildGrid(this.Grid, null, changing);
+		this.Reset();
+	}
+
+	// TODO why does attachTo need to have a ? to work?
+	private void buildGrid(Gtk.Grid grid, Gtk.Widget? attachTo, bool changing)
 	{
 		this.Name = "";
 

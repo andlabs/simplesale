@@ -86,6 +86,7 @@ public class EmployeeEditor : ManagerTask {
 			this.selected = this.list.get_selection().get_selected(null, out this.selection);
 			this.name.sensitive = this.selected;
 			this.pe.Sensitive = this.selected;
+			this.remove.sensitive = this.selected;
 			this.pe.Reset();
 			if (this.selected) {
 				string n;
@@ -101,5 +102,31 @@ public class EmployeeEditor : ManagerTask {
 		});
 		// and set initial value
 		this.list.get_selection().changed();
+
+		this.add.clicked.connect(() => {
+			Gtk.MessageDialog prompt;
+			Gtk.Box messageArea;
+
+			prompt = new Gtk.MessageDialog(this, Gtk.DialogFlags.MODAL,
+				Gtk.MessageType.QUESTION, Gtk.ButtonsType.OK_CANCEL,
+				"Have the new Employee enter a password to create their account.");
+			prompt.format_secondary_text("All Employees must have a password. Please ask the new employee to enter a password, and their account will be created.");
+			prompt.image = new Gtk.Image.from_icon_name("dialog-password", Gtk.IconSize.DIALOG);
+			pe = new PasswordEditor.AndGrid(false);
+			messageArea = prompt.message_area as Gtk.Box;
+			messageArea.pack_end(pe.Grid);
+			pe.bind_property("Valid",
+				prompt.get_widget_for_response(Gtk.ResponseType.OK), "sensitive",
+				GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
+			// left-align everything
+			messageArea.@foreach((widget) => {
+				widget.halign = Gtk.Align.START;
+			});
+			// TODO doesn't look right
+			prompt.show_all();
+			prompt.run();
+			// TODO
+			prompt.destroy();
+		});
 	}
 }
