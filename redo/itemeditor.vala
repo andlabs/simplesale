@@ -100,13 +100,13 @@ public class ItemEditor : ManagerTask {
 
 		this.name.changed.connect(() => {
 			if (!this.selected)
-				GLib.error("item named changed with no item selected");
+				GLib.error("item name changed with no item selected");
 			this.items.set(this.selection, 0, this.name.text);
 		});
 
 		this.price.changed.connect(() => {
 			if (!this.selected)
-				GLib.error("item named changed with no item selected");
+				GLib.error("item price changed with no item selected");
 			if (this.price.Valid)
 				this.items.set(this.selection, 1, this.price.Price);
 		});
