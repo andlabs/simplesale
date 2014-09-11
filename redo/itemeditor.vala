@@ -19,6 +19,9 @@ public class ItemEditor : ManagerTask {
 	private bool selected;
 	private Gtk.TreeIter selection;
 
+	private ulong nameChangedHandler;
+	private ulong priceChangedHandler;
+
 	// we can't use a normal constructor here because Vala constructor != GObject constructor
 	// thanks to Lethalman, flo, and mezen in irc.gimp.net/#vala
 	construct {
@@ -49,6 +52,7 @@ public class ItemEditor : ManagerTask {
 		this.items = new Items.FromDB();
 		this.list = new Gtk.TreeView();
 		this.items.SetupTreeView(this.list);
+		this.list.set_search_entry(this.search);
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
 		this.listScroller.add(this.list);
@@ -78,11 +82,25 @@ public class ItemEditor : ManagerTask {
 			Gtk.PositionType.LEFT, 1, 1);
 		this.dp.Add2(this.editorGrid);
 
+		// these two must come before the selected ones so the variables can be set for the initial signal
+		this.nameChangedHandler = this.name.changed.connect(() => {
+			if (!this.selected)
+				GLib.error("item name changed with no item selected");
+			this.items.set(this.selection, 0, this.name.text);
+		});
+		this.priceChangedHandler = this.price.changed.connect(() => {
+			if (!this.selected)
+				GLib.error("item price changed with no item selected");
+			if (this.price.Valid)
+				this.items.set(this.selection, 1, this.price.Price);
+		});
+
 		this.selected = false;
 		this.list.get_selection().changed.connect(() => {
 			this.selected = this.list.get_selection().get_selected(null, out this.selection);
 			this.name.sensitive = this.selected;
 			this.price.sensitive = this.selected;
+			this.remove.sensitive = this.selected;
 			if (this.selected) {
 				string n;
 				Price p;
@@ -91,24 +109,29 @@ public class ItemEditor : ManagerTask {
 				this.name.text = n;
 				this.price.Price = p;
 			} else {
+				// prevent the GLib.error()s above from triggering when deselecting
+				GLib.SignalHandler.block(this.name, this.nameChangedHandler);
+				GLib.SignalHandler.block(this.price, this.priceChangedHandler);
 				this.name.text = "";
 				this.price.Price = 0;
+				GLib.SignalHandler.unblock(this.name, this.nameChangedHandler);
+				GLib.SignalHandler.unblock(this.price, this.priceChangedHandler);
 			}
 		});
 		// and set initial value
 		this.list.get_selection().changed();
 
-		this.name.changed.connect(() => {
-			if (!this.selected)
-				GLib.error("item name changed with no item selected");
-			this.items.set(this.selection, 0, this.name.text);
-		});
+		this.add.clicked.connect(() => {
+			Gtk.TreeIter iter;
 
-		this.price.changed.connect(() => {
+			this.items.append(out iter);
+			this.items.set(iter, 0, "New Item");
+			this.list.get_selection().select_iter(iter);
+		});
+		this.remove.clicked.connect(() => {
 			if (!this.selected)
-				GLib.error("item price changed with no item selected");
-			if (this.price.Valid)
-				this.items.set(this.selection, 1, this.price.Price);
+				GLib.error("remove item button clicked without any item selected");
+			this.items.remove(this.selection);
 		});
 	}
 }
