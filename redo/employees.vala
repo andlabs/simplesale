@@ -47,4 +47,15 @@ public class Employees : Gtk.ListStore {
 		iv.pixbuf_column = 2;
 		iv.item_width = 2;		// makes item widths just right (not too wide)
 	}
+
+	public void SetupTreeView(Gtk.TreeView tv)
+	{
+		Gtk.CellRenderer r;
+		Gtk.TreeViewColumn col;
+
+		tv.model = this;
+		r = new Gtk.CellRendererText();
+		col = new Gtk.TreeViewColumn.with_attributes("Name", r, "text", 0);
+		tv.append_column(col);
+	}
 }

@@ -13,6 +13,15 @@ public void ScaleWindowUp(Gtk.Window win, double xscale, double yscale)
 	win.resize((int) w, (int) h);
 }
 
+public Gtk.Label newLabel(string text)
+{
+	Gtk.Label l;
+
+	l = new Gtk.Label(text);
+	l.halign = Gtk.Align.START;
+	return l;
+}
+
 public class DualPane : GLib.Object {
 	public Gtk.HeaderBar LeftHeader {
 		get;

@@ -29,7 +29,7 @@ public class Manager : Gtk.Window {
 	}
 	private static mTaskButton[] buttonspec = {
 		mTaskButton(typeof (ItemEditor), "insert-object", "Manage Items"),
-		mTaskButton(typeof (ManagerTask), "contact-new", "Manage Employees"),
+		mTaskButton(typeof (EmployeeEditor), "contact-new", "Manage Employees"),
 		mTaskButton(typeof (ManagerTask), "printer", "Device Settings"),
 		mTaskButton(typeof (ManagerTask), "preferences-other", "Other Settings"),
 		mTaskButton(typeof (ManagerTask), "list-remove", "Withdraw Money"),

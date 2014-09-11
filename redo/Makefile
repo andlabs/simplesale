@@ -1,5 +1,6 @@
 VALAFILES= \
 	db.vala \
+	employeeeditor.vala \
 	employees.vala \
 	itemeditor.vala \
 	items.vala \
