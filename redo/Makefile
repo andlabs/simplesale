@@ -15,12 +15,17 @@ VALAFILES= \
 	shiftwindow.vala \
 	util.vala
 
+VALAPKGS= \
+	--vapidir . \
+	--pkg gtk+-3.0 \
+	--pkg pwquality
+
 all:
-	jhbuild run valac -g --pkg gtk+-3.0 $(VALAFILES) -o simplesale $(VALAFLAGS)
+	jhbuild run valac -g $(VALAPKGS) $(VALAFILES) -o simplesale $(VALAFLAGS)
 
 c: VALAFLAGS += -C -H simplesale.h
 c: all
 C: c
 
 clean:
-	rm *.c *.h
+	rm -f *.c *.h
