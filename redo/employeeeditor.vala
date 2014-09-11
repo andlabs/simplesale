@@ -24,6 +24,11 @@ public class EmployeeEditor : ManagerTask {
 	private bool selected;
 	private Gtk.TreeIter selection;
 
+	private ulong nameChangedHandler;
+	private ulong currentHandler;
+	private ulong newHandler;
+	private ulong confirmHandler;
+
 	construct {
 		Gtk.Label label;
 
@@ -93,6 +98,8 @@ public class EmployeeEditor : ManagerTask {
 		this.editorGrid.attach_next_to(newLabel("Confirm New Password"), this.confirmPassword,
 			Gtk.PositionType.LEFT, 1, 1);
 		this.strength = new Gtk.LevelBar();
+		this.strength.min_value = 0;
+		this.strength.max_value = 100;
 		this.editorGrid.attach_next_to(this.strength, this.confirmPassword,
 			Gtk.PositionType.BOTTOM, 1, 1);
 		this.editorGrid.attach_next_to(newLabel("New Password Strength"), this.strength,
@@ -102,6 +109,8 @@ public class EmployeeEditor : ManagerTask {
 		this.qualityMessage.wrap_mode = Pango.WrapMode.WORD;
 		this.qualityMessage.hexpand = true;
 		this.qualityMessage.halign = Gtk.Align.FILL;
+		this.qualityMessage.xalign = 0;
+		this.qualityMessage.valign = Gtk.Align.START;
 		this.editorGrid.attach_next_to(this.qualityMessage, this.strength,
 			Gtk.PositionType.RIGHT, 1, 2);
 		this.changePassword = new Gtk.Button.with_label("Change Password");
@@ -109,5 +118,76 @@ public class EmployeeEditor : ManagerTask {
 			Gtk.PositionType.BOTTOM, 1, 1);
 
 		this.dp.Add2(this.editorGrid);
+
+		this.currentHandler = this.currentPassword.changed.connect(this.checkPassword);
+		this.newHandler = this.newPassword.changed.connect(this.checkPassword);
+		this.confirmHandler = this.confirmPassword.changed.connect(this.checkPassword);
+
+		this.selected = false;
+		this.list.get_selection().changed.connect(() => {
+			this.selected = this.list.get_selection().get_selected(null, out this.selection);
+			this.name.sensitive = this.selected;
+			this.currentPassword.sensitive = this.selected;
+			this.newPassword.sensitive = this.selected;
+			this.confirmPassword.sensitive = this.selected;
+			this.resetPasswordFields();
+			if (this.selected) {
+				string n;
+
+				this.employees.get(this.selection, 0, out n);
+				this.name.text = n;
+			} else {
+				// prevent the GLib.error()s above from triggering when deselecting
+				GLib.SignalHandler.block(this.name, this.nameChangedHandler);
+				this.name.text = "";
+				GLib.SignalHandler.unblock(this.name, this.nameChangedHandler);
+			}
+		});
+		// and set initial value
+		this.list.get_selection().changed();
+	}
+
+	private void checkPassword()
+	{
+		int quality;
+		PasswordQuality.Error err;
+		void *auxerror = null;
+		bool allow = false;
+
+		if (!this.selected)
+			GLib.error("employee password fields changed with no employee selected");
+		quality = (new PasswordQuality.Settings()).check(this.newPassword.text,
+			this.currentPassword.text,
+			this.name.text,
+			out auxerror);
+		err = (PasswordQuality.Error) quality;
+		if (quality < 0)
+			quality = 0;
+		this.strength.value = (double) quality;
+		if (err < 0 || auxerror != null)
+			this.qualityMessage.label = err.to_string(auxerror);
+		else if (this.newPassword.text != this.confirmPassword.text)
+			this.qualityMessage.label = "Passwords do not match.";
+		else {
+			this.qualityMessage.label = "";
+			allow = true;
+		}
+		this.changePassword.sensitive = allow;
+	}
+
+	private void resetPasswordFields()
+	{
+		GLib.SignalHandler.block(this.currentPassword, this.currentHandler);
+		GLib.SignalHandler.block(this.newPassword, this.newHandler);
+		GLib.SignalHandler.block(this.confirmPassword, this.confirmHandler);
+		this.currentPassword.text = "";
+		this.newPassword.text = "";
+		this.confirmPassword.text = "";
+		this.strength.value = 0;
+		this.qualityMessage.label = "";
+		this.changePassword.sensitive = false;
+		GLib.SignalHandler.unblock(this.confirmPassword, this.confirmHandler);
+		GLib.SignalHandler.unblock(this.newPassword, this.newHandler);
+		GLib.SignalHandler.unblock(this.currentPassword, this.currentHandler);
 	}
 }
