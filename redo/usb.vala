@@ -14,7 +14,7 @@ public class USBIDs : GLib.Object {
 	private static string[] uris = {
 		// Ubuntu, Gentoo
 		"file:///usr/share/misc/usb.ids",
-		// openSUSE (thanks jrra), Slackware
+		// openSUSE (thanks jrra), Slackware, Mageia
 		"file:///usr/share/usb.ids",
 		// Arch (thanks Sanky), Fedora
 		"file///usr/share/hwdata/usb.ids",
