@@ -5,10 +5,7 @@ public class EmployeeEditor : ManagerTask {
 	private Gtk.SearchEntry search;
 	private Gtk.Button add;
 	private Gtk.Button remove;
-	private Gtk.Button save;
-	private Gtk.Button cancel;
 
-	private Employees employees;
 	private Gtk.TreeView list;
 	private Gtk.ScrolledWindow listScroller;
 
@@ -30,6 +27,7 @@ public class EmployeeEditor : ManagerTask {
 		ScaleWindowUp(this, 5, 3);
 
 		this.dp = new DualPane(this);
+		this.dp.RightHeader.show_close_button = true;
 		this.dp.RightHeader.title = "Employee Editor";
 		this.search = new Gtk.SearchEntry();
 		this.search.placeholder_text = "Find existing employee";
@@ -39,16 +37,9 @@ public class EmployeeEditor : ManagerTask {
 		this.dp.LeftHeader.pack_end(this.remove);
 		this.add = new Gtk.Button.from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON);
 		this.dp.LeftHeader.pack_end(this.add);
-		this.save = new Gtk.Button.with_label("Save Changes");
-		this.save.get_style_context().add_class("suggested-action");
-		this.dp.RightHeader.pack_start(this.save);
-		this.cancel = new Gtk.Button.with_label("Cancel Changes");
-		this.cancel.get_style_context().add_class("destructive-action");
-		this.dp.RightHeader.pack_end(this.cancel);
 
-		this.employees = new Employees.FromDB();
 		this.list = new Gtk.TreeView();
-		this.employees.SetupTreeView(this.list);
+		employees.SetupTreeView(this.list);
 		this.list.set_search_entry(this.search);
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
@@ -91,7 +82,7 @@ public class EmployeeEditor : ManagerTask {
 			if (this.selected) {
 				string n;
 
-				this.employees.get(this.selection, 0, out n);
+				employees.get(this.selection, 0, out n);
 				this.name.text = n;
 			} else {
 				// prevent the GLib.error()s above from triggering when deselecting

@@ -5,10 +5,7 @@ public class ItemEditor : ManagerTask {
 	private Gtk.SearchEntry search;
 	private Gtk.Button add;
 	private Gtk.Button remove;
-	private Gtk.Button save;
-	private Gtk.Button cancel;
 
-	private Items items;
 	private Gtk.TreeView list;
 	private Gtk.ScrolledWindow listScroller;
 
@@ -33,6 +30,7 @@ public class ItemEditor : ManagerTask {
 		ScaleWindowUp(this, 5, 3);
 
 		this.dp = new DualPane(this);
+		this.dp.RightHeader.show_close_button = true;
 		this.dp.RightHeader.title = "Item Editor";
 		this.search = new Gtk.SearchEntry();
 		this.search.placeholder_text = "Find existing item";
@@ -42,16 +40,9 @@ public class ItemEditor : ManagerTask {
 		this.dp.LeftHeader.pack_end(this.remove);
 		this.add = new Gtk.Button.from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON);
 		this.dp.LeftHeader.pack_end(this.add);
-		this.save = new Gtk.Button.with_label("Save Changes");
-		this.save.get_style_context().add_class("suggested-action");
-		this.dp.RightHeader.pack_start(this.save);
-		this.cancel = new Gtk.Button.with_label("Cancel Changes");
-		this.cancel.get_style_context().add_class("destructive-action");
-		this.dp.RightHeader.pack_end(this.cancel);
 
-		this.items = new Items.FromDB();
 		this.list = new Gtk.TreeView();
-		this.items.SetupTreeView(this.list);
+		items.SetupTreeView(this.list);
 		this.list.set_search_entry(this.search);
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
@@ -86,13 +77,13 @@ public class ItemEditor : ManagerTask {
 		this.nameChangedHandler = this.name.changed.connect(() => {
 			if (!this.selected)
 				GLib.error("item name changed with no item selected");
-			this.items.set(this.selection, 0, this.name.text);
+			items.set(this.selection, 0, this.name.text);
 		});
 		this.priceChangedHandler = this.price.changed.connect(() => {
 			if (!this.selected)
 				GLib.error("item price changed with no item selected");
 			if (this.price.Valid)
-				this.items.set(this.selection, 1, this.price.Price);
+				items.set(this.selection, 1, this.price.Price);
 		});
 
 		this.selected = false;
@@ -105,7 +96,7 @@ public class ItemEditor : ManagerTask {
 				string n;
 				Price p;
 
-				this.items.get(this.selection, 0, out n, 1, out p);
+				items.get(this.selection, 0, out n, 1, out p);
 				this.name.text = n;
 				this.price.Price = p;
 			} else {
@@ -124,14 +115,14 @@ public class ItemEditor : ManagerTask {
 		this.add.clicked.connect(() => {
 			Gtk.TreeIter iter;
 
-			this.items.append(out iter);
-			this.items.set(iter, 0, "New Item");
+			items.append(out iter);
+			items.set(iter, 0, "New Item");
 			this.list.get_selection().select_iter(iter);
 		});
 		this.remove.clicked.connect(() => {
 			if (!this.selected)
 				GLib.error("remove item button clicked without any item selected");
-			this.items.remove(this.selection);
+			items.remove(this.selection);
 		});
 	}
 }
