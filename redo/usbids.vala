@@ -94,21 +94,3 @@ stdout.printf("reading from %s\n", USBIDs.uris[i]);
 		}
 	}
 }
-
-public int main(string[] args)
-{
-	USBIDs ids;
-
-	ids = new USBIDs();
-	if (ids.Vendors == null) {
-		stdout.printf("couldn't open vendor IDs\n");
-		return 0;
-	}
-	ids.Vendors.foreach((k, v) => {
-		stdout.printf("%x %s\n", k, v);
-		ids.Products[k].foreach((k, v) => {
-			stdout.printf("\t%x %s\n", k, v);
-		});
-	});
-	return 0;
-}

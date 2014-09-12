@@ -3,6 +3,7 @@
 private Database db;
 private Items items;
 private Employees employees;
+private USBIDs usbids;
 
 public int main(string[] args)
 {
@@ -10,6 +11,7 @@ public int main(string[] args)
 	db = new Database();
 	items = new Items.FromDB();
 	employees = new Employees.FromDB();
+	usbids = new USBIDs();
 	(new Login()).show_all();
 	Gtk.main();
 	return 0;

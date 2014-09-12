@@ -14,6 +14,7 @@ VALAFILES= \
 	price.vala \
 	shift.vala \
 	shiftwindow.vala \
+	usbids.vala \
 	util.vala
 
 VALAPKGS= \
