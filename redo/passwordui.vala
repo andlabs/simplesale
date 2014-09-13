@@ -1,10 +1,10 @@
 // 7 september 2014
 
 public class PasswordPopover : Gtk.Popover {
-	Gtk.Grid layout;
-	Gtk.Entry password;
-	Gtk.Button login;
-	Gtk.Label incorrect;
+	private Gtk.Grid layout;
+	private Gtk.Entry password;
+	private Gtk.Button login;
+	private Gtk.Label incorrect;
 
 	public PasswordPopover(Gtk.Widget relativeTo)
 	{
@@ -52,33 +52,15 @@ public class PasswordPopover : Gtk.Popover {
 	public signal bool Entered(string password);
 }
 
-public class PasswordEditor : GLib.Object {
+public class PasswordDialog : Gtk.Dialog {
+	private Gtk.Grid layout;
 	private Gtk.Entry currentPassword;
 	private Gtk.Entry newPassword;
 	private Gtk.Entry confirmPassword;
 	private Gtk.LevelBar strength;
 	private Gtk.Label qualityMessage;
-	private Gtk.Button changePassword;
 
-	public Gtk.Grid Grid {
-		get;
-		private set;
-	}
-
-	public bool Valid {
-		get;
-		private set;
-	}
-
-	public bool Sensitive {
-		set {
-			if (this.currentPassword != null)
-				this.currentPassword.sensitive = value;
-			this.newPassword.sensitive = value;
-			this.confirmPassword.sensitive = value;
-			this.Valid = false;
-		}
-	}
+	private Gtk.Button okButton;
 
 	public string Name {
 		get;
@@ -97,61 +79,65 @@ public class PasswordEditor : GLib.Object {
 		}
 	}
 
-	public PasswordEditor(Gtk.Grid grid, Gtk.Widget attachTo, bool changing)
+	public PasswordDialog(Gtk.Window parent, bool changing)
 	{
-		this.Grid = null;
-		this.buildGrid(grid, attachTo, changing);
-		this.Reset();
-	}
+		// we can't chain up to gtk_dialog_new_with_buttons(); fake it
+		// thanks to b4n and ebassi in irc.gimp.net/#vala
+		GLib.Object(transient_for: parent, modal: true);
+		this.title = "Choose Password";
+		if (changing)
+			this.title = "Change Password";
+		this.okButton = this.add_button("Confirm", Gtk.ResponseType.ACCEPT) as Gtk.Button;
+		if (changing)
+			this.okButton.label = "Change";
+		this.add_button("Cancel", Gtk.ResponseType.CANCEL);
+		this.border_width = 12;
 
-	public PasswordEditor.AndGrid(bool changing)
-	{
-		this.Grid = new Gtk.Grid();
-		this.Grid.row_spacing = 6;
-		this.Grid.column_spacing = 12;
-		this.buildGrid(this.Grid, null, changing);
-		this.Reset();
-	}
+		this.layout = new Gtk.Grid();
+		this.layout.row_spacing = 6;
+		this.layout.column_spacing = 12;
 
-	// TODO why does attachTo need to have a ? to work?
-	private void buildGrid(Gtk.Grid grid, Gtk.Widget? attachTo, bool changing)
-	{
-		this.Name = "";
+		// TODO icon and messages
+
+		string pwstring;
+
+		pwstring = "Password";
+		if (changing)
+			pwstring = "New Password";
 
 		this.currentPassword = null;
 		if (changing) {
 			this.currentPassword = new Gtk.Entry();
 			this.currentPassword.visibility = false;
-			grid.attach_next_to(this.currentPassword, attachTo,
+			this.layout.attach_next_to(this.currentPassword, null,
 				Gtk.PositionType.BOTTOM, 1, 1);
-			grid.attach_next_to(newLabel("Current Password"), this.currentPassword,
+			this.layout.attach_next_to(newLabel("Current Password"), this.currentPassword,
 				Gtk.PositionType.LEFT, 1, 1);
 			this.currentPassword.changed.connect(this.checkPassword);
-			attachTo = this.currentPassword;
 		}
 
 		this.newPassword = new Gtk.Entry();
 		this.newPassword.visibility = false;
-		grid.attach_next_to(this.newPassword, attachTo,
+		this.layout.attach_next_to(this.newPassword, null,
 			Gtk.PositionType.BOTTOM, 1, 1);
-		grid.attach_next_to(newLabel("New Password"), this.newPassword,
+		this.layout.attach_next_to(newLabel(pwstring), this.newPassword,
 			Gtk.PositionType.LEFT, 1, 1);
 		this.newPassword.changed.connect(this.checkPassword);
 
 		this.confirmPassword = new Gtk.Entry();
 		this.confirmPassword.visibility = false;
-		grid.attach_next_to(this.confirmPassword, this.newPassword,
+		this.layout.attach_next_to(this.confirmPassword, this.newPassword,
 			Gtk.PositionType.BOTTOM, 1, 1);
-		grid.attach_next_to(newLabel("Confirm New Password"), this.confirmPassword,
+		this.layout.attach_next_to(newLabel("Confirm " + pwstring), this.confirmPassword,
 			Gtk.PositionType.LEFT, 1, 1);
 		this.confirmPassword.changed.connect(this.checkPassword);
 
 		this.strength = new Gtk.LevelBar();
 		this.strength.min_value = 0;
 		this.strength.max_value = 100;
-		grid.attach_next_to(this.strength, this.confirmPassword,
+		this.layout.attach_next_to(this.strength, this.confirmPassword,
 			Gtk.PositionType.BOTTOM, 1, 1);
-		grid.attach_next_to(newLabel("New Password Strength"), this.strength,
+		this.layout.attach_next_to(newLabel(pwstring + " Strength"), this.strength,
 			Gtk.PositionType.LEFT, 1, 1);
 
 		this.qualityMessage = new Gtk.Label("");
@@ -161,24 +147,13 @@ public class PasswordEditor : GLib.Object {
 		this.qualityMessage.halign = Gtk.Align.FILL;
 		this.qualityMessage.xalign = 0;
 		this.qualityMessage.valign = Gtk.Align.START;
-		grid.attach_next_to(this.qualityMessage, this.strength,
-			Gtk.PositionType.RIGHT, 1, 2);
+		this.layout.attach_next_to(this.qualityMessage, this.strength,
+			Gtk.PositionType.BOTTOM, 1, 1);
 
-		this.Valid = false;
-		this.changePassword = null;
-		if (changing) {
-			this.changePassword = new Gtk.Button.with_label("Change Password");
-			grid.attach_next_to(this.changePassword, this.strength,
-				Gtk.PositionType.BOTTOM, 1, 1);
-			this.changePassword.clicked.connect(() => {
-				if (!this.Valid)
-					GLib.error("Change Password button clicked while editor fields are invalid");
-				this.Changed();
-			});
-			this.bind_property("Valid",
-				this.changePassword, "sensitive",
-				GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
-		}
+		// TODO space below the label
+
+		this.get_content_area().add(this.layout);
+		this.reset("");
 	}
 
 	private void checkPassword()
@@ -208,19 +183,22 @@ public class PasswordEditor : GLib.Object {
 			this.qualityMessage.label = "";
 			allow = true;
 		}
-		this.Valid = allow;
+		this.okButton.sensitive = allow;
 	}
 
-	public void Reset()
+	private void reset(string qualityMessage)
 	{
 		if (this.currentPassword != null)
 			this.currentPassword.text = "";
 		this.newPassword.text = "";
 		this.confirmPassword.text = "";
 		this.strength.value = 0;
-		this.qualityMessage.label = "";
-		this.Valid = false;
+		this.qualityMessage.label = qualityMessage;
+		this.okButton.sensitive = false;
 	}
 
-	public signal void Changed();
+	public void Incorrect()
+	{
+		this.reset("Current password incorrect.");
+	}
 }

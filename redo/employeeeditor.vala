@@ -11,7 +11,7 @@ public class EmployeeEditor : ManagerTask {
 
 	private Gtk.Grid editorGrid;
 	private new Gtk.Entry name;
-	private PasswordEditor pe;
+	private Gtk.Button changePassword;
 
 	private bool selected;
 	private Gtk.TreeIter selection;
@@ -19,8 +19,6 @@ public class EmployeeEditor : ManagerTask {
 	private ulong nameChangedHandler;
 
 	construct {
-		Gtk.Label label;
-
 		this.title = "simplesale";
 		// TODO get rid of this
 		this.destroy.connect(Gtk.main_quit);
@@ -55,30 +53,20 @@ public class EmployeeEditor : ManagerTask {
 		this.name.halign = Gtk.Align.FILL;
 		this.editorGrid.attach_next_to(this.name, null,
 			Gtk.PositionType.TOP, 2, 1);
-		label = newLabel("Name");		// save for separator below
-		this.editorGrid.attach_next_to(label, this.name,
+		this.editorGrid.attach_next_to(new Gtk.Label("Name"), this.name,
 			Gtk.PositionType.LEFT, 1, 1);
-
-		// but first, add the password stuff
-		this.pe = new PasswordEditor(this.editorGrid, this.name, true);
-
-		this.editorGrid.insert_next_to(label, Gtk.PositionType.BOTTOM);
-		this.editorGrid.attach_next_to(new Gtk.Separator(Gtk.Orientation.HORIZONTAL), label,
-			Gtk.PositionType.BOTTOM, 3, 1);
+		this.changePassword = new Gtk.Button.with_label("Change Password");
+		this.editorGrid.attach_next_to(this.changePassword, this.name,
+			Gtk.PositionType.BOTTOM, 1, 1);
 
 		this.dp.Add2(this.editorGrid);
-
-		this.name.bind_property("text",
-			this.pe, "Name",
-			GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
 
 		this.selected = false;
 		this.list.get_selection().changed.connect(() => {
 			this.selected = this.list.get_selection().get_selected(null, out this.selection);
 			this.name.sensitive = this.selected;
-			this.pe.Sensitive = this.selected;
+			this.changePassword.sensitive = this.selected;
 			this.remove.sensitive = this.selected;
-			this.pe.Reset();
 			if (this.selected) {
 				string n;
 
@@ -95,25 +83,12 @@ public class EmployeeEditor : ManagerTask {
 		this.list.get_selection().changed();
 
 		this.add.clicked.connect(() => {
-			Gtk.MessageDialog prompt;
-			Gtk.Box messageArea;
+			PasswordDialog prompt;
 
-			prompt = new Gtk.MessageDialog(this, Gtk.DialogFlags.MODAL,
-				Gtk.MessageType.QUESTION, Gtk.ButtonsType.OK_CANCEL,
-				"Have the new Employee enter a password to create their account.");
-			prompt.format_secondary_text("All Employees must have a password. Please ask the new employee to enter a password, and their account will be created.");
-			prompt.image = new Gtk.Image.from_icon_name("dialog-password", Gtk.IconSize.DIALOG);
-			pe = new PasswordEditor.AndGrid(false);
-			messageArea = prompt.message_area as Gtk.Box;
-			messageArea.pack_end(pe.Grid);
-			pe.bind_property("Valid",
-				prompt.get_widget_for_response(Gtk.ResponseType.OK), "sensitive",
-				GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE);
-			// left-align everything
-			messageArea.@foreach((widget) => {
-				widget.halign = Gtk.Align.START;
-			});
-			// TODO doesn't look right
+			prompt = new PasswordDialog(this, false);
+//				"Have the new Employee enter a password to create their account.");
+//			prompt.format_secondary_text("All Employees must have a password. Please ask the new employee to enter a password, and their account will be created.");
+//			prompt.image = new Gtk.Image.from_icon_name("dialog-password", Gtk.IconSize.DIALOG);
 			prompt.show_all();
 			prompt.run();
 			// TODO
