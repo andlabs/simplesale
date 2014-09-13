@@ -24,7 +24,7 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 	}
 
 	// TODO why is owned needed here????
-	public DeviceListEntry(GUsb.Device device, GLib.SList<Gtk.RadioButton> kitchenGroup, GLib.SList<Gtk.RadioButton> receiptGroup)
+	public DeviceListEntry(GUsb.Device device, Gtk.RadioButton kitchenGroup, Gtk.RadioButton receiptGroup)
 	{
 		string vs, ps;
 		string k;
@@ -105,10 +105,10 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		this.layout.attach_next_to(this.serialLabel, this.vendorLabel,
 			Gtk.PositionType.BOTTOM, 2, 1);
 stdout.printf("%p %p\n", kitchenGroup, receiptGroup);
-		this.kitchen = new Gtk.RadioButton.with_label(kitchenGroup, "Kitchen Printer");
+		this.kitchen = new Gtk.RadioButton.with_label_from_widget(kitchenGroup, "Kitchen Printer");
 		this.layout.attach_next_to(this.kitchen, this.serialLabel,
 			Gtk.PositionType.BOTTOM, 1, 1);
-		this.receipt = new Gtk.RadioButton.with_label(receiptGroup, "Receipt Printer");
+		this.receipt = new Gtk.RadioButton.with_label_from_widget(receiptGroup, "Receipt Printer");
 		this.receipt.hexpand = true;		// force left to align left edges (TODO check to make sure this actually worked correctly)
 		this.receipt.halign = Gtk.Align.START;
 		this.layout.attach_next_to(this.receipt, this.kitchen,
@@ -143,12 +143,11 @@ public class DeviceList : Gtk.Grid {
 	private Gtk.ListBox list;
 	private Gtk.ScrolledWindow listScroller;
 	private Gtk.InfoBar warning;
+	private Gtk.RadioButton noKitchen;
+	private Gtk.RadioButton noReceipt;
 
 	private GUsb.Context context;
 	private GUsb.DeviceList devlist;
-
-	private GLib.SList<Gtk.RadioButton> kitchenGroup;
-	private GLib.SList<Gtk.RadioButton> receiptGroup;
 
 	public DeviceList()
 	{
@@ -170,12 +169,19 @@ public class DeviceList : Gtk.Grid {
 		this.listScroller.vexpand = true;
 		this.listScroller.valign = Gtk.Align.FILL;
 
-		this.kitchenGroup = new GLib.SList<Gtk.RadioButton>();
-		this.receiptGroup = new GLib.SList<Gtk.RadioButton>();
+		// this is a kludge to create the radio group early
+		// these won't be shown and cannot be clicked
+		// they will, however, be selected by default, so we can use them to ensure devices were selected, or to update radio buttons when a device is connected
+		this.noKitchen = new Gtk.RadioButton.with_label(null, "Kitchen Printer");
+		this.noKitchen.sensitive = false;
+		this.noKitchen.no_show_all = true;
+		this.noReceipt = new Gtk.RadioButton.with_label(null, "Receipt Printer");
+		this.noReceipt.sensitive = false;
+		this.noReceipt.no_show_all = true;
 
 		devlist = new GUsb.DeviceList(context);
 		devlist.device_added.connect((dev) => {
-			this.list.insert(new DeviceListEntry(dev, this.kitchenGroup, this.receiptGroup), -1);
+			this.list.insert(new DeviceListEntry(dev, this.noKitchen, this.noReceipt), -1);
 		});
 		devlist.device_removed.connect((dev) => {
 			this.list.foreach((widget) => {
@@ -199,9 +205,13 @@ public class DeviceList : Gtk.Grid {
 			this.warning.no_show_all = true;
 
 		this.attach_next_to(this.warning, null,
-			Gtk.PositionType.BOTTOM, 1, 1);
+			Gtk.PositionType.BOTTOM, 2, 1);
 		this.attach_next_to(this.listScroller, this.warning,
+			Gtk.PositionType.BOTTOM, 2, 1);
+		this.attach_next_to(this.noKitchen, this.listScroller,
 			Gtk.PositionType.BOTTOM, 1, 1);
+		this.attach_next_to(this.noReceipt, this.noKitchen,
+			Gtk.PositionType.RIGHT, 1, 1);
 		this.show_all();
 	}
 }
