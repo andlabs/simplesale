@@ -37,6 +37,9 @@ public class Database : GLib.Object {
 			this.itemi++;
 			return true;
 		}
+		// make the compiler happy
+		name = "";
+		price = 0;
 		return false;
 	}
 
@@ -53,6 +56,7 @@ public class Database : GLib.Object {
 
 	public bool GetNextEmployee(out string name, out string password, out Gdk.Pixbuf icon)
 	{
+		name = "";		// make the compiler happy
 		password = "";
 		icon = null;
 		switch (this.employeei) {
