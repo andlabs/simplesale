@@ -22,7 +22,8 @@ VALAFILES= \
 VALAPKGS= \
 	--vapidir . \
 	--pkg gtk+-3.0 \
-	--pkg pwquality
+	--pkg pwquality \
+	--pkg gusb -X -DG_USB_API_IS_SUBJECT_TO_CHANGE
 
 all:
 	jhbuild run valac -g $(VALAPKGS) $(VALAFILES) -o simplesale $(VALAFLAGS)
