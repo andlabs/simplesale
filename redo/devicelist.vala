@@ -23,7 +23,8 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		private set;
 	}
 
-	public DeviceListEntry(GUsb.Device device)
+	// TODO why is owned needed here????
+	public DeviceListEntry(GUsb.Device device, GLib.SList<Gtk.RadioButton> kitchenGroup, GLib.SList<Gtk.RadioButton> receiptGroup)
 	{
 		string vs, ps;
 		string k;
@@ -89,22 +90,29 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		this.productLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.productLabel.xalign = 0;
 		this.layout.attach_next_to(this.productLabel, null,
-			Gtk.PositionType.BOTTOM, 1, 2);
+			Gtk.PositionType.BOTTOM, 2, 1);
 		this.vendorLabel = new Gtk.Label(vs);
 		this.vendorLabel.wrap = true;
 		this.vendorLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.vendorLabel.xalign = 0;
 		this.layout.attach_next_to(this.vendorLabel, this.productLabel,
-			Gtk.PositionType.BOTTOM, 1, 2);
+			Gtk.PositionType.BOTTOM, 2, 1);
 		this.serialLabel = new Gtk.Label(serialText);
 		// TODO slightly gray style
 		this.serialLabel.wrap = true;
 		this.serialLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.serialLabel.xalign = 0;
 		this.layout.attach_next_to(this.serialLabel, this.vendorLabel,
-			Gtk.PositionType.BOTTOM, 1, 2);
-
-		// TODO radio buttons
+			Gtk.PositionType.BOTTOM, 2, 1);
+stdout.printf("%p %p\n", kitchenGroup, receiptGroup);
+		this.kitchen = new Gtk.RadioButton.with_label(kitchenGroup, "Kitchen Printer");
+		this.layout.attach_next_to(this.kitchen, this.serialLabel,
+			Gtk.PositionType.BOTTOM, 1, 1);
+		this.receipt = new Gtk.RadioButton.with_label(receiptGroup, "Receipt Printer");
+		this.receipt.hexpand = true;		// force left to align left edges (TODO check to make sure this actually worked correctly)
+		this.receipt.halign = Gtk.Align.START;
+		this.layout.attach_next_to(this.receipt, this.kitchen,
+			Gtk.PositionType.RIGHT, 1, 1);
 
 		this.add(this.layout);
 		this.show_all();
@@ -139,6 +147,9 @@ public class DeviceList : Gtk.Grid {
 	private GUsb.Context context;
 	private GUsb.DeviceList devlist;
 
+	private GLib.SList<Gtk.RadioButton> kitchenGroup;
+	private GLib.SList<Gtk.RadioButton> receiptGroup;
+
 	public DeviceList()
 	{
 		GLib.Object(orientation: Gtk.Orientation.VERTICAL);
@@ -159,9 +170,12 @@ public class DeviceList : Gtk.Grid {
 		this.listScroller.vexpand = true;
 		this.listScroller.valign = Gtk.Align.FILL;
 
+		this.kitchenGroup = new GLib.SList<Gtk.RadioButton>();
+		this.receiptGroup = new GLib.SList<Gtk.RadioButton>();
+
 		devlist = new GUsb.DeviceList(context);
 		devlist.device_added.connect((dev) => {
-			this.list.insert(new DeviceListEntry(dev), -1);
+			this.list.insert(new DeviceListEntry(dev, this.kitchenGroup, this.receiptGroup), -1);
 		});
 		devlist.device_removed.connect((dev) => {
 			this.list.foreach((widget) => {
