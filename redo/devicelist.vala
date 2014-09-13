@@ -66,6 +66,8 @@ public class DeviceList : Gtk.Grid {
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
 		this.listScroller.add(this.list);
+		this.listScroller.hexpand = true;
+		this.listScroller.halign = Gtk.Align.FILL;
 		this.listScroller.vexpand = true;
 		this.listScroller.valign = Gtk.Align.FILL;
 
@@ -73,8 +75,12 @@ public class DeviceList : Gtk.Grid {
 		this.warning.message_type = Gtk.MessageType.WARNING;
 		this.warning.show_close_button = false;
 		warningLabel = new Gtk.Label("Could not access a list of USB device names. Raw IDs will be shown instead.");
+		warningLabel.wrap = true;
+		warningLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.warning.get_content_area().add(warningLabel);
 		warningLabel.show_all();
+		this.warning.hexpand = true;
+		this.warning.halign = Gtk.Align.FILL;
 		if (usbids.Vendors != null)
 			this.warning.no_show_all = true;
 

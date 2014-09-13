@@ -1,5 +1,6 @@
 VALAFILES= \
 	db.vala \
+	deviceeditor.vala \
 	devicelist.vala \
 	employeeeditor.vala \
 	employees.vala \
