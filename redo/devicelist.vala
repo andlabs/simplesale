@@ -1,6 +1,7 @@
 // 12 september 2014
 
-public class DeviceListEntry : Gtk.Grid {
+public class DeviceListEntry : Gtk.ListBoxRow {
+	private Gtk.Grid layout;
 	private Gtk.Label productLabel;
 	private Gtk.Label vendorLabel;
 	private Gtk.Label serialLabel;
@@ -80,30 +81,32 @@ public class DeviceListEntry : Gtk.Grid {
 		if (this.Serial != "")
 			serialText = "Serial number: " + this.Serial;
 
+		this.layout = new Gtk.Grid();
 		this.productLabel = new Gtk.Label(ps);
 		this.productLabel.attributes = new Pango.AttrList();
 		this.productLabel.attributes.insert(Pango.attr_weight_new(Pango.Weight.BOLD));
 		this.productLabel.wrap = true;
 		this.productLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.productLabel.xalign = 0;
-		this.attach_next_to(this.productLabel, null,
+		this.layout.attach_next_to(this.productLabel, null,
 			Gtk.PositionType.BOTTOM, 1, 2);
 		this.vendorLabel = new Gtk.Label(vs);
 		this.vendorLabel.wrap = true;
 		this.vendorLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.vendorLabel.xalign = 0;
-		this.attach_next_to(this.vendorLabel, this.productLabel,
+		this.layout.attach_next_to(this.vendorLabel, this.productLabel,
 			Gtk.PositionType.BOTTOM, 1, 2);
 		this.serialLabel = new Gtk.Label(serialText);
 		// TODO slightly gray style
 		this.serialLabel.wrap = true;
 		this.serialLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.serialLabel.xalign = 0;
-		this.attach_next_to(this.serialLabel, this.vendorLabel,
+		this.layout.attach_next_to(this.serialLabel, this.vendorLabel,
 			Gtk.PositionType.BOTTOM, 1, 2);
 
 		// TODO radio buttons
 
+		this.add(this.layout);
 		this.show_all();
 	}
 
@@ -161,7 +164,6 @@ public class DeviceList : Gtk.Grid {
 			this.list.insert(new DeviceListEntry(dev), -1);
 		});
 		devlist.device_removed.connect((dev) => {
-			// TODO doesn't work?
 			this.list.foreach((widget) => {
 				if ((widget as DeviceListEntry).SameAs(dev))
 					this.list.remove(widget);
