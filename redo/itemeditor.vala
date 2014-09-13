@@ -3,14 +3,14 @@
 public class ItemEditor : ManagerTask {
 	private DualPane dp;
 	private Gtk.SearchEntry search;
-	private Gtk.Button add;
-	private Gtk.Button remove;
+	private new Gtk.Button add;
+	private new Gtk.Button remove;
 
 	private Gtk.TreeView list;
 	private Gtk.ScrolledWindow listScroller;
 
 	private Gtk.Grid editorGrid;
-	private Gtk.Entry name;
+	private new Gtk.Entry name;
 	private PriceEntry price;
 
 	private bool selected;

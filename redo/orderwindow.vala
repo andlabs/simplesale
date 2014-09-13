@@ -1,20 +1,20 @@
 // 6 september 2014
 
 public class OrderWindow : Gtk.Window {
-	DualPane dp;
-	Gtk.Entry name;
-	Gtk.Button deleteItem;
-	Gtk.Button payNow;
-	Gtk.Button payLater;
-	Gtk.SearchEntry search;
-	Gtk.Button cancel;
+	private DualPane dp;
+	private new Gtk.Entry name;
+	private Gtk.Button deleteItem;
+	private Gtk.Button payNow;
+	private Gtk.Button payLater;
+	private Gtk.SearchEntry search;
+	private Gtk.Button cancel;
 
-	Gtk.TreeView order;
-	Gtk.ScrolledWindow orderScroller;
-	Gtk.IconView items;
-	Gtk.ScrolledWindow itemsScroller;
+	private Gtk.TreeView order;
+	private Gtk.ScrolledWindow orderScroller;
+	private Gtk.IconView items;
+	private Gtk.ScrolledWindow itemsScroller;
 
-	Order o;
+	private Order o;
 
 	public OrderWindow(Order o)
 	{

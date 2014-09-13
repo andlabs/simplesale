@@ -16,7 +16,7 @@ public struct Price : uint64 {
 	// probably an error in the spec?
 	public new const string FORMAT = uint64.FORMAT;
 
-	public string to_string()
+	public new string to_string()
 	{
 		Price dollars, cents;
 
