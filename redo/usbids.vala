@@ -24,7 +24,7 @@ public class USBIDs : GLib.Object {
 		// TODO:
 		// - OpenBSD seems to use a different approach entirely (udi_devnames)
 		// - FreeBSD /usr/share/misc/usbdevs follows a different format entirely
-		// 	- seems to be taken from NetBSD; I assume that has the same format (TODO)
+		// - NetBSD also missing (though the FreeBSD one seems to be taken from it??)
 		// - Windows? OS X? won't be relevant for simplesale but I now want to make this into a general-purpose library
 	};
 
