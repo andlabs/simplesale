@@ -155,9 +155,13 @@ public class PasswordDialog : Gtk.Dialog {
 			this.currentPassword.changed.connect(this.checkPassword);
 		}
 
+		// kludge: if no size is specified GTK+ will by default size to fit contents perfectly
+		// this won't give us nice wrapping
+		// fix that by sizing to what's necessary for what we have so far
+		ScaleWindowUp(this, 1, 1);
+
 		Gtk.Label label;
 
-		// TODO these force the window to be super wide and I have no idea how to fix it
 		if (secondary != "") {
 			label = new Gtk.Label(secondary);
 			label.wrap = true;
