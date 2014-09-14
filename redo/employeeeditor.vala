@@ -112,6 +112,13 @@ public class EmployeeEditor : ManagerTask {
 		this.layout.attach_next_to(this.changePassword, this.name,
 			Gtk.PositionType.BOTTOM, 1, 1);
 
+		// this must come before the selected ones so the variable can be set for the initial signal
+		this.nameChangedHandler = this.name.changed.connect(() => {
+			if (!this.selected)
+				GLib.error("remove employee button with no employee selected");
+			// TODO change name
+		});
+
 		this.selected = false;
 		this.list.get_selection().changed.connect(() => {
 			this.selected = this.list.get_selection().get_selected(null, out this.selection);
@@ -135,14 +142,44 @@ public class EmployeeEditor : ManagerTask {
 
 		this.addButton.clicked.connect(() => {
 			PasswordDialog prompt;
+			int response;
 
 			prompt = new PasswordDialog(this, false,
 				"Have the new Employee enter a password to create their account.",
 				"All Employees must have a password. Please ask the new employee to enter a password, and their account will be created.");
-//			prompt.image = new Gtk.Image.from_icon_name("dialog-password", Gtk.IconSize.DIALOG);
 			prompt.show_all();
-			prompt.run();
-			// TODO
+			response = prompt.run();
+			if (response == Gtk.ResponseType.ACCEPT) {
+				// TODO add account
+			}
+			prompt.destroy();
+		});
+
+		this.removeButton.clicked.connect(() => {
+			if (!this.selected)
+				GLib.error("remove employee button with no employee selected");
+			// TODO remove employee
+		});
+
+		this.changePassword.clicked.connect(() => {
+			PasswordDialog prompt;
+			int response;
+
+			if (!this.selected)
+				GLib.error("Change Password button with no employee selected");
+			prompt = new PasswordDialog(this, true, "", "");
+			prompt.show_all();
+			for (;;) {
+				response = prompt.run();
+				if (response != Gtk.ResponseType.ACCEPT)
+					break;
+				if (false /* TODO */) {
+					// TODO change password
+					break;
+				}
+				prompt.Incorrect();
+				// and continue
+			}
 			prompt.destroy();
 		});
 
