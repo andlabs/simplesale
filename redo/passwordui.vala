@@ -163,6 +163,7 @@ public class PasswordDialog : Gtk.Dialog {
 			label.wrap = true;
 			label.wrap_mode = Pango.WrapMode.WORD;
 			label.halign = Gtk.Align.START;
+			label.xalign = 0;
 			this.layout.attach_next_to(label, this.firstLabel,
 				Gtk.PositionType.TOP, 2, 1);
 			this.firstLabel = label;
@@ -175,6 +176,7 @@ public class PasswordDialog : Gtk.Dialog {
 			label.wrap = true;
 			label.wrap_mode = Pango.WrapMode.WORD;
 			label.halign = Gtk.Align.START;
+			label.xalign = 0;
 			this.layout.attach_next_to(label, this.firstLabel,
 				Gtk.PositionType.TOP, 2, 1);
 			this.firstLabel = label;
