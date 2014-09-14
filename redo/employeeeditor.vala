@@ -1,15 +1,18 @@
 // 11 september 2014
 
 public class EmployeeEditor : ManagerTask {
-	private DualPane dp;
-	private Gtk.SearchEntry search;
-	private new Gtk.Button add;
-	private new Gtk.Button remove;
+	private Gtk.HeaderBar hb;
 
+	private Gtk.Grid layout;
+
+	private Gtk.Grid listGrid;
 	private Gtk.TreeView list;
 	private Gtk.ScrolledWindow listScroller;
+	private Gtk.Toolbar listToolbar;
+	private Gtk.ToolButton addButton;
+	private Gtk.ToolButton removeButton;
+	private Gtk.SearchEntry search;
 
-	private Gtk.Grid editorGrid;
 	private new Gtk.Entry name;
 	private Gtk.Button changePassword;
 
@@ -19,22 +22,26 @@ public class EmployeeEditor : ManagerTask {
 	private ulong nameChangedHandler;
 
 	construct {
+		Gtk.SeparatorToolItem spring;
+		Gtk.ToolItem searchItem;
+		Gtk.Label label;
+
 		this.title = "simplesale";
 		// TODO get rid of this
 		this.destroy.connect(Gtk.main_quit);
-		ScaleWindowUp(this, 5, 3);
+		ScaleWindowUp(this, 2, 3);
 
-		this.dp = new DualPane(this);
-		this.dp.RightHeader.show_close_button = true;
-		this.dp.RightHeader.title = "Employee Editor";
-		this.search = new Gtk.SearchEntry();
-		this.search.placeholder_text = "Find existing employee";
-		this.dp.LeftHeader.pack_start(this.search);
-		// pack_end() is reversed
-		this.remove = new Gtk.Button.from_icon_name("list-remove-symbolic", Gtk.IconSize.BUTTON);
-		this.dp.LeftHeader.pack_end(this.remove);
-		this.add = new Gtk.Button.from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON);
-		this.dp.LeftHeader.pack_end(this.add);
+		this.hb = new Gtk.HeaderBar();
+		this.hb.show_close_button = true;
+		this.hb.title = "Employee Editor";
+		this.set_titlebar(this.hb);
+
+		this.layout = new Gtk.Grid();
+		this.layout.border_width = 12;
+		this.layout.row_spacing = 6;
+		this.layout.column_spacing = 12;
+
+		this.listGrid = new Gtk.Grid();
 
 		this.list = new Gtk.TreeView();
 		employees.SetupTreeView(this.list);
@@ -42,31 +49,75 @@ public class EmployeeEditor : ManagerTask {
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
 		this.listScroller.shadow_type = Gtk.ShadowType.IN;
 		this.listScroller.add(this.list);
-		this.dp.Add1(this.listScroller);
+		this.listScroller.hexpand = true;
+		this.listScroller.halign = Gtk.Align.FILL;
+		this.listScroller.vexpand = true;
+		this.listScroller.valign = Gtk.Align.FILL;
+		this.listGrid.attach_next_to(this.listScroller, null,
+			Gtk.PositionType.BOTTOM, 1, 1);
 
-		this.editorGrid = new Gtk.Grid();
-		this.editorGrid.border_width = 12;
-		this.editorGrid.row_spacing = 6;
-		this.editorGrid.column_spacing = 12;
+		this.listToolbar = new Gtk.Toolbar();
+		this.listToolbar.toolbar_style = Gtk.ToolbarStyle.ICONS;
+		this.listToolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR);
+		this.listToolbar.icon_size = Gtk.IconSize.MENU;
+
+		this.addButton = new Gtk.ToolButton(null, null);
+		this.addButton.icon_name = "list-add-symbolic";
+		this.addButton.set_expand(false);
+		this.addButton.set_homogeneous(true);
+		this.listToolbar.insert(this.addButton, 0);
+		this.removeButton = new Gtk.ToolButton(null, null);
+		this.removeButton.icon_name = "list-remove-symbolic";
+		this.removeButton.set_expand(false);
+		this.removeButton.set_homogeneous(true);
+		this.listToolbar.insert(this.removeButton, 1);
+
+		spring = new Gtk.SeparatorToolItem();
+		spring.set_expand(true);
+		spring.set_homogeneous(false);
+		spring.set_draw(false);
+		this.listToolbar.insert(spring, -1);
+		this.search = new Gtk.SearchEntry();
+		this.search.placeholder_text = "Find existing employee";
+		this.list.set_search_entry(this.search);
+		searchItem = new Gtk.ToolItem();
+		searchItem.add(this.search);
+		searchItem.set_expand(false);
+		searchItem.set_homogeneous(false);
+		this.listToolbar.insert(searchItem, -1);
+
+		this.listToolbar.hexpand = true;
+		this.listToolbar.halign = Gtk.Align.FILL;
+		this.listGrid.attach_next_to(this.listToolbar, this.listScroller,
+			Gtk.PositionType.BOTTOM, 1, 1);
+
+		this.listGrid.hexpand = true;
+		this.listGrid.halign = Gtk.Align.FILL;
+		this.listGrid.vexpand = true;
+		this.listGrid.valign = Gtk.Align.FILL;
+		this.layout.attach_next_to(this.listGrid, null,
+			Gtk.PositionType.BOTTOM, 2, 1);
+
+		label = new Gtk.Label("Name");
+		label.xalign = 0;
+		this.layout.attach_next_to(label, this.listGrid,
+			Gtk.PositionType.BOTTOM, 1, 1);
 		this.name = new Gtk.Entry();
 		this.name.hexpand = true;
 		this.name.halign = Gtk.Align.FILL;
-		this.editorGrid.attach_next_to(this.name, null,
-			Gtk.PositionType.TOP, 2, 1);
-		this.editorGrid.attach_next_to(new Gtk.Label("Name"), this.name,
-			Gtk.PositionType.LEFT, 1, 1);
+		this.layout.attach_next_to(this.name, label,
+			Gtk.PositionType.RIGHT, 1, 1);
 		this.changePassword = new Gtk.Button.with_label("Change Password");
-		this.editorGrid.attach_next_to(this.changePassword, this.name,
+		this.changePassword.halign = Gtk.Align.START;
+		this.layout.attach_next_to(this.changePassword, this.name,
 			Gtk.PositionType.BOTTOM, 1, 1);
-
-		this.dp.Add2(this.editorGrid);
 
 		this.selected = false;
 		this.list.get_selection().changed.connect(() => {
 			this.selected = this.list.get_selection().get_selected(null, out this.selection);
 			this.name.sensitive = this.selected;
 			this.changePassword.sensitive = this.selected;
-			this.remove.sensitive = this.selected;
+			this.removeButton.sensitive = this.selected;
 			if (this.selected) {
 				string n;
 
@@ -82,7 +133,7 @@ public class EmployeeEditor : ManagerTask {
 		// and set initial value
 		this.list.get_selection().changed();
 
-		this.add.clicked.connect(() => {
+		this.addButton.clicked.connect(() => {
 			PasswordDialog prompt;
 
 			prompt = new PasswordDialog(this, false,
@@ -94,5 +145,7 @@ public class EmployeeEditor : ManagerTask {
 			// TODO
 			prompt.destroy();
 		});
+
+		this.add(this.layout);
 	}
 }
