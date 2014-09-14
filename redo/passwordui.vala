@@ -80,7 +80,7 @@ public class PasswordDialog : Gtk.Dialog {
 		}
 	}
 
-	public PasswordDialog(Gtk.Window parent, bool changing)
+	public PasswordDialog(Gtk.Window parent, bool changing, string primary, string secondary)
 	{
 		// we can't chain up to gtk_dialog_new_with_buttons(); fake it
 		// thanks to b4n and ebassi in irc.gimp.net/#vala
@@ -97,8 +97,6 @@ public class PasswordDialog : Gtk.Dialog {
 		this.layout = new Gtk.Grid();
 		this.layout.row_spacing = 6;
 		this.layout.column_spacing = 12;
-
-		// TODO icon
 
 		// messages and current password field done at the end
 
@@ -155,6 +153,41 @@ public class PasswordDialog : Gtk.Dialog {
 			this.layout.attach_next_to(this.firstLabel, this.currentPassword,
 				Gtk.PositionType.LEFT, 1, 1);
 			this.currentPassword.changed.connect(this.checkPassword);
+		}
+
+		Gtk.Label label;
+
+		// TODO these force the window to be super wide and I have no idea how to fix it
+		if (secondary != "") {
+			label = new Gtk.Label(secondary);
+			label.wrap = true;
+			label.wrap_mode = Pango.WrapMode.WORD;
+			label.halign = Gtk.Align.START;
+			this.layout.attach_next_to(label, this.firstLabel,
+				Gtk.PositionType.TOP, 2, 1);
+			this.firstLabel = label;
+		}
+		if (primary != "") {
+			label = new Gtk.Label(primary);
+			label.attributes = new Pango.AttrList();
+			label.attributes.insert(Pango.attr_weight_new(Pango.Weight.BOLD));
+			label.attributes.insert(Pango.attr_scale_new(Pango.Scale.LARGE));
+			label.wrap = true;
+			label.wrap_mode = Pango.WrapMode.WORD;
+			label.halign = Gtk.Align.START;
+			this.layout.attach_next_to(label, this.firstLabel,
+				Gtk.PositionType.TOP, 2, 1);
+			this.firstLabel = label;
+
+			// have an icon if both is specified
+			if (secondary != "") {
+				Gtk.Image icon;
+
+				icon = new Gtk.Image.from_icon_name("dialog-password", Gtk.IconSize.DIALOG);
+				icon.valign = Gtk.Align.START;
+				this.layout.attach_next_to(icon, this.firstLabel,
+					Gtk.PositionType.LEFT, 1, 5);		// should be enough
+			}
 		}
 
 		this.get_content_area().add(this.layout);

@@ -85,9 +85,9 @@ public class EmployeeEditor : ManagerTask {
 		this.add.clicked.connect(() => {
 			PasswordDialog prompt;
 
-			prompt = new PasswordDialog(this, false);
-//				"Have the new Employee enter a password to create their account.");
-//			prompt.format_secondary_text("All Employees must have a password. Please ask the new employee to enter a password, and their account will be created.");
+			prompt = new PasswordDialog(this, false,
+				"Have the new Employee enter a password to create their account.",
+				"All Employees must have a password. Please ask the new employee to enter a password, and their account will be created.");
 //			prompt.image = new Gtk.Image.from_icon_name("dialog-password", Gtk.IconSize.DIALOG);
 			prompt.show_all();
 			prompt.run();
