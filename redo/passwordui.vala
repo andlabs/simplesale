@@ -54,6 +54,7 @@ public class PasswordPopover : Gtk.Popover {
 
 public class PasswordDialog : Gtk.Dialog {
 	private Gtk.Grid layout;
+	private Gtk.Label firstLabel;
 	private Gtk.Entry currentPassword;
 	private Gtk.Entry newPassword;
 	private Gtk.Entry confirmPassword;
@@ -97,7 +98,9 @@ public class PasswordDialog : Gtk.Dialog {
 		this.layout.row_spacing = 6;
 		this.layout.column_spacing = 12;
 
-		// TODO icon and messages
+		// TODO icon
+
+		// messages and current password field done at the end
 
 		string pwstring;
 
@@ -105,22 +108,12 @@ public class PasswordDialog : Gtk.Dialog {
 		if (changing)
 			pwstring = "New Password";
 
-		this.currentPassword = null;
-		if (changing) {
-			this.currentPassword = new Gtk.Entry();
-			this.currentPassword.visibility = false;
-			this.layout.attach_next_to(this.currentPassword, null,
-				Gtk.PositionType.BOTTOM, 1, 1);
-			this.layout.attach_next_to(newLabel("Current Password"), this.currentPassword,
-				Gtk.PositionType.LEFT, 1, 1);
-			this.currentPassword.changed.connect(this.checkPassword);
-		}
-
 		this.newPassword = new Gtk.Entry();
 		this.newPassword.visibility = false;
 		this.layout.attach_next_to(this.newPassword, null,
 			Gtk.PositionType.BOTTOM, 1, 1);
-		this.layout.attach_next_to(newLabel(pwstring), this.newPassword,
+		this.firstLabel = newLabel(pwstring);
+		this.layout.attach_next_to(this.firstLabel, this.newPassword,
 			Gtk.PositionType.LEFT, 1, 1);
 		this.newPassword.changed.connect(this.checkPassword);
 
@@ -150,7 +143,19 @@ public class PasswordDialog : Gtk.Dialog {
 		this.layout.attach_next_to(this.qualityMessage, this.strength,
 			Gtk.PositionType.BOTTOM, 1, 1);
 
-		// TODO space below the label
+		// TODO space below the quality label
+
+		this.currentPassword = null;
+		if (changing) {
+			this.currentPassword = new Gtk.Entry();
+			this.currentPassword.visibility = false;
+			this.layout.attach_next_to(this.currentPassword, this.newPassword,
+				Gtk.PositionType.TOP, 1, 1);
+			this.firstLabel = newLabel("Current Password");
+			this.layout.attach_next_to(this.firstLabel, this.currentPassword,
+				Gtk.PositionType.LEFT, 1, 1);
+			this.currentPassword.changed.connect(this.checkPassword);
+		}
 
 		this.get_content_area().add(this.layout);
 		this.reset("");
