@@ -1,6 +1,6 @@
 // 12 september 2014
 
-public class DeviceEditor : Gtk.Window {
+public class DeviceEditor : ManagerTask {
 	Gtk.HeaderBar hb;
 
 	Gtk.Grid layout;
@@ -41,6 +41,5 @@ public class DeviceEditor : Gtk.Window {
 			Gtk.PositionType.BOTTOM, 1, 1);
 
 		this.add(this.layout);
-		this.show_all();
 	}
 }

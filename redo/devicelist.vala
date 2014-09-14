@@ -104,7 +104,7 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		this.serialLabel.xalign = 0;
 		this.layout.attach_next_to(this.serialLabel, this.vendorLabel,
 			Gtk.PositionType.BOTTOM, 2, 1);
-stdout.printf("%p %p\n", kitchenGroup, receiptGroup);
+
 		this.kitchen = new Gtk.RadioButton.with_label_from_widget(kitchenGroup, "Kitchen Printer");
 		this.layout.attach_next_to(this.kitchen, this.serialLabel,
 			Gtk.PositionType.BOTTOM, 1, 1);
