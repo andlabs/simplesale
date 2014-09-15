@@ -3,5 +3,6 @@
 	<gresource prefix="/simplesale">
 		<file compressed="true">itemeditor.ui</file>
 		<file compressed="true">employeeeditor.ui</file>
+		<file compressed="true">othersettings.ui</file>
 	</gresource>
 </gresources>

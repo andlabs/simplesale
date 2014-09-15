@@ -33,7 +33,7 @@ public class Manager : Gtk.Window {
 		mTaskButton(typeof (ItemEditor), "insert-object", "Manage Items"),
 		mTaskButton(typeof (EmployeeEditor), "contact-new", "Manage Employees"),
 		mTaskButton(typeof (DeviceEditor), "printer", "Device Settings"),
-		mTaskButton(typeof (ManagerTask), "preferences-other", "Other Settings"),
+		mTaskButton(typeof (OtherSettings), "preferences-other", "Other Settings"),
 		mTaskButton(typeof (ManagerTask), "list-remove", "Withdraw Money"),
 		mTaskButton(typeof (ManagerTask), "utilities-system-monitor", "View Log"),
 		mTaskButton(typeof (ManagerToLogin), "system-log-out", "Return to Log In Screen"),

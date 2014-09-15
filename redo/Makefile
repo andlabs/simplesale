@@ -11,6 +11,7 @@ VALAFILES= \
 	manager.vala \
 	order.vala \
 	orderwindow.vala \
+	othersettings.vala \
 	passwordui.vala \
 	paydialog.vala \
 	price.vala \
