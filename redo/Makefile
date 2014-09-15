@@ -25,8 +25,11 @@ VALAPKGS= \
 	--pkg pwquality \
 	--pkg gusb -X -DG_USB_API_IS_SUBJECT_TO_CHANGE
 
+RESOURCES= \
+	--gresources gresources.xml
+
 all:
-	jhbuild run valac -g $(VALAPKGS) $(VALAFILES) -o simplesale $(VALAFLAGS)
+	jhbuild run valac -g $(VALAPKGS) $(VALAFILES) -o simplesale $(VALAFLAGS) $(RESOURCES)
 
 c: VALAFLAGS += -C -H simplesale.h
 c: all
