@@ -1,14 +1,15 @@
 // 10 september 2014
 
-public enum ManagerTaskType {
-	Back,
-	ToLogin,
-	Quit
-}
-
 public interface ManagerTask : Gtk.Window {
 	public abstract void Setup();
-//	public signal void Done();
+}
+
+public class ManagerToLogin : GLib.Object {
+	// dummy
+}
+
+public class ManagerQuit : GLib.Object {
+	// dummy
 }
 
 public class Manager : Gtk.Window {
@@ -35,8 +36,8 @@ public class Manager : Gtk.Window {
 		mTaskButton(typeof (ManagerTask), "preferences-other", "Other Settings"),
 		mTaskButton(typeof (ManagerTask), "list-remove", "Withdraw Money"),
 		mTaskButton(typeof (ManagerTask), "utilities-system-monitor", "View Log"),
-		mTaskButton(typeof (ManagerTask), "system-log-out", "Return to Log In Screen"),
-		mTaskButton(typeof (ManagerTask), "application-exit", "Quit"),
+		mTaskButton(typeof (ManagerToLogin), "system-log-out", "Return to Log In Screen"),
+		mTaskButton(typeof (ManagerQuit), "application-exit", "Quit"),
 	};
 	private Gtk.Grid buttonGrid;
 	private Gtk.Button[] buttons;
@@ -76,7 +77,15 @@ public class Manager : Gtk.Window {
 			this.buttons[i].clicked.connect(() => {
 				ManagerTask mt;
 
-				// see comment in itemeditor.vala for details
+				if (tb.type == typeof (ManagerToLogin)) {
+					// TODO
+					return;
+				}
+				if (tb.type == typeof (ManagerQuit)) {
+					// TODO confirm
+					Gtk.main_quit();
+					return;
+				}
 				mt = GLib.Object.@new(tb.type, type: Gtk.WindowType.TOPLEVEL) as ManagerTask;
 				mt.Setup();
 				// TODO

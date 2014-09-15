@@ -29,7 +29,7 @@ public class ItemEditor : Gtk.Window, ManagerTask {
 	private ulong nameChangedHandler;
 	private ulong priceChangedHandler;
 
-	public new/*override*/ void Setup()
+	public void Setup()
 	{
 		Gtk.HeaderBar hb;
 

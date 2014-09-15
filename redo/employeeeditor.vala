@@ -28,7 +28,7 @@ public class EmployeeEditor : Gtk.Window, ManagerTask {
 
 	private ulong nameChangedHandler;
 
-	public new/*override*/ void Setup()
+	public void Setup()
 	{
 		Gtk.HeaderBar hb;
 
