@@ -6,8 +6,9 @@ public enum ManagerTaskType {
 	Quit
 }
 
-public abstract class ManagerTask : Gtk.Window {
-	public signal void Done();
+public interface ManagerTask : Gtk.Window {
+	public abstract void Setup();
+//	public signal void Done();
 }
 
 public class Manager : Gtk.Window {
@@ -77,6 +78,7 @@ public class Manager : Gtk.Window {
 
 				// see comment in itemeditor.vala for details
 				mt = GLib.Object.@new(tb.type, type: Gtk.WindowType.TOPLEVEL) as ManagerTask;
+				mt.Setup();
 				// TODO
 				this.hide();
 				mt.show_all();

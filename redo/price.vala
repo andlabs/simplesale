@@ -123,8 +123,8 @@ public class PriceEntry : Gtk.Entry {
 		return true;
 	}
 
-	public PriceEntry()
-	{
+	// this must be in a construct block so GtkBuildable can set things up right
+	construct {
 		this.width_chars = 10;		// not too long, not too short
 		this.xalign = 1;
 		this.changedHandler = this.changed.connect(() => {

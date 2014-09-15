@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.18.1 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <object class="GtkWindow" id="window1">
+  <template class="ItemEditor" parent="GtkWindow">
     <property name="can_focus">False</property>
     <child>
       <object class="GtkBox" id="box1">
@@ -175,5 +175,5 @@
         </child>
       </object>
     </child>
-  </object>
+  </template>
 </interface>

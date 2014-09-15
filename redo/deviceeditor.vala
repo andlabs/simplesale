@@ -1,6 +1,6 @@
 // 12 september 2014
 
-public class DeviceEditor : ManagerTask {
+public class DeviceEditor : Gtk.Window/*, ManagerTask*/ {
 	Gtk.HeaderBar hb;
 
 	Gtk.Grid layout;

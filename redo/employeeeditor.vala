@@ -1,6 +1,6 @@
 // 11 september 2014
 
-public class EmployeeEditor : ManagerTask {
+public class EmployeeEditor : Gtk.Window/*, ManagerTask*/ {
 	private Gtk.HeaderBar hb;
 
 	private Gtk.Grid layout;
