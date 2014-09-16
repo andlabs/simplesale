@@ -46,7 +46,6 @@ public class Items : GLib.Object, Gtk.TreeModel {
 	}
 
 	// stamp values for Gtk.TreeIter
-	// TODO move them out of the methdos section in Items
 	private static const int goodStamp = 1000;
 	private static const int badStamp = 2000;
 

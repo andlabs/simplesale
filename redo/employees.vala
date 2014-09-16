@@ -35,11 +35,64 @@ public class Employees : GLib.Object, Gtk.TreeModel {
 		tv.append_column(col);
 	}
 
-	// Gtk.TreeModel methods
-	// these are used by Gtk.TreeView/Gtk.IconView
-
+	// stamp values for Gtk.TreeIter
 	private static const int goodStamp = 1000;
 	private static const int badStamp = 2000;
+
+	public void SetName(Gtk.TreeIter iter, string name)
+	{
+		int index;
+
+		index = fromUserData(iter.user_data);
+		if (iter.stamp != Employees.goodStamp || index < 0 || index > db.EmployeeCount())
+			GLib.error("invalid or out of range iter handed to Employees.SetName()");
+		db.EmployeeSetName(fromUserData(iter.user_data), name);
+		this.row_changed(new Gtk.TreePath.from_indices(index), iter);
+	}
+
+	public bool CheckPassword(Gtk.TreeIter iter, string against)
+	{
+		int index;
+
+		index = fromUserData(iter.user_data);
+		if (iter.stamp != Employees.goodStamp || index < 0 || index > db.EmployeeCount())
+			GLib.error("invalid or out of range iter handed to Employees.CheckPassword()");
+		return db.EmployeeCheckPassword(fromUserData(iter.user_data), against);
+	}
+
+	public bool SetPassword(Gtk.TreeIter iter, string current, string password)
+	{
+		int index;
+
+		index = fromUserData(iter.user_data);
+		if (iter.stamp != Employees.goodStamp || index < 0 || index > db.EmployeeCount())
+			GLib.error("invalid or out of range iter handed to Employees.SetPassword()");
+		return db.EmployeeSetPassword(fromUserData(iter.user_data), current, password);
+	}
+
+	public void Append(out Gtk.TreeIter iter, string password)
+	{
+		int index;
+
+		index = db.AppendEmployee("New Employee", password);
+		iter.stamp = Employees.goodStamp;
+		iter.user_data = toUserData(index);
+		this.row_inserted(new Gtk.TreePath.from_indices(index), iter);
+	}
+
+	public void Delete(Gtk.TreeIter iter)
+	{
+		int index;
+
+		index = fromUserData(iter.user_data);
+		if (iter.stamp != Employees.goodStamp || index < 0 || index > db.EmployeeCount())
+			GLib.error("invalid or out of range iter handed to Employees.Delete()");
+		db.DeleteEmployee(fromUserData(iter.user_data));
+		this.row_deleted(new Gtk.TreePath.from_indices(index));
+	}
+
+	// Gtk.TreeModel methods
+	// these are used by Gtk.TreeView/Gtk.IconView
 
 	public Gtk.TreeModelFlags get_flags()
 	{
