@@ -50,7 +50,8 @@ public class Login : Gtk.Window {
 			this.popover.Entered.connect((password) => {
 				ShiftWindow s;
 
-				// TODO confirm password
+				if (employees.CheckPassword(iter, password) == false)
+					return false;
 				this.hide();
 				s = new ShiftWindow(name);
 				s.ClockedOut.connect(() => {
