@@ -8,82 +8,23 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 	private Gtk.RadioButton kitchen;
 	private Gtk.RadioButton receipt;
 
-	public uint16 Vendor {
+	public USBDevice Device {
 		get;
 		private set;
 	}
 
-	public uint16 Product {
-		get;
-		private set;
-	}
-
-	public string Serial {
-		get;
-		private set;
-	}
-
-	// TODO why is owned needed here????
-	public DeviceListEntry(GUsb.Device device, Gtk.RadioButton kitchenGroup, Gtk.RadioButton receiptGroup)
+	public DeviceListEntry(USBDevice device, Gtk.RadioButton kitchenGroup, Gtk.RadioButton receiptGroup)
 	{
-		string vs, ps;
-		string k;
-
-		this.Vendor = device.get_vid();
-		this.Product = device.get_pid();
-		vs = "Vendor ID 0x%04X".printf(this.Vendor);
-		ps = "Product ID 0x%04X".printf(this.Product);
-		if (usbids.Vendors != null) {
-			k = usbids.Vendors[this.Vendor];
-			if (k == "")
-				vs += " (unknown)";
-			else
-				vs = k;
-			k = usbids.Products[this.Vendor][this.Product];
-			if (k == "")
-				ps += " (unknown)";
-			else
-				ps = k;
-		}
-
-		// note the use of k; this ensures the above fallback isn't clobbered
-		// same with closing /after/ assigning ps/vs/this.Serial
-		// TODO check return from device.open() and device.close()
-		try {
-			device.open();
-			k = device.get_string_descriptor(device.get_product_index());
-			ps = k;
-			device.close();
-		} catch (GLib.Error err) {
-			// do nothing
-		}
-		try {
-			device.open();
-			k = device.get_string_descriptor(device.get_manufacturer_index());
-			vs = k;
-			device.close();
-		} catch (GLib.Error err) {
-			// do nothing
-		}
-		try {
-			device.open();
-			k = device.get_string_descriptor(device.get_serial_number_index());
-			this.Serial = k;
-			device.close();
-		} catch (GLib.Error err) {
-			// do nothing; can't do anything about it
-			// we just won't check serial when comparing devices :S
-			this.Serial = "";
-		}
-
 		string serialText;
 
+		this.Device = device;
+
 		serialText = "No serial number available.";
-		if (this.Serial != "")
-			serialText = "Serial number: " + this.Serial;
+		if (this.Device.Serial != "")
+			serialText = "Serial number: " + this.Device.Serial;
 
 		this.layout = new Gtk.Grid();
-		this.productLabel = new Gtk.Label(ps);
+		this.productLabel = new Gtk.Label(this.Device.Product);
 		this.productLabel.attributes = new Pango.AttrList();
 		this.productLabel.attributes.insert(Pango.attr_weight_new(Pango.Weight.BOLD));
 		this.productLabel.wrap = true;
@@ -91,7 +32,7 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		this.productLabel.xalign = 0;
 		this.layout.attach_next_to(this.productLabel, null,
 			Gtk.PositionType.BOTTOM, 2, 1);
-		this.vendorLabel = new Gtk.Label(vs);
+		this.vendorLabel = new Gtk.Label(this.Device.Vendor);
 		this.vendorLabel.wrap = true;
 		this.vendorLabel.wrap_mode = Pango.WrapMode.WORD;
 		this.vendorLabel.xalign = 0;
@@ -117,48 +58,20 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		this.add(this.layout);
 		this.show_all();
 	}
-
-	public bool SameAs(GUsb.Device device)
-	{
-		string serial = "";
-
-		if (this.Vendor != device.get_vid())
-			return false;
-		if (this.Product != device.get_pid())
-			return false;
-		if (this.Serial == "")		// don't check; none originally available
-			return true;
-		try {
-			device.open();		// TODO
-			serial = device.get_string_descriptor(device.get_serial_number_index());
-			device.close();		// TODO
-		} catch (GLib.Error err) {
-			// fall through; this device has no serial number, so serial will be "" and the comparison below will fail
-		}
-		return this.Serial != serial;
-	}
 }
 
-public class DeviceList : Gtk.Grid {
+public class DeviceList : Gtk.Grid, USBMonitor {
 	private Gtk.ListBox list;
 	private Gtk.ScrolledWindow listScroller;
 	private Gtk.InfoBar warning;
 	private Gtk.RadioButton noKitchen;
 	private Gtk.RadioButton noReceipt;
 
-	private GUsb.Context context;
-	private GUsb.DeviceList devlist;
-
 	public DeviceList()
 	{
-		GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 		Gtk.Label warningLabel;
 
-		try {
-			context = new GUsb.Context();
-		} catch (GLib.Error err) {
-			GLib.error("error setting up USB device monitor: %s", err.message);
-		}
+		GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 
 		this.list = new Gtk.ListBox();
 		this.listScroller = new Gtk.ScrolledWindow(null, null);
@@ -179,18 +92,6 @@ public class DeviceList : Gtk.Grid {
 		this.noReceipt.sensitive = false;
 		this.noReceipt.no_show_all = true;
 
-		devlist = new GUsb.DeviceList(context);
-		devlist.device_added.connect((dev) => {
-			this.list.insert(new DeviceListEntry(dev, this.noKitchen, this.noReceipt), -1);
-		});
-		devlist.device_removed.connect((dev) => {
-			this.list.foreach((widget) => {
-				if ((widget as DeviceListEntry).SameAs(dev))
-					this.list.remove(widget);
-			});
-		});
-		devlist.coldplug();
-
 		this.warning = new Gtk.InfoBar();
 		this.warning.message_type = Gtk.MessageType.WARNING;
 		this.warning.show_close_button = false;
@@ -204,6 +105,8 @@ public class DeviceList : Gtk.Grid {
 		if (usbids.Vendors != null)
 			this.warning.no_show_all = true;
 
+		usb.RegisterMonitor(this);
+
 		this.attach_next_to(this.warning, null,
 			Gtk.PositionType.BOTTOM, 2, 1);
 		this.attach_next_to(this.listScroller, this.warning,
@@ -213,5 +116,23 @@ public class DeviceList : Gtk.Grid {
 		this.attach_next_to(this.noReceipt, this.noKitchen,
 			Gtk.PositionType.RIGHT, 1, 1);
 		this.show_all();
+	}
+
+	~DeviceList()
+	{
+		usb.UnregisterMonitor(this);
+	}
+
+	public void DeviceConnected(USBDevice dev)
+	{
+		this.list.insert(new DeviceListEntry(dev, this.noKitchen, this.noReceipt), -1);
+	}
+
+	public void DeviceDisconnected(USBDevice dev)
+	{
+		this.list.foreach((widget) => {
+			if ((widget as DeviceListEntry).Device == dev)
+				this.list.remove(widget);
+		});
 	}
 }
