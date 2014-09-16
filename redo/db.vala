@@ -6,6 +6,12 @@ public class Database : GLib.Object {
 	private GLib.ValueArray itemPrices;
 	private GLib.ValueArray employeeNames;
 	private GLib.ValueArray employeePasswords;
+	private uint16 kvendor;
+	private uint16 kproduct;
+	private string kserial;
+	private uint16 rvendor;
+	private uint16 rproduct;
+	private string rserial;
 
 	public Database()
 	{
@@ -27,6 +33,14 @@ public class Database : GLib.Object {
 		employeePasswords.append("");
 		employeePasswords.append("password");
 		employeePasswords.append("welp");
+		// actually my laptop's touchpad
+		this.kvendor = 0x413c;
+		this.kproduct = 0x8158;
+		this.kserial = "";
+		// actually my laptop's keyboard
+		this.rvendor = 0x413c;
+		this.rproduct = 0x8157;
+		this.rserial = "";
 	}
 
 	public int ItemCount()
@@ -119,5 +133,33 @@ public class Database : GLib.Object {
 
 	public void LogOrder(string name, Order o)
 	{
+	}
+
+	public bool IsKitchenPrinter(uint16 vendor, uint16 product, string serial)
+	{
+		return (vendor == this.kvendor) &&
+			(product == this.kproduct) &&
+			(serial == this.kserial);
+	}
+
+	public void SetKitchenPrinter(uint16 vendor, uint16 product, string serial)
+	{
+		this.kvendor = vendor;
+		this.kproduct = product;
+		this.kserial = serial;
+	}
+
+	public bool IsReceiptPrinter(uint16 vendor, uint16 product, string serial)
+	{
+		return (vendor == this.rvendor) &&
+			(product == this.rproduct) &&
+			(serial == this.rserial);
+	}
+
+	public void SetReceiptPrinter(uint16 vendor, uint16 product, string serial)
+	{
+		this.rvendor = vendor;
+		this.rproduct = product;
+		this.rserial = serial;
 	}
 }
