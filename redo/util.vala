@@ -25,6 +25,7 @@ public Gtk.Label newLabel(string text)
 	return l;
 }
 
+// use of size_t keeps this safe from 32-bit truncation in GINT_TO_POINTER()
 public void *toUserData(int index)
 {
 	return ((size_t) index).to_pointer();

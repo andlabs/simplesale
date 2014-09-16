@@ -6,45 +6,60 @@ public class Database : GLib.Object {
 	{
 	}
 
-	private int itemi;
-
-	public void BeginGetItems()
+	public int ItemCount()
 	{
-		this.itemi = 0;
+		return 4;
 	}
 
-	public bool GetNextItem(out string name, out Price price)
+	public string ItemName(int n)
 	{
-		switch (this.itemi) {
+		switch (n) {
 		case 0:
-			name = "Cheese Pizza";
-			price = 1000;
-			this.itemi++;
-			return true;
+			return "Cheese Pizza";
 		case 1:
-			name = "Cheese Slice";
-			price = 200;
-			this.itemi++;
-			return true;
+			return "Cheese Slice";
 		case 2:
-			name = "Soda";
-			price = 125;
-			this.itemi++;
-			return true;
+			return "Soda";
 		case 3:
-			name = "Cookie";
-			price = 100;
-			this.itemi++;
-			return true;
+			return "Cookie";
 		}
-		// make the compiler happy
-		name = "";
-		price = 0;
-		return false;
+		return "";
 	}
 
-	public void EndGetItems()
+	public Price ItemPrice(int n)
 	{
+		switch (n) {
+		case 0:
+			return 1000;
+		case 1:
+			return 200;
+		case 2:
+			return 125;
+		case 3:
+			return 100;
+		}
+		return 0;
+	}
+
+	public void ItemSetName(int index, string name)
+	{
+		// TODO
+	}
+
+	public void ItemSetPrice(int index, Price price)
+	{
+		// TODO
+	}
+
+	public int AppendItem(string name, Price price)
+	{
+		// TODO
+		return this.ItemCount();
+	}
+
+	public void DeleteItem(int index)
+	{
+		// TODO
 	}
 
 	public int EmployeeCount()

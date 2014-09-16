@@ -72,7 +72,6 @@ public class Employees : GLib.Object, Gtk.TreeModel {
 			return false;
 		}
 		iter.stamp = Employees.goodStamp;
-		// use of size_t keeps this safe from 32-bit truncation in GINT_TO_POINTER()
 		iter.user_data = toUserData(index);
 		return true;
 	}

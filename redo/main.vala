@@ -9,7 +9,7 @@ public int main(string[] args)
 {
 	Gtk.init(ref args);
 	db = new Database();
-	items = new Items.FromDB();
+	items = new Items();
 	employees = new Employees();
 	usbids = new USBIDs();
 	(new Login()).show_all();

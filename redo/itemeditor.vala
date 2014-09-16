@@ -50,13 +50,13 @@ public class ItemEditor : Gtk.Window, ManagerTask {
 		this.nameChangedHandler = this.name.changed.connect(() => {
 			if (!this.selected)
 				GLib.error("item name changed with no item selected");
-			items.set(this.selection, 0, this.name.text);
+			items.SetName(this.selection, this.name.text);
 		});
 		this.priceChangedHandler = this.price.changed.connect(() => {
 			if (!this.selected)
 				GLib.error("item price changed with no item selected");
 			if (this.price.Valid)
-				items.set(this.selection, 1, this.price.Price);
+				items.SetPrice(this.selection, this.price.Price);
 		});
 
 		this.selected = false;
@@ -88,14 +88,13 @@ public class ItemEditor : Gtk.Window, ManagerTask {
 		this.addButton.clicked.connect(() => {
 			Gtk.TreeIter iter;
 
-			items.append(out iter);
-			items.set(iter, 0, "New Item");
+			items.Append(out iter);
 			this.list.get_selection().select_iter(iter);
 		});
 		this.removeButton.clicked.connect(() => {
 			if (!this.selected)
 				GLib.error("remove item button clicked without any item selected");
-			items.remove(this.selection);
+			items.Delete(this.selection);
 		});
 	}
 }
