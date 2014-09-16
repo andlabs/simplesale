@@ -49,7 +49,7 @@ public class EmployeeEditor : Gtk.Window, ManagerTask {
 		this.nameChangedHandler = this.name.changed.connect(() => {
 			if (!this.selected)
 				GLib.error("remove employee button with no employee selected");
-			// TODO change name
+			employees.SetName(this.selection, this.name.text);
 		});
 
 		this.selected = false;
@@ -106,10 +106,8 @@ public class EmployeeEditor : Gtk.Window, ManagerTask {
 				response = prompt.run();
 				if (response != Gtk.ResponseType.ACCEPT)
 					break;
-				if (false /* TODO */) {
-					// TODO change password
+				if (employees.SetPassword(this.selection, prompt.Current, prompt.New) == true)
 					break;
-				}
 				prompt.Incorrect();
 				// and continue
 			}
