@@ -13,7 +13,7 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		private set;
 	}
 
-	public DeviceListEntry(USBDevice device, Gtk.RadioButton kitchenGroup, Gtk.RadioButton receiptGroup)
+	public DeviceListEntry(USBDevice device, Gtk.RadioButton kitchenGroup, Gtk.RadioButton receiptGroup, bool isKitchen, bool isReceipt)
 	{
 		string serialText;
 
@@ -54,6 +54,14 @@ public class DeviceListEntry : Gtk.ListBoxRow {
 		this.receipt.halign = Gtk.Align.START;
 		this.layout.attach_next_to(this.receipt, this.kitchen,
 			Gtk.PositionType.RIGHT, 1, 1);
+
+		// set these before connecting so they don't trixxxxxxxxxxxgger another change cycle
+		if (isKitchen)
+			this.kitchen.active = true;
+		if (isReceipt)
+			this.receipt.active = true;
+
+		// TODO connect the radio buttons here
 
 		this.add(this.layout);
 		this.show_all();
@@ -123,9 +131,9 @@ public class DeviceList : Gtk.Grid, USBMonitor {
 		usb.UnregisterMonitor(this);
 	}
 
-	public void DeviceConnected(USBDevice dev)
+	public void DeviceConnected(USBDevice dev, bool isKitchen, bool isReceipt)
 	{
-		this.list.insert(new DeviceListEntry(dev, this.noKitchen, this.noReceipt), -1);
+		this.list.insert(new DeviceListEntry(dev, this.noKitchen, this.noReceipt, isKitchen, isReceipt), -1);
 	}
 
 	public void DeviceDisconnected(USBDevice dev)

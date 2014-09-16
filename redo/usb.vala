@@ -62,7 +62,7 @@ public struct USBDevice {
 }
 
 public interface USBMonitor : GLib.Object {
-	public abstract void DeviceConnected(USBDevice device);
+	public abstract void DeviceConnected(USBDevice device, bool isKitchen, bool isReceipt);
 	public abstract void DeviceDisconnected(USBDevice device);
 }
 
@@ -73,10 +73,15 @@ public class USB : GLib.Object {
 	private GLib.GenericArray<USBDevice?> devices;
 	private GLib.GenericArray<USBMonitor> monitors;
 
+	private GUsb.Device kitchen;
+	private GUsb.Device receipt;
+
 	public USB()
 	{
 		this.devices = new GLib.GenericArray<USBDevice?>();
 		this.monitors = new GLib.GenericArray<USBMonitor>();
+		this.kitchen = null;
+		this.receipt = null;
 		try {
 			this.context = new GUsb.Context();
 		} catch (GLib.Error err) {
@@ -91,11 +96,14 @@ public class USB : GLib.Object {
 	private void added(GUsb.Device dev)
 	{
 		USBDevice d;
+		bool isKitchen = false;
+		bool isReceipt = false;
 
 		d = new USBDevice(dev);
 		this.devices.add(d);
+		// TODO isKitchen, isReceipt
 		this.monitors.@foreach((monitor) => {
-			monitor.DeviceConnected(d);
+			monitor.DeviceConnected(d, isKitchen, isReceipt);
 		});
 	}
 
@@ -121,7 +129,11 @@ public class USB : GLib.Object {
 	{
 		this.monitors.add(monitor);
 		this.devices.@foreach((d) => {
-			monitor.DeviceConnected(d);
+			bool isKitchen, isReceipt;
+
+			isKitchen = d.Device == this.kitchen;
+			isReceipt = d.Device == this.receipt;
+			monitor.DeviceConnected(d, isKitchen, isReceipt);
 		});
 	}
 
