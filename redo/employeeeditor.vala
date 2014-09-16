@@ -83,7 +83,10 @@ public class EmployeeEditor : Gtk.Window, ManagerTask {
 			prompt.show_all();
 			response = prompt.run();
 			if (response == Gtk.ResponseType.ACCEPT) {
-				// TODO add account
+				Gtk.TreeIter iter;
+
+				employees.Append(out iter, prompt.New);
+				this.list.get_selection().select_iter(iter);
 			}
 			prompt.destroy();
 		});
@@ -91,7 +94,8 @@ public class EmployeeEditor : Gtk.Window, ManagerTask {
 		this.removeButton.clicked.connect(() => {
 			if (!this.selected)
 				GLib.error("remove employee button with no employee selected");
-			// TODO remove employee
+			// TODO confirm
+			employees.Delete(this.selection);
 		});
 
 		this.changePassword.clicked.connect(() => {
