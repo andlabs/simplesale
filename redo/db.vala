@@ -2,6 +2,11 @@
 
 // what do you mean DB is too short wtf GObject
 public class Database : GLib.Object {
+	private GLib.ValueArray itemNames;
+	private GLib.ValueArray itemPrices;
+	private GLib.ValueArray employeeNames;
+	private GLib.ValueArray employeePasswords;
+
 	public Database()
 	{
 		itemNames = new GLib.ValueArray(0);
@@ -14,10 +19,15 @@ public class Database : GLib.Object {
 		itemPrices.append((Price) 200);
 		itemPrices.append((Price) 125);
 		itemPrices.append((Price) 100);
+		employeeNames = new GLib.ValueArray(0);
+		employeeNames.append("Name 1");
+		employeeNames.append("Name 2");
+		employeeNames.append("Name 3");
+		employeePasswords = new GLib.ValueArray(0);
+		employeePasswords.append("");
+		employeePasswords.append("password");
+		employeePasswords.append("welp");
 	}
-
-	private GLib.ValueArray itemNames;
-	private GLib.ValueArray itemPrices;
 
 	public int ItemCount()
 	{
@@ -59,20 +69,44 @@ public class Database : GLib.Object {
 
 	public int EmployeeCount()
 	{
-		return 3;
+		return (int) employeeNames.n_values;
 	}
 
 	public string EmployeeName(int n)
 	{
-		switch (n) {
-		case 0:
-			return "Name 1";
-		case 1:
-			return "Name 2";
-		case 2:
-			return "Name 3";
+		return (string) employeeNames.values[n];
+	}
+
+	public bool EmployeeCheckPassword(int n, string against)
+	{
+		return ((string) employeePasswords.values[n]) == against;
+	}
+
+	public void EmployeeSetName(int index, string name)
+	{
+		employeeNames.values[index] = name;
+	}
+
+	public bool EmployeeSetPassword(int index, string current, string password)
+	{
+		if (((string) employeePasswords.values[index]) == current) {
+			employeePasswords.values[index] = password;
+			return true;
 		}
-		return "";
+		return false;
+	}
+
+	public int AppendEmployee(string name, string password)
+	{
+		employeeNames.append(name);
+		employeePasswords.append(password);
+		return this.EmployeeCount() - 1;
+	}
+
+	public void DeleteEmployee(int index)
+	{
+		employeeNames.remove(index);
+		employeePasswords.remove(index);
 	}
 
 	public void LogShiftStart(string name)
