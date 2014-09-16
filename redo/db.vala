@@ -4,62 +4,57 @@
 public class Database : GLib.Object {
 	public Database()
 	{
+		itemNames = new GLib.ValueArray(0);
+		itemNames.append("Cheese Pizza");
+		itemNames.append("Cheese Slice");
+		itemNames.append("Soda");
+		itemNames.append("Cookie");
+		itemPrices = new GLib.ValueArray(0);
+		itemPrices.append((Price) 1000);
+		itemPrices.append((Price) 200);
+		itemPrices.append((Price) 125);
+		itemPrices.append((Price) 100);
 	}
+
+	private GLib.ValueArray itemNames;
+	private GLib.ValueArray itemPrices;
 
 	public int ItemCount()
 	{
-		return 4;
+		return (int) itemNames.n_values;
 	}
 
 	public string ItemName(int n)
 	{
-		switch (n) {
-		case 0:
-			return "Cheese Pizza";
-		case 1:
-			return "Cheese Slice";
-		case 2:
-			return "Soda";
-		case 3:
-			return "Cookie";
-		}
-		return "";
+		return (string) itemNames.values[n];
 	}
 
 	public Price ItemPrice(int n)
 	{
-		switch (n) {
-		case 0:
-			return 1000;
-		case 1:
-			return 200;
-		case 2:
-			return 125;
-		case 3:
-			return 100;
-		}
-		return 0;
+		return (Price) itemPrices.values[n];
 	}
 
 	public void ItemSetName(int index, string name)
 	{
-		// TODO
+		itemNames.values[index] = name;
 	}
 
 	public void ItemSetPrice(int index, Price price)
 	{
-		// TODO
+		itemPrices.values[index] = price;
 	}
 
 	public int AppendItem(string name, Price price)
 	{
-		// TODO
-		return this.ItemCount();
+		itemNames.append(name);
+		itemPrices.append(price);
+		return this.ItemCount() - 1;
 	}
 
 	public void DeleteItem(int index)
 	{
-		// TODO
+		itemNames.remove(index);
+		itemPrices.remove(index);
 	}
 
 	public int EmployeeCount()
