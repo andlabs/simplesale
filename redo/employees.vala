@@ -1,6 +1,6 @@
 // 6 september 2014
 
-public class Employees : Gtk.ListStore {
+public class Employees : GLib.Object, Gtk.TreeModel {
 	private static Gdk.Pixbuf defaultIcon;
 
 	static construct {
@@ -13,38 +13,14 @@ public class Employees : Gtk.ListStore {
 
 	private static GLib.Type[] schema = {
 		typeof (string),			// name
-		typeof (string),			// password
 		typeof (Gdk.Pixbuf),		// icon
 	};
-
-	public Employees()
-	{
-		this.set_column_types(Employees.schema);
-	}
-
-	public Employees.FromDB()
-	{
-		string name;
-		string password;
-		Gdk.Pixbuf icon;
-		Gtk.TreeIter iter;
-
-		this();
-		db.BeginGetEmployees();
-		while (db.GetNextEmployee(out name, out password, out icon)) {
-			this.append(out iter);
-			if (icon == null)
-				icon = Employees.defaultIcon;
-			this.set(iter, 0, name, 1, password, 2, icon);
-		}
-		db.EndGetEmployees();
-	}
 
 	public void SetupIconView(Gtk.IconView iv)
 	{
 		iv.model = this;
 		iv.text_column = 0;
-		iv.pixbuf_column = 2;
+		iv.pixbuf_column = 1;
 		iv.item_width = 2;		// makes item widths just right (not too wide)
 	}
 
@@ -57,5 +33,139 @@ public class Employees : Gtk.ListStore {
 		r = new Gtk.CellRendererText();
 		col = new Gtk.TreeViewColumn.with_attributes("Name", r, "text", 0);
 		tv.append_column(col);
+	}
+
+	// Gtk.TreeModel methods
+	// these are used by Gtk.TreeView/Gtk.IconView
+
+	private static const int goodStamp = 1000;
+	private static const int badStamp = 2000;
+
+	public Gtk.TreeModelFlags get_flags()
+	{
+		return Gtk.TreeModelFlags.LIST_ONLY;
+	}
+
+	public int get_n_columns()
+	{
+		return Employees.schema.length;
+	}
+
+	public GLib.Type get_column_type(int which)
+	{
+		if (which < Employees.schema.length)
+			return Employees.schema[which];
+		return GLib.Type.INVALID;
+	}
+
+	public bool get_iter(out Gtk.TreeIter iter, Gtk.TreePath path)
+	{
+		int index;
+
+		if (path.get_depth() != 1) {
+			iter.stamp = Employees.badStamp;
+			return false;
+		}
+		index = path.get_indices()[0];
+		if (index < 0 || index >= db.EmployeeCount()) {
+			iter.stamp = Employees.badStamp;
+			return false;
+		}
+		iter.stamp = Employees.goodStamp;
+		// use of size_t keeps this safe from 32-bit truncation in GINT_TO_POINTER()
+		iter.user_data = toUserData(index);
+		return true;
+	}
+
+	public Gtk.TreePath? get_path(Gtk.TreeIter iter)
+	{
+		if (iter.stamp != Employees.goodStamp)
+			return null;
+		return new Gtk.TreePath.from_indices(fromUserData(iter.user_data));
+	}
+
+	public void get_value(Gtk.TreeIter iter, int column, out GLib.Value value)
+	{
+		if (iter.stamp != Employees.goodStamp || column < 0 || column > schema.length)
+			return;		// don't set value
+		switch (column) {
+		case 0:			// name
+			value = db.EmployeeName(fromUserData(iter.user_data));
+			break;
+		case 1:
+			value = Employees.defaultIcon;
+			break;
+		}
+	}
+
+	public bool iter_next(ref Gtk.TreeIter iter)
+	{
+		int index;
+
+		if (iter.stamp != Employees.goodStamp)
+			return false;
+		index = fromUserData(iter.user_data);
+		index++;
+		if (index >= db.EmployeeCount()) {
+			iter.stamp = Employees.badStamp;
+			return false;
+		}
+		iter.user_data = toUserData(index);
+		return true;
+	}
+
+	// technically not required but let's provide a fast implementation
+	public bool iter_previous(ref Gtk.TreeIter iter)
+	{
+		int index;
+
+		if (iter.stamp != Employees.goodStamp)
+			return false;
+		index = fromUserData(iter.user_data);
+		index--;
+		if (index < 0) {
+			iter.stamp = Employees.badStamp;
+			return false;
+		}
+		iter.user_data = toUserData(index);
+		return true;
+	}
+
+	public bool iter_has_child(Gtk.TreeIter iter)
+	{
+		return false;
+	}
+
+	public int iter_n_children(Gtk.TreeIter? iter)
+	{
+		if (iter == null)			// number of items
+			return db.EmployeeCount();
+		return 0;
+	}
+
+	public bool iter_parent(out Gtk.TreeIter iter, Gtk.TreeIter child)
+	{
+		iter.stamp = Employees.badStamp;
+		return false;
+	}
+
+	public bool iter_nth_child(out Gtk.TreeIter iter, Gtk.TreeIter? parent, int index)
+	{
+		if (parent != null) {
+			iter.stamp = Employees.badStamp;
+			return false;
+		}
+		return this.get_iter(out iter, new Gtk.TreePath.from_indices(index));
+	}
+
+	public bool iter_children(out Gtk.TreeIter iter, Gtk.TreeIter? parent)
+	{
+		if (parent != null || db.EmployeeCount() == 0) {
+			iter.stamp = Employees.badStamp;
+			return false;
+		}
+		iter.stamp = Employees.goodStamp;
+		iter.user_data = toUserData(0);
+		return true;
 	}
 }

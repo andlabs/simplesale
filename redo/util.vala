@@ -13,6 +13,9 @@ public void ScaleWindowUp(Gtk.Window win, double xscale, double yscale)
 	win.resize((int) w, (int) h);
 }
 
+// TODO uppercase or remove public
+
+// TODO keep?
 public Gtk.Label newLabel(string text)
 {
 	Gtk.Label l;
@@ -20,6 +23,16 @@ public Gtk.Label newLabel(string text)
 	l = new Gtk.Label(text);
 	l.halign = Gtk.Align.START;
 	return l;
+}
+
+public void *toUserData(int index)
+{
+	return ((size_t) index).to_pointer();
+}
+
+public int fromUserData(void *user_data)
+{
+	return (int) ((size_t) user_data);
 }
 
 public class DualPane : GLib.Object {

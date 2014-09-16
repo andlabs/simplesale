@@ -47,37 +47,22 @@ public class Database : GLib.Object {
 	{
 	}
 
-	private int employeei;
-
-	public void BeginGetEmployees()
+	public int EmployeeCount()
 	{
-		this.employeei = 0;
+		return 3;
 	}
 
-	public bool GetNextEmployee(out string name, out string password, out Gdk.Pixbuf icon)
+	public string EmployeeName(int n)
 	{
-		name = "";		// make the compiler happy
-		password = "";
-		icon = null;
-		switch (this.employeei) {
+		switch (n) {
 		case 0:
-			name = "Name 1";
-			this.employeei++;
-			return true;
+			return "Name 1";
 		case 1:
-			name = "Name 2";
-			this.employeei++;
-			return true;
+			return "Name 2";
 		case 2:
-			name = "Name 3";
-			this.employeei++;
-			return true;
+			return "Name 3";
 		}
-		return false;
-	}
-
-	public void EndGetEmployees()
-	{
+		return "";
 	}
 
 	public void LogShiftStart(string name)
