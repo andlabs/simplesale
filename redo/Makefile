@@ -17,6 +17,7 @@ VALAFILES= \
 	price.vala \
 	shift.vala \
 	shiftwindow.vala \
+	usb.vala \
 	usbids.vala \
 	util.vala
 
