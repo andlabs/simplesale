@@ -66,7 +66,6 @@ public struct Price : uint64 {
 
 		pd = (double) this;
 		pd += (pd * db.Tax()) / 100;
-stdout.printf("%f\n", pd);
 		return (Price) pd;
 	}
 }

@@ -33,6 +33,8 @@ public class Order : GLib.Object {
 
 	private void updateTotals()
 	{
+		this.notify_property("Total");
+		this.notify_property("Subtotal");
 		this.notify_property("TotalString");
 		this.notify_property("SubtotalString");
 	}
