@@ -46,8 +46,6 @@ public class Manager : Gtk.Window {
 	{
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
-		// TODO get rid of this
-		this.destroy.connect(Gtk.main_quit);
 
 		this.hb = new Gtk.HeaderBar();
 		this.hb.title = "Manager Control Panel";
@@ -78,7 +76,7 @@ public class Manager : Gtk.Window {
 				ManagerTask mt;
 
 				if (tb.type == typeof (ManagerToLogin)) {
-					// TODO
+					this.destroy();
 					return;
 				}
 				if (tb.type == typeof (ManagerQuit)) {

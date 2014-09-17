@@ -67,10 +67,16 @@ public class Login : Gtk.Window {
 			current = null;
 			this.popover = new PasswordPopover(this.manager);
 			this.popover.Entered.connect((password) => {
+				Manager m;
+
 				// TODO
 				if(password!="")return false;
+				m = new Manager();
+				m.destroy.connect(() => {
+					this.show_all();
+				});
 				this.hide();
-				(new Manager()).show_all();
+				m.show_all();
 				return true;
 			});
 			this.popover.Open();
