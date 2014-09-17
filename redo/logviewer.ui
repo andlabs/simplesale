@@ -2,6 +2,40 @@
 <!-- Generated with glade 3.18.1 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkTextTagTable" id="logtags">
+    <child type="tag">
+      <object class="GtkTextTag" id="black">
+        <property name="font">Normal</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="red">
+        <property name="foreground_rgba">rgb(239,41,41)</property>
+        <property name="font">Normal</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="green">
+        <property name="foreground_rgba">rgb(115,210,22)</property>
+        <property name="font">Normal</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="blue">
+        <property name="foreground_rgba">rgb(114,159,207)</property>
+        <property name="font">Normal</property>
+      </object>
+    </child>
+    <child type="tag">
+      <object class="GtkTextTag" id="purple">
+        <property name="foreground_rgba">rgb(173,127,168)</property>
+        <property name="font">Normal</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkTextBuffer" id="logbuf">
+    <property name="tag_table">logtags</property>
+  </object>
   <template class="LogViewer" parent="GtkWindow">
     <property name="can_focus">False</property>
     <child>
@@ -23,6 +57,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
+                <property name="buffer">logbuf</property>
               </object>
             </child>
           </object>
