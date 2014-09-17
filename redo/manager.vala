@@ -36,7 +36,7 @@ public class Manager : Gtk.Window {
 		mTaskButton(typeof (OtherSettings), "preferences-other", "Other Settings"),
 		// TODO find better icon
 		mTaskButton(typeof (AddRemoveMoney), "list-remove", "Add/Remove Money"),
-		mTaskButton(typeof (ManagerTask), "utilities-system-monitor", "View Log"),
+		mTaskButton(typeof (LogViewer), "utilities-system-monitor", "View Log"),
 		mTaskButton(typeof (ManagerToLogin), "system-log-out", "Return to Log In Screen"),
 		mTaskButton(typeof (ManagerQuit), "application-exit", "Quit"),
 	};

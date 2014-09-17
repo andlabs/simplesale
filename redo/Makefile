@@ -8,6 +8,7 @@ VALAFILES= \
 	itemeditor.vala \
 	items.vala \
 	login.vala \
+	logviewer.vala \
 	main.vala \
 	manager.vala \
 	order.vala \
