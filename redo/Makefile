@@ -1,4 +1,5 @@
 VALAFILES= \
+	addremovemoney.vala \
 	db.vala \
 	deviceeditor.vala \
 	devicelist.vala \

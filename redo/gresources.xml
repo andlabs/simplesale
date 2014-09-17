@@ -4,5 +4,6 @@
 		<file compressed="true">itemeditor.ui</file>
 		<file compressed="true">employeeeditor.ui</file>
 		<file compressed="true">othersettings.ui</file>
+		<file compressed="true">addremovemoney.ui</file>
 	</gresource>
 </gresources>
