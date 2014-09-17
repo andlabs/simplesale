@@ -1,5 +1,10 @@
 // 16 september 2014
 
+private GLib.Error usbOpenError()
+{
+	return new GLib.Error(0, 0, "GUsb.Device.open() returned false with no error");
+}
+
 public struct USBDevice {
 	public uint16 VendorID;
 	public uint16 ProductID;
@@ -101,7 +106,30 @@ public class USB : GLib.Object {
 
 		d = new USBDevice(dev);
 		this.devices.add(d);
-		// TODO isKitchen, isReceipt
+		if (this.kitchen == null && db.IsKitchenPrinter(d.VendorID, d.ProductID, d.Serial)) {
+			this.kitchen = d.Device;
+/* TODO this complains
+			try {
+				if (this.kitchen.open() == false)
+					throw usbOpenError();
+			} catch (GLib.Error err) {
+				GLib.error("error connecting to kitchen printer: %s", err.message);
+			}
+*/
+			isKitchen = true;
+		}
+		if (this.receipt == null && db.IsReceiptPrinter(d.VendorID, d.ProductID, d.Serial)) {
+			this.receipt = d.Device;
+/* TODO this complains
+			try {
+				if (this.receipt.open() == false)
+					throw usbOpenError();
+			} catch (GLib.Error err) {
+				GLib.error("error connecting to receipt printer: %s", err.message);
+			}
+*/
+			isReceipt = true;
+		}
 		this.monitors.@foreach((monitor) => {
 			monitor.DeviceConnected(d, isKitchen, isReceipt);
 		});
@@ -119,6 +147,7 @@ public class USB : GLib.Object {
 				this.monitors.@foreach((monitor) => {
 					monitor.DeviceDisconnected(d);
 				});
+				// TODO handle receipt/kitchen
 				this.devices.remove_index(i);
 				return;
 			}

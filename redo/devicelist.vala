@@ -138,6 +138,8 @@ public class DeviceList : Gtk.Grid, USBMonitor {
 
 	public void DeviceDisconnected(USBDevice dev)
 	{
+		// TODO handle kitchen/receipt properly
+		// TODO explicitly set noKitchen/noReceipt above as well when this is written
 		this.list.foreach((widget) => {
 			if ((widget as DeviceListEntry).Device == dev)
 				this.list.remove(widget);
