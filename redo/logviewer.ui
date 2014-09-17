@@ -5,30 +5,35 @@
   <object class="GtkTextTagTable" id="logtags">
     <child type="tag">
       <object class="GtkTextTag" id="black">
+        <property name="name">black</property>
         <property name="font">Normal</property>
       </object>
     </child>
     <child type="tag">
       <object class="GtkTextTag" id="red">
+        <property name="name">red</property>
         <property name="foreground_rgba">rgb(239,41,41)</property>
         <property name="font">Normal</property>
       </object>
     </child>
     <child type="tag">
       <object class="GtkTextTag" id="green">
-        <property name="foreground_rgba">rgb(115,210,22)</property>
+        <property name="name">green</property>
+        <property name="foreground_rgba">rgb(78,154,6)</property>
         <property name="font">Normal</property>
       </object>
     </child>
     <child type="tag">
       <object class="GtkTextTag" id="blue">
-        <property name="foreground_rgba">rgb(114,159,207)</property>
+        <property name="name">blue</property>
+        <property name="foreground_rgba">rgb(52,101,164)</property>
         <property name="font">Normal</property>
       </object>
     </child>
     <child type="tag">
       <object class="GtkTextTag" id="purple">
-        <property name="foreground_rgba">rgb(173,127,168)</property>
+        <property name="name">purple</property>
+        <property name="foreground_rgba">rgb(117,80,123)</property>
         <property name="font">Normal</property>
       </object>
     </child>
