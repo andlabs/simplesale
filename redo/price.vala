@@ -58,6 +58,17 @@ public struct Price : uint64 {
 		}
 		return out;
 	}
+
+	// TODO is this really the best
+	public Price WithTax()
+	{
+		double pd;
+
+		pd = (double) this;
+		pd += (pd * db.Tax()) / 100;
+stdout.printf("%f\n", pd);
+		return (Price) pd;
+	}
 }
 
 public class PriceEntry : Gtk.Entry {

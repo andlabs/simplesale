@@ -10,8 +10,7 @@ public class Order : GLib.Object {
 
 	public Price Total {
 		get {
-			// TODO
-			return this.Subtotal;
+			return this.Subtotal.WithTax();
 		}
 	}
 
@@ -22,7 +21,7 @@ public class Order : GLib.Object {
 
 	public string TotalString {
 		owned get {
-			return "Total: " + this.Subtotal.SignString();
+			return "Total: " + this.Total.SignString();
 		}
 	}
 
