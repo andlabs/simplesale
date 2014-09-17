@@ -12,6 +12,8 @@ public class Database : GLib.Object {
 	private uint16 rvendor;
 	private uint16 rproduct;
 	private string rserial;
+	private double tax;
+	private string managerPassword;
 
 	public Database()
 	{
@@ -41,6 +43,8 @@ public class Database : GLib.Object {
 		this.rvendor = 0x413c;
 		this.rproduct = 0x8157;
 		this.rserial = "";
+		this.tax = 8.5;
+		this.managerPassword = "";
 	}
 
 	public int ItemCount()
@@ -161,5 +165,29 @@ public class Database : GLib.Object {
 		this.rvendor = vendor;
 		this.rproduct = product;
 		this.rserial = serial;
+	}
+
+	public double Tax()
+	{
+		return this.tax;
+	}
+
+	public void SetTax(double tax)
+	{
+		this.tax = tax;
+	}
+
+	public bool ManagerCheckPassword(string against)
+	{
+		return this.managerPassword == against;
+	}
+
+	public bool ManagerSetPassword(string current, string password)
+	{
+		if (this.managerPassword == current) {
+			this.managerPassword = password;
+			return true;
+		}
+		return false;
 	}
 }
