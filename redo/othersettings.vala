@@ -21,8 +21,9 @@ public class OtherSettings : Gtk.Window, ManagerTask {
 		this.set_titlebar(hb);
 		// TODO doing the above adds lots of blank space to the bottom of the window
 
+		this.tax.value = db.Tax();		// set initial value before connecting signal to avoid double trigger
 		this.tax.changed.connect(() => {
-			// TODO
+			db.SetTax(this.tax.value);
 		});
 
 		this.changeManagerPassword.clicked.connect(() => {
@@ -35,10 +36,8 @@ public class OtherSettings : Gtk.Window, ManagerTask {
 				response = prompt.run();
 				if (response != Gtk.ResponseType.ACCEPT)
 					break;
-				if (false /* TODO */) {
-					// TODO change password
+				if (db.ManagerSetPassword(prompt.Current, prompt.New) == true)
 					break;
-				}
 				prompt.Incorrect();
 				// and continue
 			}
