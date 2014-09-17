@@ -88,10 +88,8 @@ public class Manager : Gtk.Window {
 				}
 				mt = GLib.Object.@new(tb.type, type: Gtk.WindowType.TOPLEVEL) as ManagerTask;
 				mt.Setup();
-				mt.delete_event.connect((e) => {		// TODO e? Vala doesn't complain without...
-					mt.destroy();
+				mt.destroy.connect(() => {
 					this.show_all();
-					return false;
 				});
 				this.hide();
 				mt.show_all();
