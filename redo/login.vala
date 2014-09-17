@@ -15,8 +15,6 @@ public class Login : Gtk.Window {
 	{
 		GLib.Object(type: Gtk.WindowType.TOPLEVEL);
 		this.title = "simplesale";
-		// TODO get rid fo this
-		this.destroy.connect(Gtk.main_quit);
 		ScaleWindowUp(this, 2, 1.5);
 
 		this.hb = new Gtk.HeaderBar();
@@ -69,8 +67,8 @@ public class Login : Gtk.Window {
 			this.popover.Entered.connect((password) => {
 				Manager m;
 
-				// TODO
-				if(password!="")return false;
+				if (db.ManagerCheckPassword(password) == false)
+					return false;
 				m = new Manager();
 				m.destroy.connect(() => {
 					this.show_all();
