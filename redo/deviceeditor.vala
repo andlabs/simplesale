@@ -11,8 +11,6 @@ public class DeviceEditor : Gtk.Window, ManagerTask {
 		Gtk.Label label;
 
 		this.title = "simplesale";
-		// TODO get rid of this
-		this.destroy.connect(Gtk.main_quit);
 		ScaleWindowUp(this, 2, 3);
 
 		this.hb = new Gtk.HeaderBar();

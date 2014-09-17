@@ -34,8 +34,6 @@ public class ItemEditor : Gtk.Window, ManagerTask {
 		Gtk.HeaderBar hb;
 
 		this.title = "simplesale";
-		// TODO get rid of this
-		this.destroy.connect(Gtk.main_quit);
 		ScaleWindowUp(this, 1, 3);
 
 		hb = new Gtk.HeaderBar();
