@@ -1,1 +1,7 @@
 +/- buttons on editor windows should have the same size; - button should be a last-child
+
+general ideas for the shift screen:
+- time that order was placed (will require database changes)
+- an optional List view that lists the full order
+
+specification of To Stay/To Go in orders
