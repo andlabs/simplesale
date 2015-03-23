@@ -2,9 +2,11 @@ OBJDIR = .objs
 OUTFILE = simplesale
 
 CFILES = \
+	manager.c \
 	zresources.c
 
 HFILES = \
+	simplesale.h \
 	zaddremovemoney.h \
 	zemployeeeditor.h \
 	zitemeditor.h \
