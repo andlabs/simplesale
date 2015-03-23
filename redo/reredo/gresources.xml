@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+	<gresource prefix="/simplesale">
+		<file compressed="true">itemeditor.ui</file>
+		<file compressed="true">employeeeditor.ui</file>
+		<file compressed="true">othersettings.ui</file>
+		<file compressed="true">addremovemoney.ui</file>
+		<file compressed="true">logviewer.ui</file>
+	</gresource>
+</gresources>
