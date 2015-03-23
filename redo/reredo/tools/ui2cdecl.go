@@ -45,6 +45,14 @@ type outParams struct {
 	Members			[]*member
 }
 
+var knownTypes = map[string]string{
+	"GtkTreeSelection":		"GTK_TREE_SELECTION",
+	"GtkTextBuffer":		"GTK_TEXT_BUFFER",
+	"GtkTextTag":			"GTK_TEXT_TAG",
+	"GtkTextTagTable":		"GTK_TEXT_TAG_TABLE",
+	"GtkAdjustment":		"GTK_ADJUSTMENT",
+}
+
 func die(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, args...)
 	fmt.Fprintf(os.Stderr, "\n")
@@ -100,13 +108,19 @@ func main() {
 				break
 			}
 		}
-		if ty == "GtkTreeSelection" {
-			members = append(members, &member{
-				Name:	id,
-				Type:	"GtkTreeSelection",
-				CastTo:	"GTK_TREE_SELECTION",
-			})
-		} else {
+		found := false
+		for name, conv := range knownTypes {
+			if ty == name {
+				members = append(members, &member{
+					Name:	id,
+					Type:	name,
+					CastTo:	conv,
+				})
+				found = true
+				break
+			}
+		}
+		if !found {
 			members = append(members, &member{
 				Name:	id,
 				Type:	"GtkWidget",
