@@ -14,7 +14,7 @@ static const struct {
 	{ "printer", "Device Editor", newDeviceEditor },			// TODO rename to Printers?
 	{ "preferences-other", "Other Settings", newOtherSettings },
 	{ "list-remove", "Add/Remove Money", newAddRemoveMoney },
-	{ "utilities-system-monitor", "Log", newLogViewer },
+	{ "utilities-system-monitor", "Log Viewer", newLogViewer },
 	{ NULL, NULL, NULL },
 };
 
