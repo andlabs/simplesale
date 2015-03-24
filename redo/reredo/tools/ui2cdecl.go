@@ -26,7 +26,8 @@ static {{.TypeName}} *make{{.TypeName}}FromUIFile(void)
 {{$typename := .TypeName}}{{range .Members}}	instance->{{.Name}} = {{.CastTo}}(gtk_builder_get_object(builder, "{{.Name}}"));
 	if (instance->{{.Name}} == NULL)
 		g_error("error getting {{$typename}} member {{.Name}} (exact error unspecified)");
-{{end}}	g_object_unref(builder);
+{{if .Keep}}	g_object_ref(instance->{{.Name}});
+{{end}}{{end}}	g_object_unref(builder);
 	return instance;
 }
 `
@@ -35,6 +36,7 @@ type member struct {
 	Name	string
 	Type		string
 	CastTo	string
+	Keep		bool
 }
 
 type outParams struct {
@@ -126,6 +128,8 @@ func main() {
 					Name:	o.ID,
 					Type:	"GtkWidget",
 					CastTo:	"GTK_WIDGET",
+					// needed because the only class that GtkBuilder tries to preserve itself is GtkWindow; any widget not in a GtkWindow that we don't explicitly ref is lost when the builder is destroyed
+					Keep:	(o.ID == "main" && o.Class != "GtkWindow"),
 				})
 			}
 			if o.ID == "main" {
