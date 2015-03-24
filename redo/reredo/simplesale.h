@@ -38,5 +38,17 @@ extern GType PriceEntry_get_type(void);
 // manager.c
 extern gboolean manager(void);
 
+// itemeditor.c
+extern GtkWidget *newItemEditor(void);
+
+// employeeeditor.c
+extern GtkWidget *newEmployeeEditor(void);
+
+// othersettings.c
+extern GtkWidget *newOtherSettings(void);
+
 // addremovemoney.c
 extern GtkWidget *newAddRemoveMoney(void);
+
+// logviewer.c
+extern GtkWidget *newLogViewer(void);

@@ -3,7 +3,11 @@ OUTFILE = simplesale
 
 CFILES = \
 	addremovemoney.c \
+	employeeeditor.c \
+	itemeditor.c \
+	logviewer.c \
 	manager.c \
+	othersettings.c \
 	price.c \
 	priceentry.c \
 	zresources.c
