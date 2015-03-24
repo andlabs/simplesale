@@ -1,4 +1,7 @@
 # 24 march 2015
+r#include "simplesale.h"
+rBackend *backend;
+
 i Backend
 	# shifts
 	m ShiftHandle Login GtkTreeIter* char*
