@@ -1,3 +1,6 @@
+# TODO
+# - remove $(OUTFILE) in make clean?
+
 OBJDIR = .objs
 OUTFILE = simplesale
 
