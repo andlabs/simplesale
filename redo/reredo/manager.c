@@ -77,7 +77,7 @@ gboolean manager(void)
 	gtk_widget_show_all(m->main);
 	gtk_main();
 	gtk_widget_destroy(m->main);
-	g_free(m);		// TODO is this the counterpart to g_new0()?
+	g_free(m);
 	return doQuit;
 }
 
