@@ -3,6 +3,7 @@ OUTFILE = simplesale
 
 CFILES = \
 	addremovemoney.c \
+	deviceeditor.c \
 	employeeeditor.c \
 	itemeditor.c \
 	logviewer.c \
@@ -14,6 +15,7 @@ CFILES = \
 
 UIFILES = \
 	addremovemoney.ui \
+	deviceeditor.ui \
 	employeeeditor.ui \
 	itemeditor.ui \
 	logviewer.ui \

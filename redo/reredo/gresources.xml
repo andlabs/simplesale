@@ -4,6 +4,7 @@
 		<file compressed="true">manager.ui</file>
 		<file compressed="true">itemeditor.ui</file>
 		<file compressed="true">employeeeditor.ui</file>
+		<file compressed="true">deviceeditor.ui</file>
 		<file compressed="true">othersettings.ui</file>
 		<file compressed="true">addremovemoney.ui</file>
 		<file compressed="true">logviewer.ui</file>

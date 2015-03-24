@@ -11,7 +11,7 @@ static const struct {
 	// TODO trim down labels?
 	{ "insert-object", "Item Editor", newItemEditor },
 	{ "contact-new", "Employee Editor", newEmployeeEditor },
-	{ "printer", "Device Editor", gtk_color_button_new },	// TODO rename to Printers?
+	{ "printer", "Device Editor", newDeviceEditor },			// TODO rename to Printers?
 	{ "preferences-other", "Other Settings", newOtherSettings },
 	{ "list-remove", "Add/Remove Money", newAddRemoveMoney },
 	{ "utilities-system-monitor", "Log", newLogViewer },

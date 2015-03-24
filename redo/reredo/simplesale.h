@@ -44,6 +44,9 @@ extern GtkWidget *newItemEditor(void);
 // employeeeditor.c
 extern GtkWidget *newEmployeeEditor(void);
 
+// deviceeditor.c
+extern GtkWidget *newDeviceEditor(void);
+
 // othersettings.c
 extern GtkWidget *newOtherSettings(void);
 
