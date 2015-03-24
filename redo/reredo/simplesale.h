@@ -13,3 +13,6 @@ enum {
 
 // manager.c
 extern gboolean manager(void);
+
+// addremovemoney.c
+extern GtkWidget *newAddRemoveMoney(void);

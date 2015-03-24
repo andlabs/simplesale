@@ -13,7 +13,7 @@ static const struct {
 	{ "contact-new", "Employee Editor", gtk_calendar_new },
 	{ "printer", "Device Editor", gtk_color_button_new },	// TODO rename to Printers?
 	{ "preferences-other", "Other Options", gtk_header_bar_new },
-	{ "list-remove", "Add/Remove Money", gtk_places_sidebar_new },
+	{ "list-remove", "Add/Remove Money", newAddRemoveMoney },
 	{ "utilities-system-monitor", "Log", gtk_hsv_new },
 	{ NULL, NULL, NULL },
 };

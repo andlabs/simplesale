@@ -2,6 +2,7 @@ OBJDIR = .objs
 OUTFILE = simplesale
 
 CFILES = \
+	addremovemoney.c \
 	manager.c \
 	zresources.c
 
