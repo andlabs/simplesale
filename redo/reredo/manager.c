@@ -41,8 +41,6 @@ gboolean manager(void)
 	int i;
 	GtkWidget *page;
 
-	// TODO verify window title
-
 	m = makeManagerFromUIFile();
 
 	g_signal_connect(m->toLogin, "clicked", G_CALLBACK(toLoginClicked), &doQuit);
