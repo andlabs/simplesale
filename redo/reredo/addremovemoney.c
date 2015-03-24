@@ -7,7 +7,6 @@ static void destroy(GtkWidget *widget, gpointer data)
 {
 	AddRemoveMoney *a = (AddRemoveMoney *) data;
 
-printf("in destroy()\n");
 	g_free(a);
 }
 
