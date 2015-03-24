@@ -4,9 +4,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"io"
 	"encoding/xml"
-	"strings"
 	"text/template"
 )
 
@@ -53,6 +51,26 @@ var knownTypes = map[string]string{
 	"GtkAdjustment":		"GTK_ADJUSTMENT",
 }
 
+type uiProp struct {
+	Name	string		`xml:"name,attr"`
+	Value	string		`xml:",chardata"`
+}
+
+type uiChild struct {
+	Objects	[]uiObject		`xml:"object"`
+}
+
+type uiObject struct {
+	Class	string		`xml:"class,attr"`
+	ID		string		`xml:"id,attr"`
+	Props	[]uiProp		`xml:"property"`
+	Children	[]uiChild		`xml:"child"`
+}
+
+type uiInterface struct {
+	Objects	[]uiObject		`xml:"object"`
+}
+
 func die(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, args...)
 	fmt.Fprintf(os.Stderr, "\n")
@@ -60,8 +78,11 @@ func die(format string, args ...interface{}) {
 }
 
 func main() {
-	if len(os.Args) != 5 {
-		die("usage: %s uifile cfile typename grespath", os.Args[0])
+	var iface uiInterface
+	var f func([]uiObject)
+
+	if len(os.Args) != 4 {
+		die("usage: %s uifile cfile grespath", os.Args[0])
 	}
 
 	uifile, err := os.Open(os.Args[1])
@@ -76,57 +97,54 @@ func main() {
 	}
 	defer cfile.Close()
 
-	typename := os.Args[3]
-	grespath := os.Args[4]
+	grespath := os.Args[3]
 	members := make([]*member, 0, 50)
 
 	uireader := xml.NewDecoder(uifile)
-	for {
-		t, err := uireader.Token()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			die("error parsing .ui file: %v", err)
-		}
-		s, ok := t.(xml.StartElement)
-		if !ok {
-			continue
-		}
-		if strings.ToLower(s.Name.Local) != "object" {
-			continue
-		}
-		id := ""
-		ty := ""
-		for _, a := range s.Attr {
-			switch strings.ToLower(a.Name.Local) {
-			case "id":
-				id = a.Value
-			case "class":
-				ty = a.Value
+	err = uireader.Decode(&iface)
+	if err != nil {
+		die("error parsing .ui file: %v", err)
+	}
+
+	typename := ""
+	f = func(objs []uiObject) {
+		for _, o := range objs {
+			found := false
+			for name, conv := range knownTypes {
+				if o.Class == name {
+					members = append(members, &member{
+						Name:	o.ID,
+						Type:	name,
+						CastTo:	conv,
+					})
+					found = true
+					break
+				}
 			}
-			if id != "" && ty != "" {
-				break
-			}
-		}
-		found := false
-		for name, conv := range knownTypes {
-			if ty == name {
+			if !found {
 				members = append(members, &member{
-					Name:	id,
-					Type:	name,
-					CastTo:	conv,
+					Name:	o.ID,
+					Type:	"GtkWidget",
+					CastTo:	"GTK_WIDGET",
 				})
-				found = true
-				break
+			}
+			if o.ID == "main" {
+				for _, p := range o.Props {
+					if p.Name == "name" {
+						typename = p.Value
+						break
+					}
+				}
+			}
+			for _, c := range o.Children {
+				f(c.Objects)
 			}
 		}
-		if !found {
-			members = append(members, &member{
-				Name:	id,
-				Type:	"GtkWidget",
-				CastTo:	"GTK_WIDGET",
-			})
-		}
+	}
+	f(iface.Objects)
+
+	if typename == "" {
+		die("error: type name not in .ui file")
 	}
 
 	t, err := template.New("outTemplate").Parse(outTemplate)
