@@ -1,0 +1,1 @@
+GLADE_CATALOG_SEARCH_PATH="$GLADE_CATALOG_SEARCH_PATH:." jhbuild run glade "$@"
