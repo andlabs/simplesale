@@ -1,0 +1,3 @@
+- GtkStackSidebar is too new; change?
+	- if keep, should we move the buttons and fuse them like in gtk3-widget-factory?
+	- if keep, icons?
