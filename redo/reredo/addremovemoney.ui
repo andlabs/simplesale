@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.18.1 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <object class="GtkGrid" id="AddRemoveMoney">
+  <requires lib="simplesale" version="0.0"/>
+  <object class="GtkGrid" id="main">
+    <property name="name">AddRemoveMoney</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="border_width">12</property>
     <property name="row_spacing">6</property>
     <property name="column_spacing">12</property>
     <child>
