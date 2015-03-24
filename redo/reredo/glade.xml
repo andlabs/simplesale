@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- 23 march 2015 -->
+<glade-catalog name="simplesale" library="simplesale" depends="gtk+">
+
+<glade-widget-classes>
+	<glade-widget-class name="PriceEntry" generic-name="priceEntry" title="Price Entry" parent="GtkEntry" />
+</glade-widget-classes>
+
+<glade-widget-group name="simplesaleWidgets" title="simplesale Widgets">
+	<default-palette-state expanded="True" />
+	<glade-widget-class-ref name="PriceEntry" />
+</glade-widget-group>
+
+</glade-catalog>
