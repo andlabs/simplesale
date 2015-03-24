@@ -63,6 +63,7 @@ gboolean manager(void)
 int main(void)
 {
 	gtk_init(NULL, NULL);
+	PriceEntryType;
 	while (!manager())
 		;
 	return 0;

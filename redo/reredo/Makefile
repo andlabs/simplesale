@@ -4,6 +4,8 @@ OUTFILE = simplesale
 CFILES = \
 	addremovemoney.c \
 	manager.c \
+	price.c \
+	priceentry.c \
 	zresources.c
 
 UIFILES = \
