@@ -5,13 +5,17 @@ CFILES = \
 	manager.c \
 	zresources.c
 
+UIFILES = \
+	addremovemoney.ui \
+	employeeeditor.ui \
+	itemeditor.ui \
+	logviewer.ui \
+	manager.ui \
+	othersettings.ui
+
 HFILES = \
 	simplesale.h \
-	zaddremovemoney.h \
-	zemployeeeditor.h \
-	zitemeditor.h \
-	zlogviewer.h \
-	zothersettings.h
+	$(UIFILES:%.ui=z%.h)
 
 OFILES = $(CFILES:%.c=$(OBJDIR)/%.o)
 PKGS = gtk+-3.0
@@ -34,25 +38,11 @@ $(OUTFILE): $(OFILES)
 $(OBJDIR)/%.o: %.c $(HFILES) dirs
 	$(CC) -g -o $@ -c $< $(xCFLAGS)
 
-# TODO make zresources.c depend on the .ui files and the .h files not need separate rules (get type name from .ui file)
-
-zresources.c: gresources.xml $(HFILES)
+zresources.c: gresources.xml $(UIFILES)
 	glib-compile-resources --target $@ --generate-source $<
 
-zaddremovemoney.h: addremovemoney.ui
-	go run tools/ui2cdecl.go $< $@ AddRemoveMoney /simplesale/addremovemoney.ui
-
-zemployeeeditor.h: employeeeditor.ui
-	go run tools/ui2cdecl.go $< $@ EmployeeEditor /simplesale/employeeeditor.ui
-
-zitemeditor.h: itemeditor.ui
-	go run tools/ui2cdecl.go $< $@ ItemEditor /simplesale/itemeditor.ui
-
-zlogviewer.h: logviewer.ui
-	go run tools/ui2cdecl.go $< $@ LogViewer /simplesale/logviewer.ui
-
-zothersettings.h: othersettings.ui
-	go run tools/ui2cdecl.go $< $@ OtherSettings /simplesale/othersettings.ui
+z%.h: %.ui
+	go run tools/ui2cdecl.go $< $@ /simplesale/$<
 
 dirs:
 	mkdir -p $(OBJDIR)
