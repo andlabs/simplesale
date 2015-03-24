@@ -26,13 +26,16 @@
                 <property name="vexpand">True</property>
                 <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkIconView" id="pageSwitcher">
+                  <object class="GtkViewport" id="viewport1">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="margin">6</property>
-                    <property name="selection_mode">browse</property>
-                    <property name="columns">1</property>
-                    <property name="activate_on_single_click">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkStackSidebar" id="pageSwitcher">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stack">pageStack</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>

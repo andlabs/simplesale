@@ -12,5 +12,4 @@ enum {
 // TODO prices
 
 // manager.c
-extern void initManager(void);
 extern gboolean manager(void);
