@@ -7,15 +7,15 @@ static GtkListStore *pages;
 static struct {
 	char *icon;
 	char *label;
-	GtkWidget (*new)(void);
+	GtkWidget *(*new)(void);
 } pageList[] = {
 	// TODO trim down labels?
-	{ "insert-object", "Item Editor", NULL },
-	{ "contact-new", "Employee Editor", NULL },
-	{ "printer", "Device Editor", NULL },	// TODO rename to Printers?
-	{ "preferences-other", "Other Options", NULL },
-	{ "list-remove", "Add/Remove Money", NULL },
-	{ "utilities-system-monitor", "Log", NULL },
+	{ "insert-object", "Item Editor", gtk_switch_new },
+	{ "contact-new", "Employee Editor", gtk_calendar_new },
+	{ "printer", "Device Editor", gtk_color_button_new },	// TODO rename to Printers?
+	{ "preferences-other", "Other Options", gtk_header_bar_new },
+	{ "list-remove", "Add/Remove Money", gtk_places_sidebar_new },
+	{ "utilities-system-monitor", "Log", gtk_hsv_new },
 	{ NULL, NULL, NULL },
 };
 
@@ -34,6 +34,16 @@ void initManager(void)
 	// keep pages around so it isn't destroyed after the first Manager window is dismissed
 	// TODO necessary?
 	g_object_ref(pages);
+}
+
+static void switchPage(GtkIconView *iv, GtkTreePath *path, gpointer data)
+{
+	Manager *m = (Manager *) data;
+	int page;
+
+	// TODO what if nothing was selected? (that could happen under undefined or vaguely defined circumstances)
+	page = gtk_tree_path_get_indices(path)[0];
+	gtk_stack_set_visible_child_name(GTK_STACK(m->pageStack), pageList[page].label);
 }
 
 static void toLoginClicked(GtkButton *b, gpointer data)
@@ -57,6 +67,8 @@ gboolean manager(void)
 	Manager *m;
 	gboolean doQuit;
 	GtkTreePath *firstItem;
+	int i;
+	GtkWidget *page;
 
 	// TODO verify window title
 
@@ -69,6 +81,12 @@ gboolean manager(void)
 
 	g_signal_connect(m->toLogin, "clicked", G_CALLBACK(toLoginClicked), &doQuit);
 	g_signal_connect(m->quit, "clicked", G_CALLBACK(quitClicked), &doQuit);
+
+	for (i = 0; pageList[i].icon != NULL; i++) {
+		page = (*(pageList[i].new))();
+		gtk_stack_add_named(GTK_STACK(m->pageStack), page, pageList[i].label);
+	}
+	g_signal_connect(m->pageSwitcher, "selection-changed", G_CALLBACK(switchPage), m);
 
 	// and select the first option and get the ball rolling
 	firstItem = gtk_tree_path_new_first();
