@@ -1,11 +1,7 @@
 // 23 march 2015
 #include "simplesale.h"
 
-struct Manager {
-	GtkWidget *window;
-	GtkWidget *pageSwitcher;
-	GtkWidget *pageStack;
-};
+#include "zmanager.h"
 
 static GtkListStore *pages;
 static struct {
@@ -58,65 +54,30 @@ static void quitClicked(GtkButton *b, gpointer data)
 
 gboolean manager(void)
 {
-	struct Manager m;
-	GtkWidget *c1, *c2, *c3;
-	GtkWidget *pageScroller;
-	GtkWidget *toLogin, *quit;
+	Manager *m;
 	gboolean doQuit;
 	GtkTreePath *firstItem;
 
-	m.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	// TODO verify title
-	gtk_window_set_title(GTK_WINDOW(m.window), "Manager");
-	gtk_container_set_border_width(GTK_CONTAINER(m.window), gtkMargin);
+	// TODO verify window title
 
-	c1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, gtkXPadding);
-	gtk_container_add(GTK_CONTAINER(m.window), c1);
+	m = makeManagerFromUIFile();
 
-	c2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, gtkYPadding);
-	gtk_container_add(GTK_CONTAINER(c1), c2);
-
-	pageScroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(pageScroller), GTK_SHADOW_IN);
-	gtk_widget_set_vexpand(pageScroller, TRUE);
-	gtk_widget_set_valign(pageScroller, GTK_ALIGN_FILL);
-	gtk_container_add(GTK_CONTAINER(c2), pageScroller);
-
-	m.pageSwitcher = gtk_icon_view_new_with_model(GTK_TREE_MODEL(pages));
+	gtk_icon_view_set_model(GTK_ICON_VIEW(m->pageSwitcher), GTK_TREE_MODEL(pages));
 	// TODO figure this out
-	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(m.pageSwitcher), 0);
-	gtk_icon_view_set_text_column(GTK_ICON_VIEW(m.pageSwitcher), 1);
-	gtk_icon_view_set_columns(GTK_ICON_VIEW(m.pageSwitcher), 1);
-	gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(m.pageSwitcher), TRUE);
-	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW(m.pageSwitcher), GTK_SELECTION_BROWSE);
-	gtk_container_add(GTK_CONTAINER(pageScroller), m.pageSwitcher);
+	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(m->pageSwitcher), 0);
+	gtk_icon_view_set_text_column(GTK_ICON_VIEW(m->pageSwitcher), 1);
 
-	c3 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_box_set_homogeneous(GTK_BOX(c3), TRUE);
-	gtk_container_add(GTK_CONTAINER(c2), c3);
-
-	toLogin = gtk_button_new_with_label("To Login");
-	g_signal_connect(toLogin, "clicked", G_CALLBACK(toLoginClicked), &doQuit);
-	gtk_container_add(GTK_CONTAINER(c3), toLogin);
-
-	quit = gtk_button_new_with_label("Quit");
-	g_signal_connect(quit, "clicked", G_CALLBACK(quitClicked), &doQuit);
-	gtk_container_add(GTK_CONTAINER(c3), quit);
-
-	m.pageStack = gtk_stack_new();
-	gtk_widget_set_hexpand(m.pageStack, TRUE);
-	gtk_widget_set_halign(m.pageStack, GTK_ALIGN_FILL);
-	gtk_widget_set_vexpand(m.pageStack, TRUE);
-	gtk_widget_set_valign(m.pageStack, GTK_ALIGN_FILL);
-	gtk_container_add(GTK_CONTAINER(c1), m.pageStack);
+	g_signal_connect(m->toLogin, "clicked", G_CALLBACK(toLoginClicked), &doQuit);
+	g_signal_connect(m->quit, "clicked", G_CALLBACK(quitClicked), &doQuit);
 
 	// and select the first option and get the ball rolling
 	firstItem = gtk_tree_path_new_first();
-	gtk_icon_view_select_path(GTK_ICON_VIEW(m.pageSwitcher), firstItem);
+	gtk_icon_view_select_path(GTK_ICON_VIEW(m->pageSwitcher), firstItem);
 	gtk_tree_path_free(firstItem);
-	gtk_widget_show_all(m.window);
+	gtk_widget_show_all(m->main);
 	gtk_main();
-	gtk_widget_destroy(m.window);
+	gtk_widget_destroy(m->main);
+	g_free(m);		// TODO is this the counterpart to g_new0()?
 	return doQuit;
 }
 
