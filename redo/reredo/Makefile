@@ -16,6 +16,8 @@ UIFILES = \
 HFILES = \
 	simplesale.h \
 	$(UIFILES:%.ui=z%.h)
+# see http://stackoverflow.com/a/29223637/3408572
+.PRECIOUS: $(HFILES)
 
 OFILES = $(CFILES:%.c=$(OBJDIR)/%.o)
 PKGS = gtk+-3.0
