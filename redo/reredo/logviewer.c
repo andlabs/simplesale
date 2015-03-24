@@ -20,7 +20,7 @@ GtkWidget *newLogViewer(void)
 	GtkTextIter iter;
 
 #define getEndIter() gtk_text_buffer_get_end_iter(l->logbuf, &iter)
-#define append(t, c) gtk_text_buffer_insert_with_tags_by_name(l->logbuf, &iter, t, -1, c)
+#define append(t, c) gtk_text_buffer_insert_with_tags_by_name(l->logbuf, &iter, t, -1, c, NULL)
 	getEndIter();
 	append("Test log entry 1\n", "black");
 	getEndIter();
