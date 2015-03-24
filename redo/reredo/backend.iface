@@ -1,0 +1,48 @@
+# 24 march 2015
+i Backend
+	# shifts
+	m ShiftHandle Login GtkTreeIter* char*
+	m void ClockOut ShiftHandle
+	m gboolean StartManagerSession char*
+	m void StopManagerSession
+
+	# orders
+	# TODO should each individual act of an order be logged?
+	m void FileOrder ShiftHandle Order* gboolean
+
+	# item management
+	m void SetItemsTreeView GtkTreeView*
+	m void SetItemsIconView GtkTreeView*
+	m void AppendItem char* Price
+	m void DeleteItem GtkTreeIter*
+	m char* ItemName GtkTreeIter*
+	m Price ItemPrice GtkTreeIter*
+	m void SetItemName GtkTreeIter* char*
+	m void SetItemPrice GtkTreeIter* Price
+
+	# employee management
+	m void SetEmployeesTreeView GtkTreeView*
+	m void SetEmployeesIconView GtkIconView*
+	m void AppendEmployee char* char*
+	m void DeleteEmployee GtkTreeIter*
+	m char* EmployeeName GtkTreeIter*
+	m gboolean VerifyEmployeePassword GtkTreeIter* char*
+	m void SetEmployeeName GtkTreeIter* char*
+	m gboolean ChangeEmployeePassword GtkTreeIter* char* char*
+
+	# devices
+	# TODO
+
+	# miscellaneous settings
+	# TODO tax
+	m gboolean VerifyManagerPassword char*
+	m gboolean ChangeManagerPassword char* char*
+
+	# add/remove money
+	m void AddMoney Price
+	# TODO gboolean return?
+	m gboolean RemoveMoney Price
+
+	# log viewing
+	# TODO log iteration
+	m Price CurrentExpectedMoneyInDrawer
