@@ -1,3 +1,7 @@
 - GtkStackSidebar is too new; change?
 	- if keep, should we move the buttons and fuse them like in gtk3-widget-factory?
 	- if keep, icons?
+- either link, space, or move the o Login and Quit buttons
+- lessen space between device editor drop-downs and Test Page buttons?
+- searching the log
+- make sure labels on the Other Settings and Add/Remove Money screens are left-aligned
