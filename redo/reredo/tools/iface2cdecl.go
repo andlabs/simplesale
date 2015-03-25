@@ -132,7 +132,7 @@ func genhfile(i iface, filename string) {
 		}
 		fmt.Fprintf(f, "};\n")
 		fmt.Fprintf(f, "extern GType %s_get_type(void);\n", curiface)
-		fmt.Fprintf(f, "extern void verify%sImpl(%sIface *);\n", curiface, curiface)
+		fmt.Fprintf(f, "extern void verify%sImpl(char *, %sInterface *);\n", curiface, curiface)
 		for _, m := range curmethods {
 			fmt.Fprintf(f, "extern %s;\n", m.globaldecl(curiface))
 		}
@@ -160,6 +160,73 @@ func genhfile(i iface, filename string) {
 	endiface()
 }
 
+func gencfile(i iface, filename string) {
+	f, err := os.Create(filename)
+	if err != nil {
+		die("error creating %s: %v", filename, err)
+	}
+	defer f.Close()
+
+	// TODO error checking
+
+	curiface := ""
+	curmethods := []method(nil)
+	startiface := func() {
+		// TODO really G_TYPE_INTERFACE?
+		fmt.Fprintf(f, "G_DEFINE_INTERFACE(%s, %s, G_TYPE_INTERFACE)\n", curiface, curiface)
+	}
+	endiface := func() {
+		if curiface == "" {
+			return
+		}
+		fmt.Fprintf(f, "static void %s_default_init(%sInterface *iface)\n", curiface, curiface)
+		fmt.Fprintf(f, "{\n")
+		fmt.Fprintf(f, "}\n")
+		fmt.Fprintf(f, "void verify%sImpl(char *typename, %sInterface *iface)\n", curiface, curiface)
+		fmt.Fprintf(f, "{\n")
+		for _, m := range curmethods {
+			fmt.Fprintf(f, "\tif (iface->%s == NULL)\n", m.Name)
+			fmt.Fprintf(f, "\t\tg_error(\"BUG: type %%s missing implementation of %s method %s\", typename);\n", curiface, m.Name)
+		}
+		fmt.Fprintf(f, "}\n")
+		fmt.Fprintf(f, "\n")
+		curiface = ""
+		curmethods = nil
+	}
+
+	// TODO error checking
+	fmt.Fprintf(f, "%s\n", banner)
+	for _, e := range i {
+		if e.Raw != "" {		// raw line
+			continue
+		}
+		if e.Name != "" {	// new interface
+			endiface()
+			curiface = e.Name
+			startiface()
+			continue
+		}
+		// must be a method
+		curmethods = append(curmethods, e.Method)
+		fmt.Fprintf(f, "%s\n", e.Method.globaldecl(curiface))
+		fmt.Fprintf(f, "{\n")
+		fmt.Fprintf(f, "\t")
+		if e.Method.Ret != "void" {
+			fmt.Fprintf(f, "return ")
+		}
+		k := "(*(Get" + curiface + "Interface(this)->" + e.Method.Name + "))"
+		fmt.Fprintf(f, "%s(this", k)
+		n := 1
+		for _, _ = range e.Method.Args {
+			fmt.Fprintf(f, ", arg%d", n)
+			n++
+		}
+		fmt.Fprintf(f, ");\n")
+		fmt.Fprintf(f, "}\n")
+	}
+	endiface()
+}
+
 func main() {
 	if len(os.Args) != 4 {
 		die("usage: %s ifacefile type outfile", os.Args[0])
@@ -172,6 +239,7 @@ func main() {
 	case "hfile":
 		genhfile(iface, outfile)
 	case "cfile":
+		gencfile(iface, outfile)
 	default:
 		die("unknown output type %q", os.Args[2])
 	}
