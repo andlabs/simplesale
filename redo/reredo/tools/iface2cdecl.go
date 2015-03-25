@@ -113,6 +113,16 @@ func (m *Method) GlobalDecl(curiface string) string {
 	return m.decl(curiface, curiface + m.Name)
 }
 
+func (m *Method) ArgCallList() string {
+	s := "this"
+	i := 1
+	for _, _ = range m.Args {
+		s += fmt.Sprintf(", arg%d", i)
+		i++
+	}
+	return s
+}
+
 const hfileTemplate = banner + `
 {{range .}}
 #define {{.Name}}Type ({{.Name}}_get_type())
@@ -151,73 +161,42 @@ func genhfile(f File, filename string) {
 	}
 }
 
-/*
-func gencfile(i iface, filename string) {
-	f, err := os.Create(filename)
+const cfileTemplate = banner + `
+{{range .}}{{if .IsRaw}}{{.Raw}}
+{{else}}
+// {{.Name}}
+
+G_DEFINE_INTERFACE({{.Name}}, {{.Name}}, G_TYPE_OBJECT)
+
+{{$name := .Name}}{{range .Methods}}{{.GlobalDecl $name}}
+{
+	{{if ne .Ret "void"}}return {{end}}(*(Get{{$name}}Interface(this)->{{.Name}}))({{.ArgCallList}});
+}
+
+{{end}}static void {{.Name}}_default_init({{.Name}}Interface *iface)
+{
+}
+
+void verify{{.Name}}Impl(char *typename, {{.Name}}Interface *iface)
+{
+{{$name := .Name}}{{range .Methods}}	if (iface->{{.Name}} == NULL)
+		g_error("BUG: type %s missing implementation of {{$name}} method {{.Name}}()", typename);
+{{end}}}
+{{end}}{{end}}`
+
+func gencfile(f File, filename string) {
+	of, err := os.Create(filename)
 	if err != nil {
 		die("error creating %s: %v", filename, err)
 	}
-	defer f.Close()
+	defer of.Close()
 
-	// TODO error checking
-
-	curiface := ""
-	curmethods := []method(nil)
-	startiface := func() {
-		fmt.Fprintf(f, "G_DEFINE_INTERFACE(%s, %s, G_TYPE_OBJECT)\n", curiface, curiface)
+	t := template.Must(template.New("hfile").Parse(cfileTemplate))
+	err = t.Execute(of, f)
+	if err != nil {
+		die("error generating .c file: %v", err)
 	}
-	endiface := func() {
-		if curiface == "" {
-			return
-		}
-		fmt.Fprintf(f, "static void %s_default_init(%sInterface *iface)\n", curiface, curiface)
-		fmt.Fprintf(f, "{\n")
-		fmt.Fprintf(f, "}\n")
-		fmt.Fprintf(f, "void verify%sImpl(char *typename, %sInterface *iface)\n", curiface, curiface)
-		fmt.Fprintf(f, "{\n")
-		for _, m := range curmethods {
-			fmt.Fprintf(f, "\tif (iface->%s == NULL)\n", m.Name)
-			fmt.Fprintf(f, "\t\tg_error(\"BUG: type %%s missing implementation of %s method %s\", typename);\n", curiface, m.Name)
-		}
-		fmt.Fprintf(f, "}\n")
-		fmt.Fprintf(f, "\n")
-		curiface = ""
-		curmethods = nil
-	}
-
-	// TODO error checking
-	fmt.Fprintf(f, "%s\n", banner)
-	for _, e := range i {
-		if e.Raw != "" {		// raw line
-			continue
-		}
-		if e.Name != "" {	// new interface
-			endiface()
-			curiface = e.Name
-			startiface()
-			continue
-		}
-		// must be a method
-		curmethods = append(curmethods, e.Method)
-		fmt.Fprintf(f, "%s\n", e.Method.globaldecl(curiface))
-		fmt.Fprintf(f, "{\n")
-		fmt.Fprintf(f, "\t")
-		if e.Method.Ret != "void" {
-			fmt.Fprintf(f, "return ")
-		}
-		k := "(*(Get" + curiface + "Interface(this)->" + e.Method.Name + "))"
-		fmt.Fprintf(f, "%s(this", k)
-		n := 1
-		for _, _ = range e.Method.Args {
-			fmt.Fprintf(f, ", arg%d", n)
-			n++
-		}
-		fmt.Fprintf(f, ");\n")
-		fmt.Fprintf(f, "}\n")
-	}
-	endiface()
 }
-*/
 
 func main() {
 	if len(os.Args) != 4 {
@@ -231,7 +210,7 @@ func main() {
 	case "hfile":
 		genhfile(f, outfile)
 	case "cfile":
-//		gencfile(f, outfile)
+		gencfile(f, outfile)
 	default:
 		die("unknown output type %q", os.Args[2])
 	}

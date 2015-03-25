@@ -1,5 +1,6 @@
 # 24 march 2015
 r#include "simplesale.h"
+r
 rBackend *backend;
 
 i Backend
