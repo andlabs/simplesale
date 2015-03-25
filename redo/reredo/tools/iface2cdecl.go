@@ -172,8 +172,7 @@ func gencfile(i iface, filename string) {
 	curiface := ""
 	curmethods := []method(nil)
 	startiface := func() {
-		// TODO really G_TYPE_INTERFACE?
-		fmt.Fprintf(f, "G_DEFINE_INTERFACE(%s, %s, G_TYPE_INTERFACE)\n", curiface, curiface)
+		fmt.Fprintf(f, "G_DEFINE_INTERFACE(%s, %s, G_TYPE_OBJECT)\n", curiface, curiface)
 	}
 	endiface := func() {
 		if curiface == "" {
