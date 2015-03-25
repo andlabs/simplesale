@@ -37,7 +37,9 @@ i Backend
 	# TODO
 
 	# miscellaneous settings
-	# TODO tax
+	# TODO gdouble?
+	m gdouble Tax
+	m void SetTax gdouble
 	m gboolean VerifyManagerPassword char*
 	m gboolean ChangeManagerPassword char* char*
 
@@ -45,7 +47,9 @@ i Backend
 	m void AddMoney Price
 	# TODO gboolean return?
 	m gboolean RemoveMoney Price
+	m Price CurrentExpectedMoneyInDrawer
 
 	# log viewing
-	# TODO log iteration
-	m Price CurrentExpectedMoneyInDrawer
+	m void BeginReadLog
+	m LogEntry* NextLogEntry
+	m Price EndReadLog
