@@ -4,6 +4,9 @@
 OBJDIR = .objs
 OUTFILE = simplesale
 
+IFACEFILES = \
+	backend.iface
+
 CFILES = \
 	addremovemoney.c \
 	deviceeditor.c \
@@ -14,7 +17,10 @@ CFILES = \
 	othersettings.c \
 	price.c \
 	priceentry.c \
-	zresources.c
+	zresources.c \
+	$(IFACEFILES:%.iface=z%.c)
+# see comment below
+.PRECIOUS: $(CFILES)
 
 UIFILES = \
 	addremovemoney.ui \
@@ -27,7 +33,8 @@ UIFILES = \
 
 HFILES = \
 	simplesale.h \
-	$(UIFILES:%.ui=z%.h)
+	$(UIFILES:%.ui=z%.h) \
+	$(IFACEFILES:%.iface=z%.h)
 # see http://stackoverflow.com/a/29223637/3408572
 .PRECIOUS: $(HFILES)
 
@@ -55,8 +62,14 @@ $(OBJDIR)/%.o: %.c $(HFILES) dirs
 zresources.c: gresources.xml $(UIFILES)
 	glib-compile-resources --target $@ --generate-source $<
 
+z%.c: %.iface
+	go run tools/iface2cdecl.go $< cfile $@
+
 z%.h: %.ui
 	go run tools/ui2cdecl.go $< $@ /simplesale/$<
+
+z%.h: %.iface
+	go run tools/iface2cdecl.go $< hfile $@
 
 dirs:
 	mkdir -p $(OBJDIR)
