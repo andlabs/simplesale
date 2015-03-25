@@ -53,3 +53,5 @@ i Backend
 	m void BeginReadLog
 	m LogEntry* NextLogEntry
 	m Price EndReadLog
+
+i GeneratorTestTODO
