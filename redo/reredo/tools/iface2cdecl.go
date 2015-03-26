@@ -123,6 +123,16 @@ func (m *Method) ArgCallList() string {
 	return s
 }
 
+func ifacesOnly(f File) []*Interface {
+	ifaces := make([]*Interface, 0, len(f))
+	for _, i := range f {
+		if !i.IsRaw {
+			ifaces = append(ifaces, i)
+		}
+	}
+	return ifaces
+}
+
 const hfileTemplate = banner + `
 {{range .}}
 #define {{.Name}}Type ({{.Name}}_get_type())
@@ -147,15 +157,8 @@ func genhfile(f File, filename string) {
 	}
 	defer of.Close()
 
-	ifaces := make([]*Interface, 0, len(f))
-	for _, i := range f {
-		if !i.IsRaw {			// skip raw lines; they're just for the C file
-			ifaces = append(ifaces, i)
-		}
-	}
-
 	t := template.Must(template.New("hfile").Parse(hfileTemplate))
-	err = t.Execute(of, ifaces)
+	err = t.Execute(of, ifacesOnly(f))
 	if err != nil {
 		die("error generating .h file: %v", err)
 	}
@@ -191,8 +194,42 @@ func gencfile(f File, filename string) {
 	}
 	defer of.Close()
 
-	t := template.Must(template.New("hfile").Parse(cfileTemplate))
+	t := template.Must(template.New("cfile").Parse(cfileTemplate))
 	err = t.Execute(of, f)
+	if err != nil {
+		die("error generating .c file: %v", err)
+	}
+}
+
+const stubTemplate = `{{$tn := .TypeName}}G_DEFINE_TYPE_WITH_CODE({{$tn}}, {{$tn}}, G_TYPE_OBJECT,{{range .Interfaces}}
+	G_IMPLEMENT_INTERFACE({{.Name}}Type, {{$tn}}_{{.Name}}_init){{end}})
+{{range .Interfaces}}{{range .Methods}}
+static {{.GlobalDecl $tn}}
+{
+}
+{{end}}
+static void {{$tn}}_{{.Name}}_init({{.Name}}Interface *iface)
+{
+{{range .Methods}}	iface->{{.Name}} = {{$tn}}{{.Name}};
+{{end}}	verify{{.Name}}Impl("{{$tn}}", iface);
+}
+{{end}}`
+
+func genstub(f File, typename string, filename string) {
+	of, err := os.Create(filename)
+	if err != nil {
+		die("error creating %s: %v", filename, err)
+	}
+	defer of.Close()
+
+	t := template.Must(template.New("stub").Parse(stubTemplate))
+	err = t.Execute(of, struct {
+		TypeName	string
+		Interfaces		[]*Interface
+	}{
+		TypeName:	typename,
+		Interfaces:	ifacesOnly(f),
+	})
 	if err != nil {
 		die("error generating .c file: %v", err)
 	}
@@ -206,12 +243,16 @@ func main() {
 	f := readfile(os.Args[1])
 	outfile := os.Args[3]
 
-	switch os.Args[2] {
-	case "hfile":
+	s := os.Args[2]
+	switch {
+	case s == "hfile":
 		genhfile(f, outfile)
-	case "cfile":
+	case s == "cfile":
 		gencfile(f, outfile)
+	case strings.HasPrefix(s, "stub"):
+		s = s[4:]
+		genstub(f, s, outfile)
 	default:
-		die("unknown output type %q", os.Args[2])
+		die("unknown output type %q", s)
 	}
 }
