@@ -201,8 +201,26 @@ func gencfile(f File, filename string) {
 	}
 }
 
-const stubTemplate = `{{$tn := .TypeName}}G_DEFINE_TYPE_WITH_CODE({{$tn}}, {{$tn}}, G_TYPE_OBJECT,{{range .Interfaces}}
+const stubTemplate = `{{$tn := .TypeName}}struct {{$tn}}Priv {
+};
+
+G_DEFINE_TYPE_WITH_CODE({{$tn}}, {{$tn}}, G_TYPE_OBJECT,{{range .Interfaces}}
 	G_IMPLEMENT_INTERFACE({{.Name}}Type, {{$tn}}_{{.Name}}_init){{end}})
+
+static void {{$tn}}_init({{$tn}} *this)
+{
+	this->priv = G_TYPE_INSTANCE_GET_PRIVATE(this, {{$tn}}Type, struct {{$tn}}Priv);
+}
+
+static void {{$tn}}_dispose(GObject *obj)
+{
+	G_OBJECT_CLASS({{$tn}}_parent_class)->dispose(obj);
+}
+
+static void {{$tn}}_finalize(GObject *obj)
+{
+	G_OBJECT_CLASS({{$tn}}_parent_class)->finalize(obj);
+}
 {{range .Interfaces}}{{range .Methods}}
 static {{.GlobalDecl $tn}}
 {
@@ -213,7 +231,15 @@ static void {{$tn}}_{{.Name}}_init({{.Name}}Interface *iface)
 {{range .Methods}}	iface->{{.Name}} = {{$tn}}{{.Name}};
 {{end}}	verify{{.Name}}Impl("{{$tn}}", iface);
 }
-{{end}}`
+{{end}}
+static void {{$tn}}_class_init({{$tn}}Class *class)
+{
+	g_type_class_add_private(class, sizeof (struct {{$tn}}Priv));
+
+	G_OBJECT_CLASS(class)->dispose = {{$tn}}_dispose;
+	G_OBJECT_CLASS(class)->finalize = {{$tn}}_finalize;
+}
+`
 
 func genstub(f File, typename string, filename string) {
 	of, err := os.Create(filename)
