@@ -5,34 +5,34 @@ rBackend *backend;
 
 i Backend
 	# shifts
-	m ShiftHandle Login GtkTreeIter* char*
-	m void ClockOut ShiftHandle
-	m gboolean StartManagerSession char*
+	m ShiftHandle Login GtkTreeIter* employeeIter char* password
+	m void ClockOut ShiftHandle shift
+	m gboolean StartManagerSession char* password
 	m void StopManagerSession
 
 	# orders
 	# TODO should each individual act of an order be logged?
-	m void FileOrder ShiftHandle Order* gboolean
+	m void FileOrder ShiftHandle shift Order* order gboolean takeout
 
 	# item management
-	m void SetItemsTreeView GtkTreeView*
-	m void SetItemsIconView GtkTreeView*
-	m void AppendItem char* Price
-	m void DeleteItem GtkTreeIter*
-	m char* ItemName GtkTreeIter*
-	m Price ItemPrice GtkTreeIter*
-	m void SetItemName GtkTreeIter* char*
-	m void SetItemPrice GtkTreeIter* Price
+	m void SetItemsTreeView GtkTreeView* tv
+	m void SetItemsIconView GtkIconView* iv
+	m void AppendItem char* name Price price
+	m void DeleteItem GtkTreeIter* itemIter
+	m char* ItemName GtkTreeIter* itemIter
+	m Price ItemPrice GtkTreeIter* itemIter
+	m void SetItemName GtkTreeIter* itemIter char* name
+	m void SetItemPrice GtkTreeIter* itemIter Price price
 
 	# employee management
-	m void SetEmployeesTreeView GtkTreeView*
-	m void SetEmployeesIconView GtkIconView*
-	m void AppendEmployee char* char*
-	m void DeleteEmployee GtkTreeIter*
-	m char* EmployeeName GtkTreeIter*
-	m gboolean VerifyEmployeePassword GtkTreeIter* char*
-	m void SetEmployeeName GtkTreeIter* char*
-	m gboolean ChangeEmployeePassword GtkTreeIter* char* char*
+	m void SetEmployeesTreeView GtkTreeView* tv
+	m void SetEmployeesIconView GtkIconView* iv
+	m void AppendEmployee char* name char* password
+	m void DeleteEmployee GtkTreeIter* employeeIter
+	m char* EmployeeName GtkTreeIter* employeeIter
+#TODO	m gboolean VerifyEmployeePassword GtkTreeIter* employeeIter char* password
+	m void SetEmployeeName GtkTreeIter* employeeIter char* name
+	m gboolean ChangeEmployeePassword GtkTreeIter* employeeIter char* oldPassword char* newPassword 
 
 	# devices
 	# TODO
@@ -40,17 +40,18 @@ i Backend
 	# miscellaneous settings
 	# TODO gdouble?
 	m gdouble Tax
-	m void SetTax gdouble
-	m gboolean VerifyManagerPassword char*
-	m gboolean ChangeManagerPassword char* char*
+	m void SetTax gdouble tax
+#TODO	m gboolean VerifyManagerPassword char*
+	m gboolean ChangeManagerPassword char* oldPassword char* newPassword
 
 	# add/remove money
-	m void AddMoney Price
+	m void AddMoney Price amount
 	# TODO gboolean return?
-	m gboolean RemoveMoney Price
+	m gboolean RemoveMoney Price amount
 	m Price CurrentExpectedMoneyInDrawer
 
 	# log viewing
+	# TODO return handles?
 	m void BeginReadLog
 	m LogEntry* NextLogEntry
 	m Price EndReadLog
