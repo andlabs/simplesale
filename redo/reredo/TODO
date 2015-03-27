@@ -8,3 +8,4 @@
 - remove homogeneous from the Manager window GtkStack?
 	- seems to work for making window not weirdly wide, but not too sure I like the effect without additional configuration or not...
 - grow the Manager window initial height?
+- is our GtkStack being made with any pages initially?
