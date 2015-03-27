@@ -61,7 +61,7 @@ gboolean manager(void)
 int main(void)
 {
 	gtk_init(NULL, NULL);
-	backend = MockBackend(g_object_new(MockBackendType, NULL));
+	backend = Backend(g_object_new(MockBackendType, NULL));
 	PriceEntryType;
 	while (!manager())
 		;

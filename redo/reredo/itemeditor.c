@@ -17,7 +17,8 @@ GtkWidget *newItemEditor(void)
 	e = makeItemEditorFromUIFile();
 	g_signal_connect(e->main, "destroy", G_CALLBACK(destroy), e);
 
-	// TODO connect search handler
+	BackendSetItemsTreeView(backend, GTK_TREE_VIEW(e->list));
+	// TODO search entry (in .ui file?) and signals
 
 	return e->main;
 }
