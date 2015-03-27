@@ -36,9 +36,9 @@ struct PriceEntryClass {
 extern GType PriceEntry_get_type(void);
 
 // TODO sort this out
-typedef gpointer ShiftHandle;
-typedef gpointer Order;
-typedef gpointer LogEntry;
+typedef gint64 ShiftHandle;		// good for g_get_real_time()
+typedef struct Order Order;
+typedef struct LogEntry LogEntry;
 
 // zbackend.c
 #include "zbackend.h"

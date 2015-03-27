@@ -3,6 +3,7 @@ package main
 
 // TODO
 // - should stub generator should provide a way to rename 'this'?
+// - handle T* as a return type
 
 import (
 	"fmt"
@@ -248,7 +249,9 @@ static void {{$tn}}_finalize(GObject *obj)
 {{range .Interfaces}}{{range .Methods}}
 static {{.GlobalDefn $tn}}
 {
-}
+	// TODO
+{{if ne .Ret "void"}}	// TODO return something
+{{end}}}
 {{end}}
 static void {{$tn}}_{{.Name}}_init({{.Name}}Interface *iface)
 {
