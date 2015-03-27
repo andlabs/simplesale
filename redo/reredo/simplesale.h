@@ -44,6 +44,24 @@ typedef struct LogEntry LogEntry;
 #include "zbackend.h"
 extern Backend *backend;
 
+// mockbackend.c
+#define MockBackendType (MockBackend_get_type())
+#define MockBackend(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), MockBackendType, MockBackend))
+#define IsMockBackend(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), MockBackendType))
+#define MockBackendClass(class) (G_TYPE_CHECK_CLASS_CAST((class), MockBackendType, MockBackendClass))
+#define IsMockBackendClass(class) (G_TYPE_CHECK_CLASS_TYPE((class), MockBackend))
+#define GetMockBackendClass(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), MockBackendType, MockBackendClass))
+typedef struct MockBackend MockBackend;
+typedef struct MockBackendClass MockBackendClass;
+struct MockBackend {
+	GObject parent_instance;
+	struct MockBackendPriv *priv;
+};
+struct MockBackendClass {
+	GObjectClass parent_class;
+};
+extern GType MockBackend_get_type(void);
+
 // manager.c
 extern gboolean manager(void);
 

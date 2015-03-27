@@ -3,6 +3,7 @@ package main
 
 // TODO
 // - should stub generator should provide a way to rename 'this'?
+// - change stub to make this argument of each stub function a pointer to the interface, not the class, and to declare the interface init function before each G_DEFINE_TYPE()...
 
 import (
 	"fmt"

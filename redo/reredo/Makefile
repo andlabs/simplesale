@@ -14,6 +14,7 @@ CFILES = \
 	itemeditor.c \
 	logviewer.c \
 	manager.c \
+	mockbackend.c \
 	othersettings.c \
 	price.c \
 	priceentry.c \
