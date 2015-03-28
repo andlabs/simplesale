@@ -1,6 +1,9 @@
 // 23 march 2015
 #include "simplesale.h"
 
+struct ManagerPriv {
+};
+
 #include "zmanager.h"
 
 static const struct {

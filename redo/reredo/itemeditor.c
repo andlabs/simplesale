@@ -1,6 +1,11 @@
 // 24 march 2015
 #include "simplesale.h"
 
+struct ItemEditorPriv {
+	gboolean selected;
+	GtkTreeIter selectedIter;
+};
+
 #include "zitemeditor.h"
 
 static void destroy(GtkWidget *widget, gpointer data)

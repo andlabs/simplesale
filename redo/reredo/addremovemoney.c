@@ -1,6 +1,9 @@
 // 24 march 2015
 #include "simplesale.h"
 
+struct AddRemoveMoneyPriv {
+};
+
 #include "zaddremovemoney.h"
 
 static void destroy(GtkWidget *widget, gpointer data)
