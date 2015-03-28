@@ -13,6 +13,7 @@ CFILES = \
 	employeeeditor.c \
 	itemeditor.c \
 	logviewer.c \
+	main.c \
 	manager.c \
 	mockbackend.c \
 	othersettings.c \

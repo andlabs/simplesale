@@ -84,13 +84,3 @@ gboolean manager(void)
 	g_free(m);
 	return doQuit;
 }
-
-int main(void)
-{
-	gtk_init(NULL, NULL);
-	backend = Backend(g_object_new(MockBackendType, NULL));
-	PriceEntryType;
-	while (!manager())
-		;
-	return 0;
-}
