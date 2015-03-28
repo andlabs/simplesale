@@ -144,11 +144,9 @@ static void MockBackendSetItemsTreeView(Backend *this, GtkTreeView *tv)
 	col = gtk_tree_view_column_new_with_attributes("Item", r, "text", 0, NULL);
 	gtk_tree_view_column_set_expand(col, TRUE);
 	gtk_tree_view_append_column(tv, col);
-/* TODO
 	r = newPriceRenderer();
 	col = gtk_tree_view_column_new_with_attributes("Price", r, "price", 1, NULL);
 	gtk_tree_view_append_column(tv, col);
-*/
 	gtk_tree_view_set_headers_visible(tv, TRUE);
 }
 
@@ -165,11 +163,9 @@ static void MockBackendSetItemsIconView(Backend *this, GtkIconView *iv)
 	r = gtk_cell_renderer_text_new();
 	gtk_cell_layout_pack_start(layout, r, TRUE);
 	gtk_cell_layout_set_attributes(layout, r, "text", 0, NULL);
-/* TODO
 	r = newPriceRenderer();
 	gtk_cell_layout_pack_start(layout, r, FALSE);
 	gtk_cell_layout_set_attributes(layout, r, "price", 1, NULL);
-*/
 }
 
 static void MockBackendAppendItem(Backend *this, char *name, Price price)

@@ -9,5 +9,5 @@ char *priceString(Price p)
 
 	dollars = p / 100;
 	cents = p % 100;
-	return g_strdup_printf("%" PriceFormat ".%02" PriceFormat, dollars, cents);
+	return g_strdup_printf("$%" PriceFormat ".%02" PriceFormat, dollars, cents);
 }

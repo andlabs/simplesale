@@ -18,6 +18,7 @@ CFILES = \
 	othersettings.c \
 	price.c \
 	priceentry.c \
+	pricerenderer.c \
 	zresources.c \
 	$(IFACEFILES:%.iface=z%.c)
 # see comment below
