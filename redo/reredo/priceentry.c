@@ -103,7 +103,9 @@ static void PriceEntry_set_property(GObject *obj, guint prop, const GValue *valu
 	p->priv->price = g_value_get_Price(value);
 	p->priv->valid = TRUE;
 	// TODO will this call our changed handler?
-	gtk_entry_set_text(GTK_ENTRY(p), priceString(p->priv->price));
+	// TODO get rid of the + 1 kludge
+	// TODO this leaks memory
+	gtk_entry_set_text(GTK_ENTRY(p), priceString(p->priv->price) + 1);
 	updateIconsAndNotifyValid(p);
 }
 

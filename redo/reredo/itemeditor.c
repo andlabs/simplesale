@@ -1,6 +1,8 @@
 // 24 march 2015
 #include "simplesale.h"
 
+// TODO selection changed does not fire when deleting the last item (which selects the new last item)...?
+
 struct ItemEditorPriv {
 	gboolean selected;
 	GtkTreeIter selectedIter;		// TODO rename selection?
