@@ -6,6 +6,8 @@
 struct ItemEditorPriv {
 	gboolean selected;
 	GtkTreeIter selectedIter;		// TODO rename selection?
+	gulong nameChangedHandler;
+	gulong priceChangedHandler;
 };
 
 #include "zitemeditor.h"
@@ -56,9 +58,14 @@ static void selectionChanged(GtkTreeSelection *sel, gpointer data)
 		g_object_set(e->price, "price", BackendItemPrice(backend, &(e->priv->selectedIter)), NULL);
 	} else {
 		// clear the fields to make deselection make sense
-		// TODO this causes our signals to fire, and as such, the g_error()s
+		// we need to disable our signal handlers to prevent the g_error() calls in our signal handlers from firing
+		// TODO really necessary?
+		g_signal_handler_block(e->name, e->priv->nameChangedHandler);
+		g_signal_handler_block(e->price, e->priv->priceChangedHandler);
 		gtk_entry_set_text(GTK_ENTRY(e->name), "");
 		g_object_set(e->price, "price", 0, NULL);
+		g_signal_handler_unblock(e->name, e->priv->nameChangedHandler);
+		g_signal_handler_unblock(e->price, e->priv->priceChangedHandler);
 	}
 }
 
@@ -86,9 +93,9 @@ GtkWidget *newItemEditor(void)
 	BackendSetItemsTreeView(backend, GTK_TREE_VIEW(e->list));
 	// TODO search entry (in .ui file?) and signals
 
-	g_signal_connect(e->name, "changed", G_CALLBACK(nameChanged), e);
+	e->priv->nameChangedHandler = g_signal_connect(e->name, "changed", G_CALLBACK(nameChanged), e);
 	// TODO signal on valid instead?
-	g_signal_connect(e->price, "changed", G_CALLBACK(priceChanged), e);
+	e->priv->priceChangedHandler = g_signal_connect(e->price, "changed", G_CALLBACK(priceChanged), e);
 	g_signal_connect(e->listSelection, "changed", G_CALLBACK(selectionChanged), e);
 	g_signal_connect(e->addButton, "clicked", G_CALLBACK(addItem), e);
 	g_signal_connect(e->removeButton, "clicked", G_CALLBACK(removeItem), e);
