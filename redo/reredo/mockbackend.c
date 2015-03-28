@@ -219,33 +219,62 @@ static void MockBackendSetItemPrice(Backend *this, GtkTreeIter *itemIter, Price 
 
 static void MockBackendSetEmployeesTreeView(Backend *this, GtkTreeView *tv)
 {
-	// TODO
+	// TODO split into separate functions
+	MockBackend *mb = MockBackend(this);
+	GtkCellRenderer *r;
+	GtkTreeViewColumn *col;
+
+	gtk_tree_view_set_model(tv, GTK_TREE_MODEL(mb->priv->employees));
+	// TODO clear columns
+	r = gtk_cell_renderer_text_new();
+	col = gtk_tree_view_column_new_with_attributes("Item", r, "text", 0, NULL);
+	gtk_tree_view_column_set_expand(col, TRUE);		// TODO needed?
+	gtk_tree_view_append_column(tv, col);
+	gtk_tree_view_set_headers_visible(tv, TRUE);
 }
 
 static void MockBackendSetEmployeesIconView(Backend *this, GtkIconView *iv)
 {
 	// TODO
+/*
+		iv.model = this;
+		iv.text_column = 0;
+		iv.pixbuf_column = 1;
+		iv.item_width = 2;		// makes item widths just right (not too wide)
+*/
 }
 
 static void MockBackendAppendEmployee(Backend *this, char *name, char *password)
 {
-	// TODO
+	MockBackend *mb = MockBackend(this);
+	GtkTreeIter iter;
+
+	gtk_list_store_append(mb->priv->employees, &iter);
+	gtk_list_store_set(mb->priv->employees, &iter, 0, name, 1, password, -1);
 }
 
 static void MockBackendDeleteEmployee(Backend *this, GtkTreeIter *employeeIter)
 {
-	// TODO
+	MockBackend *mb = MockBackend(this);
+
+	gtk_list_store_remove(mb->priv->employees, employeeIter);
 }
 
 static char *MockBackendEmployeeName(Backend *this, GtkTreeIter *employeeIter)
 {
-	// TODO
-	return NULL;
+	MockBackend *mb = MockBackend(this);
+	char *name;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(mb->priv->employees), employeeIter, 0, &name, -1);
+	// TODO really?
+	return g_strdup(name);
 }
 
 static void MockBackendSetEmployeeName(Backend *this, GtkTreeIter *employeeIter, char *name)
 {
-	// TODO
+	MockBackend *mb = MockBackend(this);
+
+	gtk_list_store_set(mb->priv->employees, employeeIter, 0, name, -1);
 }
 
 static gboolean MockBackendChangeEmployeePassword(Backend *this, GtkTreeIter *employeeIter, char *oldPassword, char *newPassword)
