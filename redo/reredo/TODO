@@ -11,6 +11,7 @@
 - is our GtkStack being made with any pages initially?
 - make sure MockBackend's GtkListStores aren't being destroyed early
 - switch from g_utf8_strlen() to just strlen()?
+- right-align PriceRenderer text?
 
 
 
