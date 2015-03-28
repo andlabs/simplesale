@@ -56,6 +56,7 @@ static void selectionChanged(GtkTreeSelection *sel, gpointer data)
 		g_object_set(e->price, "price", BackendItemPrice(backend, &(e->priv->selectedIter)), NULL);
 	} else {
 		// clear the fields to make deselection make sense
+		// TODO this causes our signals to fire, and as such, the g_error()s
 		gtk_entry_set_text(GTK_ENTRY(e->name), "");
 		g_object_set(e->price, "price", 0, NULL);
 	}
