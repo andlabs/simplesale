@@ -2,6 +2,7 @@
 #include "simplesale.h"
 
 // TODO selection changed does not fire when deleting the last item (which selects the new last item)...?
+// or rather, selectedIter doesn't change?
 
 struct ItemEditorPriv {
 	gboolean selected;
@@ -91,7 +92,8 @@ GtkWidget *newItemEditor(void)
 	g_signal_connect(e->main, "destroy", G_CALLBACK(destroy), e);
 
 	BackendSetItemsTreeView(backend, GTK_TREE_VIEW(e->list));
-	// TODO search entry (in .ui file?) and signals
+	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(e->list), GTK_ENTRY(e->search));
+	// TODO search should do case-insensitive substring or word-string match
 
 	e->priv->nameChangedHandler = g_signal_connect(e->name, "changed", G_CALLBACK(nameChanged), e);
 	// TODO signal on valid instead?
@@ -99,6 +101,10 @@ GtkWidget *newItemEditor(void)
 	g_signal_connect(e->listSelection, "changed", G_CALLBACK(selectionChanged), e);
 	g_signal_connect(e->addButton, "clicked", G_CALLBACK(addItem), e);
 	g_signal_connect(e->removeButton, "clicked", G_CALLBACK(removeItem), e);
+
+	// get the ball rolling
+	// TODO make this unnecessary
+	selectionChanged(e->listSelection, e);
 
 	return e->main;
 }
