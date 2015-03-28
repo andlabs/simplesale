@@ -189,7 +189,7 @@ static char *MockBackendItemName(Backend *this, GtkTreeIter *itemIter)
 	MockBackend *mb = MockBackend(this);
 	char *name;
 
-	gtk_tree_model_get(GTK_TREE_MODEL(mb), itemIter, 0, &name, -1);
+	gtk_tree_model_get(GTK_TREE_MODEL(mb->priv->items), itemIter, 0, &name, -1);
 	// TODO really?
 	return g_strdup(name);
 }
@@ -199,7 +199,7 @@ static Price MockBackendItemPrice(Backend *this, GtkTreeIter *itemIter)
 	MockBackend *mb = MockBackend(this);
 	Price price;
 
-	gtk_tree_model_get(GTK_TREE_MODEL(mb), itemIter, 1, &price, -1);
+	gtk_tree_model_get(GTK_TREE_MODEL(mb->priv->items), itemIter, 1, &price, -1);
 	return price;
 }
 
