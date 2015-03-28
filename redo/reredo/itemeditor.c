@@ -104,7 +104,8 @@ GtkWidget *newItemEditor(void)
 
 	// get the ball rolling
 	// TODO make this unnecessary
-	selectionChanged(e->listSelection, e);
+	// TODO temporarily disabled due to PriceEntry GtkBuilder bug
+//TODO	selectionChanged(e->listSelection, e);
 
 	return e->main;
 }
