@@ -16,6 +16,7 @@ CFILES = \
 	main.c \
 	manager.c \
 	mockbackend.c \
+	orderwindow.c \
 	othersettings.c \
 	price.c \
 	priceentry.c \
@@ -32,6 +33,7 @@ UIFILES = \
 	itemeditor.ui \
 	logviewer.ui \
 	manager.ui \
+	orderwindow.ui \
 	othersettings.ui
 
 HFILES = \

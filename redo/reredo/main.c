@@ -18,13 +18,15 @@ static const initp initFunctions[] = {
 int main(void)
 {
 	initp *init;
+	extern void orderwindow(void);
 
 	gtk_init(NULL, NULL);		// TODO args?
 	for (init = initFunctions; *init != NULL; init++)
 		(*(*init))();
 	backend = Backend(g_object_new(MockBackendType, NULL));
 //TODO	gtk_main();
-	while (!manager())
-		;
+//	while (!manager())
+//		;
+	orderwindow();
 	return 0;
 }
