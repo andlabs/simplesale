@@ -3,9 +3,9 @@
 
 // TODO
 // - https://git.gnome.org/browse/gedit/tree/gedit/resources/css/gedit-style.css
-// - change the UI to be OrderWindowUI so OrderWindow itself can be a GObject with signals for the shift window
+// - rename OrderWindowUI to OrderWindowGUI?
 
-struct OrderWindowPriv {
+struct OrderWindowUIPriv {
 	GtkWidget *removeItem;
 };
 
@@ -13,11 +13,11 @@ struct OrderWindowPriv {
 
 void orderwindow(void)
 {
-	OrderWindow *o;
+	OrderWindowUI *o;
 	GtkWidget *actionBar;
 	GtkWidget *addNoteButton;
 
-	o = makeOrderWindowFromUIFile();
+	o = makeOrderWindowUIFromUIFile();
 	// TODO grow the window
 
 	// bind header to body; that's more likely to be set properly

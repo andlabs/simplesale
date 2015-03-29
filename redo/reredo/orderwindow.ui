@@ -3,7 +3,7 @@
 <interface>
   <requires lib="gtk+" version="3.16"/>
   <object class="GtkWindow" id="main">
-    <property name="name">OrderWindow</property>
+    <property name="name">OrderWindowUI</property>
     <property name="can_focus">False</property>
     <property name="deletable">False</property>
     <child>
