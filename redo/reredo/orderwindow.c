@@ -33,6 +33,8 @@ void orderwindow(void)
 	gtk_action_bar_pack_end(GTK_ACTION_BAR(actionBar), addNoteButton);
 	gtk_container_add(GTK_CONTAINER(o->box1), actionBar);
 
+	setName0Price1TreeViewColumnLayout(GTK_TREE_VIEW(o->orderList));
+
 	gtk_widget_show_all(o->main);
 	gtk_main();
 }

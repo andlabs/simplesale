@@ -9,6 +9,9 @@ enum {
 	gtkYPadding = 6,
 };
 
+// util.c
+extern void setName0Price1TreeViewColumnLayout(GtkTreeView *);
+
 // price.c
 typedef guint64 Price;
 #define PriceType G_TYPE_UINT64

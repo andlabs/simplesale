@@ -133,26 +133,15 @@ static void MockBackendFileOrder(Backend *this, ShiftHandle shift, Order *order,
 
 static void MockBackendSetItemsTreeView(Backend *this, GtkTreeView *tv)
 {
-	// TODO split into separate functions
 	MockBackend *mb = MockBackend(this);
-	GtkCellRenderer *r;
-	GtkTreeViewColumn *col;
 
 	gtk_tree_view_set_model(tv, GTK_TREE_MODEL(mb->priv->items));
-	// TODO clear columns
-	r = gtk_cell_renderer_text_new();
-	col = gtk_tree_view_column_new_with_attributes("Item", r, "text", 0, NULL);
-	gtk_tree_view_column_set_expand(col, TRUE);
-	gtk_tree_view_append_column(tv, col);
-	r = newPriceRenderer();
-	col = gtk_tree_view_column_new_with_attributes("Price", r, "price", 1, NULL);
-	gtk_tree_view_append_column(tv, col);
-	gtk_tree_view_set_headers_visible(tv, TRUE);
+	setName0Price1TreeViewColumnLayout(tv);
 }
 
 static void MockBackendSetItemsIconView(Backend *this, GtkIconView *iv)
 {
-	// TODO split into separate functions
+	// TODO split into separate functions?
 	MockBackend *mb = MockBackend(this);
 	GtkCellLayout *layout;
 	GtkCellRenderer *r;
