@@ -35,6 +35,8 @@ void orderwindow(void)
 
 	setName0Price1TreeViewColumnLayout(GTK_TREE_VIEW(o->orderList));
 
+	BackendSetItemsIconView(backend, GTK_ICON_VIEW(o->items));
+
 	gtk_widget_show_all(o->main);
 	gtk_main();
 }
