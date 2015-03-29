@@ -15,7 +15,7 @@ static const initp initFunctions[] = {
 	NULL,
 };
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	initp *init;
 	extern void orderwindow(void);
@@ -25,8 +25,10 @@ int main(void)
 		(*(*init))();
 	backend = Backend(g_object_new(MockBackendType, NULL));
 //TODO	gtk_main();
-//	while (!manager())
-//		;
-	orderwindow();
+	if (argc == 2 && strcmp(argv[1], "manager") == 0)
+		while (!manager())
+			;
+	else
+		orderwindow();
 	return 0;
 }

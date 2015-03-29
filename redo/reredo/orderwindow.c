@@ -18,6 +18,7 @@ void orderwindow(void)
 	GtkWidget *addNoteButton;
 
 	o = makeOrderWindowFromUIFile();
+	// TODO grow the window
 
 	// bind header to body; that's more likely to be set properly
 	g_object_bind_property(o->headerPaned, "position",
