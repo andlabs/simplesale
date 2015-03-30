@@ -12,6 +12,7 @@
 - make sure MockBackend's GtkListStores aren't being destroyed early
 - switch from g_utf8_strlen() to just strlen()?
 - right-align PriceRenderer text?
+- reduce number of pixels between order list and item icon view in order window?
 
 
 
