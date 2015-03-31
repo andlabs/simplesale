@@ -28,7 +28,12 @@ int main(int argc, char *argv[])
 	if (argc == 2 && strcmp(argv[1], "manager") == 0)
 		while (!manager())
 			;
-	else
-		orderwindow();
+	else {
+		OrderWindow *o;
+
+		o = newOrderWindow();
+		OrderWindowShow(o);
+		gtk_main();
+	}
 	return 0;
 }

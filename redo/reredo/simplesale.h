@@ -102,6 +102,26 @@ struct MockBackendClass {
 };
 extern GType MockBackend_get_type(void);
 
+// orderwindow.c
+#define OrderWindowType (OrderWindow_get_type())
+#define OrderWindow(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), OrderWindowType, OrderWindow))
+#define IsOrderWindow(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), OrderWindowType))
+#define OrderWindowClass(class) (G_TYPE_CHECK_CLASS_CAST((class), OrderWindowType, OrderWindowClass))
+#define IsOrderWindowClass(class) (G_TYPE_CHECK_CLASS_TYPE((class), OrderWindow))
+#define GetOrderWindowClass(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), OrderWindowType, OrderWindowClass))
+typedef struct OrderWindow OrderWindow;
+typedef struct OrderWindowClass OrderWindowClass;
+struct OrderWindow {
+	GtkEntry parent_instance;
+	struct OrderWindowPriv *priv;
+};
+struct OrderWindowClass {
+	GtkEntryClass parent_class;
+};
+extern GType OrderWindow_get_type(void);
+extern OrderWindow *newOrderWindow(void);
+extern void OrderWindowShow(OrderWindow *);
+
 // manager.c
 extern gboolean manager(void);
 
