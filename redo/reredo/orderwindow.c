@@ -6,6 +6,8 @@
 // - rename OrderWindowUI to OrderWindowGUI?
 // - macroize o->priv->o and o->priv->ow
 // - a better way would be to make OrderWindow a subclass of GtkWindow and make o->priv->ow->main the OrderWindow itself but that would probably require some tooling/code generator muckery
+// - don't let empty notes pass through
+// - make sure the problem with the item list removal doesn't happen here
 
 struct OrderWindowUIPriv {
 };
@@ -40,6 +42,39 @@ static void removeItem(GtkToolButton *b, gpointer data)
 	// TODO update totals
 }
 
+static void addNote(GtkToolButton *b, gpointer data)
+{
+	OrderWindow *o = OrderWindow(data);
+	GtkWidget *message;
+	GtkWidget *note;
+	GtkWidget *msgarea;
+
+	message = gtk_message_dialog_new(GTK_WINDOW(o->priv->ow->main), GTK_DIALOG_MODAL,
+		// TODO really GTK_MESSAGE_QUESTION?
+		GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
+		"Enter the note to add to the order below.");
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message),
+		"It must fit on the receipt, so keep it short.");
+	note = gtk_entry_new();
+	gtk_widget_set_hexpand(note, TRUE);
+	gtk_widget_set_halign(note, GTK_ALIGN_FILL);
+	msgarea = gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(message));
+	gtk_container_add(GTK_CONTAINER(msgarea), note);
+	gtk_widget_show_all(note);		// not shown by default by message dialog
+	if (gtk_dialog_run(GTK_DIALOG(message)) == GTK_RESPONSE_OK)
+		OrderAppendNote(o->priv->o, gtk_entry_get_text(GTK_ENTRY(note)));
+	gtk_widget_destroy(message);
+}
+
+static void orderListSelected(GtkTreeSelection *sel, gpointer data)
+{
+	OrderWindow *o = OrderWindow(data);
+	gboolean selected;
+
+	selected = gtk_tree_selection_get_selected(o->priv->ow->orderListSelection, NULL, NULL);
+	gtk_widget_set_sensitive(o->priv->ow->removeItem, selected);
+}
+
 static void OrderWindow_init(OrderWindow *o)
 {
 	Order *order;
@@ -56,9 +91,14 @@ static void OrderWindow_init(OrderWindow *o)
 
 	g_signal_connect(ow->items, "item-activated", G_CALLBACK(addItem), o);
 	g_signal_connect(ow->removeItem, "clicked", G_CALLBACK(removeItem), o);
+	g_signal_connect(ow->addNote, "clicked", G_CALLBACK(addNote), o);
+	g_signal_connect(ow->orderListSelection, "changed", G_CALLBACK(orderListSelected), o);
 
 	o->priv->o = order;
 	o->priv->ow = ow;
+
+	// TODO necessary?
+	orderListSelected(ow->orderListSelection, o);
 }
 
 static void OrderWindow_dispose(GObject *obj)

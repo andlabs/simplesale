@@ -1,6 +1,9 @@
 // 24 march 2015
 #include "simplesale.h"
 
+// TODO
+// - make sure the problem with the item editor removal doesn't happen here
+
 struct EmployeeEditorPriv {
 	gboolean selected;
 	GtkTreeIter selectedIter;		// TODO rename selection?
