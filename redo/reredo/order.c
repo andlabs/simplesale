@@ -73,7 +73,7 @@ void OrderAppendNote(Order *o, char *note)
 	g_free(xnote);
 }
 
-void OrderRemoveItem(Order *o, GtkTreeIter *iter)
+void OrderDeleteItem(Order *o, GtkTreeIter *iter)
 {
 	Price price;
 

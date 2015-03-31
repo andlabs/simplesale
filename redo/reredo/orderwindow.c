@@ -19,6 +19,27 @@ struct OrderWindowPriv {
 
 G_DEFINE_TYPE(OrderWindow, OrderWindow, G_TYPE_OBJECT)
 
+static void addItem(GtkIconView *iv, GtkTreePath *path, gpointer data)
+{
+	OrderWindow *o = OrderWindow(data);
+	GtkTreeIter iter;
+
+	BackendItemsPathToIter(backend, path, &iter);
+	OrderAppendItem(o->priv->o, &iter);
+	// TODO update total/subtotal labels here?
+}
+
+static void removeItem(GtkToolButton *b, gpointer data)
+{
+	OrderWindow *o = OrderWindow(data);
+	GtkTreeIter iter;
+
+	if (gtk_tree_selection_get_selected(o->priv->ow->orderListSelection, NULL, &iter) == FALSE)
+		g_error("order window remove item button clicked with no item selected");
+	OrderDeleteItem(o->priv->o, &iter);
+	// TODO update totals
+}
+
 static void OrderWindow_init(OrderWindow *o)
 {
 	Order *order;
@@ -32,6 +53,9 @@ static void OrderWindow_init(OrderWindow *o)
 
 	OrderSetTreeView(order, GTK_TREE_VIEW(ow->orderList));
 	BackendSetItemsIconView(backend, GTK_ICON_VIEW(ow->items));
+
+	g_signal_connect(ow->items, "item-activated", G_CALLBACK(addItem), o);
+	g_signal_connect(ow->removeItem, "clicked", G_CALLBACK(removeItem), o);
 
 	o->priv->o = order;
 	o->priv->ow = ow;

@@ -73,7 +73,7 @@ extern void OrderSetCustomerName(Order *, char *);
 extern void OrderSetTreeView(Order *, GtkTreeView *);
 extern void OrderAppendItem(Order *, GtkTreeIter *);
 extern void OrderAppendNote(Order *, char *);
-extern void OrderRemoveItem(Order *, GtkTreeIter *);
+extern void OrderDeleteItem(Order *, GtkTreeIter *);
 extern Price OrderTotal(Order *);
 extern Price OrderSubtotal(Order *);
 
