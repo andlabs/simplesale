@@ -206,6 +206,13 @@ static void MockBackendSetItemPrice(Backend *this, GtkTreeIter *itemIter, Price 
 	gtk_list_store_set(mb->priv->items, itemIter, 1, price, -1);
 }
 
+static void MockBackendItemsPathToIter(Backend *this, GtkTreePath *path, GtkTreeIter *iter)
+{
+	MockBackend *mb = MockBackend(this);
+
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(mb->priv->items), iter, path);
+}
+
 static void MockBackendSetEmployeesTreeView(Backend *this, GtkTreeView *tv)
 {
 	// TODO split into separate functions
@@ -338,6 +345,7 @@ static void MockBackend_Backend_init(BackendInterface *iface)
 	iface->ItemPrice = MockBackendItemPrice;
 	iface->SetItemName = MockBackendSetItemName;
 	iface->SetItemPrice = MockBackendSetItemPrice;
+	iface->ItemsPathToIter = MockBackendItemsPathToIter;
 	iface->SetEmployeesTreeView = MockBackendSetEmployeesTreeView;
 	iface->SetEmployeesIconView = MockBackendSetEmployeesIconView;
 	iface->AppendEmployee = MockBackendAppendEmployee;

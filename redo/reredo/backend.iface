@@ -15,6 +15,7 @@ i Backend
 	m void FileOrder ShiftHandle shift Order* order gboolean takeout
 
 	# item management
+	# TODO standardize plurality
 	m void SetItemsTreeView GtkTreeView* tv
 	m void SetItemsIconView GtkIconView* iv
 	m void AppendItem char* name Price price
@@ -23,8 +24,10 @@ i Backend
 	m Price ItemPrice GtkTreeIter* itemIter
 	m void SetItemName GtkTreeIter* itemIter char* name
 	m void SetItemPrice GtkTreeIter* itemIter Price price
+	m void ItemsPathToIter GtkTreePath* path GtkTreeIter* iter
 
 	# employee management
+	# TODO standardize plurality
 	m void SetEmployeesTreeView GtkTreeView* tv
 	m void SetEmployeesIconView GtkIconView* iv
 	m void AppendEmployee char* name char* password
