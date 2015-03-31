@@ -63,7 +63,21 @@ extern GtkCellRenderer *newPriceRenderer(void);
 
 // TODO sort this out
 typedef gint64 ShiftHandle;		// good for g_get_real_time()
+
+// order.c
 typedef struct Order Order;
+extern Order *newOrder(void);
+extern void deleteOrder(Order *);
+extern char *OrderCustomerName(Order *);
+extern void OrderSetCustomerName(Order *, char *);
+extern void OrderSetTreeView(Order *, GtkTreeView *);
+extern void OrderAppendItem(Order *, GtkTreeIter *);
+extern void OrderAppendNote(Order *, char *);
+extern void OrderRemoveItem(Order *, GtkTreeIter *);
+extern Price OrderTotal(Order *);
+extern Price OrderSubtotal(Order *);
+
+// TODO sort this out
 typedef struct LogEntry LogEntry;
 
 // zbackend.c

@@ -1,5 +1,6 @@
 # TODO
 # - remove $(OUTFILE) in make clean?
+# - fix wonky dependency testing and rebuilding
 
 OBJDIR = .objs
 OUTFILE = simplesale
@@ -16,6 +17,7 @@ CFILES = \
 	main.c \
 	manager.c \
 	mockbackend.c \
+	order.c \
 	orderwindow.c \
 	othersettings.c \
 	price.c \
