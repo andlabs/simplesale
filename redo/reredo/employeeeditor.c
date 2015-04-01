@@ -39,7 +39,6 @@ struct EmployeeEditorPrivate {
 G_DEFINE_TYPE_WITH_CODE(EmployeeEditor, EmployeeEditor, GTK_TYPE_BOX,
 	G_ADD_PRIVATE(EmployeeEditor))
 
-
 static void nameChanged(GtkEditable *editable, gpointer data)
 {
 	EmployeeEditor *e = (EmployeeEditor *) data;
