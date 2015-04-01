@@ -41,7 +41,6 @@ UIFILES = \
 
 HFILES = \
 	simplesale.h \
-	$(UIFILES:%.ui=z%.h) \
 	$(IFACEFILES:%.iface=z%.h)
 # see http://stackoverflow.com/a/29223637/3408572
 .PRECIOUS: $(HFILES)
@@ -72,9 +71,6 @@ zresources.c: gresources.xml $(UIFILES)
 
 z%.c: %.iface
 	go run tools/iface2cdecl.go $< cfile $@
-
-z%.h: %.ui
-	go run tools/ui2cdecl.go $< $@ /simplesale/$<
 
 z%.h: %.iface
 	go run tools/iface2cdecl.go $< hfile $@
