@@ -2,24 +2,28 @@
 #include "simplesale.h"
 
 // TODO
-// - https://git.gnome.org/browse/gedit/tree/gedit/resources/css/gedit-style.css
-// - rename OrderWindowUI to OrderWindowGUI?
-// - macroize o->priv->o and o->priv->ow
-// - a better way would be to make OrderWindow a subclass of GtkWindow and make o->priv->ow->main the OrderWindow itself but that would probably require some tooling/code generator muckery
 // - don't let empty notes pass through
 // - make sure the problem with the item list removal doesn't happen here
 
-struct OrderWindowUIPriv {
-};
+typedef struct OrderWindowPrivate OrderWindowPrivate;
 
-#include "zorderwindow.h"
-
-struct OrderWindowPriv {
+struct OrderWindowPrivate {
 	Order *o;
-	OrderWindowUI *ow;
+	GtkWidget *orderList;
+	GtkTreeSelection *orderListSelection;
+	GtkWidget *removeItem;
+	GtkWidget *addNote;
+	GtkWidget *search;
+	GtkWidget *items;
+	GtkWidget *customerName;
+	GtkWidget *tableButton;
+	GtkWidget *cancel;
+	GtkWidget *payLater;
+	GtkWidget *payNow;
 };
 
-G_DEFINE_TYPE(OrderWindow, OrderWindow, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_CODE(OrderWindow, OrderWindow, GTK_TYPE_WINDOW,
+	G_ADD_PRIVATE(OrderWindow))
 
 static void addItem(GtkIconView *iv, GtkTreePath *path, gpointer data)
 {
@@ -36,7 +40,7 @@ static void removeItem(GtkToolButton *b, gpointer data)
 	OrderWindow *o = OrderWindow(data);
 	GtkTreeIter iter;
 
-	if (gtk_tree_selection_get_selected(o->priv->ow->orderListSelection, NULL, &iter) == FALSE)
+	if (gtk_tree_selection_get_selected(o->priv->orderListSelection, NULL, &iter) == FALSE)
 		g_error("order window remove item button clicked with no item selected");
 	OrderDeleteItem(o->priv->o, &iter);
 	// TODO update totals
@@ -49,7 +53,7 @@ static void addNote(GtkToolButton *b, gpointer data)
 	GtkWidget *note;
 	GtkWidget *msgarea;
 
-	message = gtk_message_dialog_new(GTK_WINDOW(o->priv->ow->main), GTK_DIALOG_MODAL,
+	message = gtk_message_dialog_new(GTK_WINDOW(o), GTK_DIALOG_MODAL,
 		// TODO really GTK_MESSAGE_QUESTION?
 		GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
 		"Enter the note to add to the order below.");
@@ -71,34 +75,29 @@ static void orderListSelected(GtkTreeSelection *sel, gpointer data)
 	OrderWindow *o = OrderWindow(data);
 	gboolean selected;
 
-	selected = gtk_tree_selection_get_selected(o->priv->ow->orderListSelection, NULL, NULL);
-	gtk_widget_set_sensitive(o->priv->ow->removeItem, selected);
+	selected = gtk_tree_selection_get_selected(o->priv->orderListSelection, NULL, NULL);
+	gtk_widget_set_sensitive(o->priv->removeItem, selected);
 }
 
 static void OrderWindow_init(OrderWindow *o)
 {
-	Order *order;
-	OrderWindowUI *ow;
+	o->priv = OrderWindow_get_instance_private(o);
 
-	o->priv = G_TYPE_INSTANCE_GET_PRIVATE(o, OrderWindowType, struct OrderWindowPriv);
-
-	order = newOrder();
-	ow = makeOrderWindowUIFromUIFile();
+	gtk_widget_init_template(GTK_WIDGET(o));
 	// TODO grow the window
 
-	OrderSetTreeView(order, GTK_TREE_VIEW(ow->orderList));
-	BackendSetItemsIconView(backend, GTK_ICON_VIEW(ow->items));
+	o->priv->o = newOrder();
 
-	g_signal_connect(ow->items, "item-activated", G_CALLBACK(addItem), o);
-	g_signal_connect(ow->removeItem, "clicked", G_CALLBACK(removeItem), o);
-	g_signal_connect(ow->addNote, "clicked", G_CALLBACK(addNote), o);
-	g_signal_connect(ow->orderListSelection, "changed", G_CALLBACK(orderListSelected), o);
+	OrderSetTreeView(o->priv->o, GTK_TREE_VIEW(o->priv->orderList));
+	BackendSetItemsIconView(backend, GTK_ICON_VIEW(o->priv->items));
 
-	o->priv->o = order;
-	o->priv->ow = ow;
+	g_signal_connect(o->priv->items, "item-activated", G_CALLBACK(addItem), o);
+	g_signal_connect(o->priv->removeItem, "clicked", G_CALLBACK(removeItem), o);
+	g_signal_connect(o->priv->addNote, "clicked", G_CALLBACK(addNote), o);
+	g_signal_connect(o->priv->orderListSelection, "changed", G_CALLBACK(orderListSelected), o);
 
 	// TODO necessary?
-	orderListSelected(ow->orderListSelection, o);
+	orderListSelected(o->priv->orderListSelection, o);
 }
 
 static void OrderWindow_dispose(GObject *obj)
@@ -114,26 +113,34 @@ static void OrderWindow_finalize(GObject *obj)
 
 	G_OBJECT_CLASS(OrderWindow_parent_class)->finalize(obj);
 
-	// TODO free these here?
-	gtk_widget_destroy(o->priv->ow->main);
-	g_free(o->priv->ow);
+	// TODO free this here?
 	deleteOrder(o->priv->o);
 }
 
 static void OrderWindow_class_init(OrderWindowClass *class)
 {
-	g_type_class_add_private(class, sizeof (struct OrderWindowPriv));
-
 	G_OBJECT_CLASS(class)->dispose = OrderWindow_dispose;
 	G_OBJECT_CLASS(class)->finalize = OrderWindow_finalize;
+
+	// TODO macroize filename somehow?
+	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/simplesale/orderwindow.ui");
+#define T(name) gtk_widget_class_bind_template_child_private(GTK_WIDGET_CLASS(class), OrderWindow, name)
+	T(orderList);
+	T(orderListSelection);
+	T(removeItem);
+	T(addNote);
+	T(search);
+	T(items);
+	T(customerName);
+	T(tableButton);
+	T(cancel);
+	T(payLater);
+	T(payNow);
+#undef T
 }
 
+// TODO return GtkWidget instead?
 OrderWindow *newOrderWindow(void)
 {
 	return OrderWindow(g_object_new(OrderWindowType, NULL));
-}
-
-void OrderWindowShow(OrderWindow *o)
-{
-	gtk_widget_show_all(o->priv->ow->main);
 }

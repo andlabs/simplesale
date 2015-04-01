@@ -112,15 +112,14 @@ extern GType MockBackend_get_type(void);
 typedef struct OrderWindow OrderWindow;
 typedef struct OrderWindowClass OrderWindowClass;
 struct OrderWindow {
-	GtkEntry parent_instance;
-	struct OrderWindowPriv *priv;
+	GtkWindow parent_instance;
+	struct OrderWindowPrivate *priv;
 };
 struct OrderWindowClass {
-	GtkEntryClass parent_class;
+	GtkWindowClass parent_class;
 };
 extern GType OrderWindow_get_type(void);
 extern OrderWindow *newOrderWindow(void);
-extern void OrderWindowShow(OrderWindow *);
 
 // manager.c
 extern gboolean manager(void);

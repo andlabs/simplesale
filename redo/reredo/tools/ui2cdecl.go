@@ -152,7 +152,7 @@ func main() {
 	f(iface.Objects)
 
 	if typename == "" {
-		die("error: type name not in .ui file")
+//TODO		die("error: type name not in .ui file")
 	}
 
 	t, err := template.New("outTemplate").Parse(outTemplate)

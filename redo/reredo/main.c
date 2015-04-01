@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 		OrderWindow *o;
 
 		o = newOrderWindow();
-		OrderWindowShow(o);
+		gtk_widget_show_all(GTK_WIDGET(o));
 		gtk_main();
 	}
 	return 0;
