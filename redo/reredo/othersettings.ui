@@ -7,8 +7,7 @@
     <property name="step_increment">0.050000000000000003</property>
     <property name="page_increment">1</property>
   </object>
-  <object class="GtkGrid" id="main">
-    <property name="name">OtherSettings</property>
+  <template class="OtherSettings" parent="GtkGrid">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="row_spacing">6</property>
@@ -56,5 +55,5 @@
     <child>
       <placeholder/>
     </child>
-  </object>
+  </template>
 </interface>
