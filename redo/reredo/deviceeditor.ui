@@ -2,8 +2,7 @@
 <!-- Generated with glade 3.18.1 -->
 <interface>
   <requires lib="gtk+" version="3.16"/>
-  <object class="GtkBox" id="main">
-    <property name="name">DeviceEditor</property>
+  <template class="DeviceEditor" parent="GtkBox">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
@@ -87,7 +86,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="button1">
+          <object class="GtkButton" id="kitchenTest">
             <property name="label" translatable="yes">Test Page</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -105,5 +104,5 @@
         <property name="position">1</property>
       </packing>
     </child>
-  </object>
+  </template>
 </interface>
