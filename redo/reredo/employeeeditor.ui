@@ -2,8 +2,7 @@
 <!-- Generated with glade 3.18.1 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <object class="GtkBox" id="main">
-    <property name="name">EmployeeEditor</property>
+  <template class="EmployeeEditor" parent="GtkBox">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
@@ -165,5 +164,5 @@
         <property name="position">1</property>
       </packing>
     </child>
-  </object>
+  </template>
 </interface>
