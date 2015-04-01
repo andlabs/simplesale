@@ -122,7 +122,23 @@ extern GType OrderWindow_get_type(void);
 extern OrderWindow *newOrderWindow(void);
 
 // manager.c
-extern gboolean manager(void);
+#define ManagerType (Manager_get_type())
+#define Manager(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), ManagerType, Manager))
+#define IsManager(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), ManagerType))
+#define ManagerClass(class) (G_TYPE_CHECK_CLASS_CAST((class), ManagerType, ManagerClass))
+#define IsManagerClass(class) (G_TYPE_CHECK_CLASS_TYPE((class), Manager))
+#define GetManagerClass(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), ManagerType, ManagerClass))
+typedef struct Manager Manager;
+typedef struct ManagerClass ManagerClass;
+struct Manager {
+	GtkWindow parent_instance;
+	struct ManagerPrivate *priv;
+};
+struct ManagerClass {
+	GtkWindowClass parent_class;
+};
+extern GType Manager_get_type(void);
+extern Manager *newManager(void);
 
 // itemeditor.c
 extern GtkWidget *newItemEditor(void);

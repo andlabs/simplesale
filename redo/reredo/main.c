@@ -25,10 +25,13 @@ int main(int argc, char *argv[])
 		(*(*init))();
 	backend = Backend(g_object_new(MockBackendType, NULL));
 //TODO	gtk_main();
-	if (argc == 2 && strcmp(argv[1], "manager") == 0)
-		while (!manager())
-			;
-	else {
+	if (argc == 2 && strcmp(argv[1], "manager") == 0) {
+		Manager *m;
+
+		m = newManager();
+		gtk_widget_show_all(GTK_WIDGET(m));
+		gtk_main();
+	} else {
 		OrderWindow *o;
 
 		o = newOrderWindow();

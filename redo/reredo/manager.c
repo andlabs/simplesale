@@ -1,10 +1,19 @@
 // 23 march 2015
 #include "simplesale.h"
 
-struct ManagerPriv {
+typedef struct ManagerPrivate ManagerPrivate;
+
+struct ManagerPrivate {
+	Order *o;
+	GtkWidget *pageSwitcher;
+	GtkWidget *toLogin;
+	GtkWidget *quit;
+	GtkWidget *pageStack;
+	GtkWidget *about;
 };
 
-#include "zmanager.h"
+G_DEFINE_TYPE_WITH_CODE(Manager, Manager, GTK_TYPE_WINDOW,
+	G_ADD_PRIVATE(Manager))
 
 static const struct {
 	char *icon;
@@ -23,17 +32,15 @@ static const struct {
 
 static void toLoginClicked(GtkButton *b, gpointer data)
 {
-	gboolean *doQuit = (gboolean *) data;
+	Manager *m = Manager(data);
 
-	*doQuit = FALSE;
 	gtk_main_quit();
 }
 
 static void quitClicked(GtkButton *b, gpointer data)
 {
-	gboolean *doQuit = (gboolean *) data;
+	Manager *m = Manager(data);
 
-	*doQuit = TRUE;
 	gtk_main_quit();
 }
 
@@ -44,11 +51,11 @@ static const char *authors[] = {
 
 static void aboutClicked(GtkButton *button, gpointer data)
 {
-	Manager *m = (Manager *) data;
+	Manager *m = Manager(data);
 	GtkWidget *a;
 
 	a = gtk_about_dialog_new();
-	gtk_window_set_transient_for(GTK_WINDOW(a), GTK_WINDOW(m->main));
+	gtk_window_set_transient_for(GTK_WINDOW(a), GTK_WINDOW(m));
 	gtk_window_set_modal(GTK_WINDOW(a), TRUE);
 	gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(a), "simplesale");		// TODO
 	gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(a), "A dead-simple point of sale system.");
@@ -59,28 +66,62 @@ static void aboutClicked(GtkButton *button, gpointer data)
 	gtk_widget_destroy(a);
 }
 
-gboolean manager(void)
+static void Manager_init(Manager *m)
 {
-	Manager *m;
-	gboolean doQuit;
 	int i;
 	GtkWidget *page;
 
-	m = makeManagerFromUIFile();
+	m->priv = Manager_get_instance_private(m);
 
-	g_signal_connect(m->toLogin, "clicked", G_CALLBACK(toLoginClicked), &doQuit);
-	g_signal_connect(m->quit, "clicked", G_CALLBACK(quitClicked), &doQuit);
+	gtk_widget_init_template(GTK_WIDGET(m));
+	// TODO grow the window
+
+	g_signal_connect(m->priv->toLogin, "clicked", G_CALLBACK(toLoginClicked), m);
+	g_signal_connect(m->priv->quit, "clicked", G_CALLBACK(quitClicked), m);
 
 	for (i = 0; pageList[i].icon != NULL; i++) {
 		page = (*(pageList[i].new))();
-		gtk_stack_add_titled(GTK_STACK(m->pageStack), page, pageList[i].label, pageList[i].label);
+		gtk_stack_add_titled(GTK_STACK(m->priv->pageStack), page, pageList[i].label, pageList[i].label);
 	}
 
-	g_signal_connect(m->about, "clicked", G_CALLBACK(aboutClicked), m);
+	g_signal_connect(m->priv->about, "clicked", G_CALLBACK(aboutClicked), m);
+}
 
-	gtk_widget_show_all(m->main);
-	gtk_main();
-	gtk_widget_destroy(m->main);
-	g_free(m);
-	return doQuit;
+static void Manager_dispose(GObject *obj)
+{
+	G_OBJECT_CLASS(Manager_parent_class)->dispose(obj);
+
+	// TODO free anything here?
+}
+
+static void Manager_finalize(GObject *obj)
+{
+	Manager *o = Manager(obj);
+
+	G_OBJECT_CLASS(Manager_parent_class)->finalize(obj);
+
+	// TODO free this here?
+	deleteOrder(o->priv->o);
+}
+
+static void Manager_class_init(ManagerClass *class)
+{
+	G_OBJECT_CLASS(class)->dispose = Manager_dispose;
+	G_OBJECT_CLASS(class)->finalize = Manager_finalize;
+
+	// TODO macroize filename somehow?
+	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/simplesale/manager.ui");
+#define T(name) gtk_widget_class_bind_template_child_private(GTK_WIDGET_CLASS(class), Manager, name)
+	T(pageSwitcher);
+	T(toLogin);
+	T(quit);
+	T(pageStack);
+	T(about);
+#undef T
+}
+
+// TODO return GtkWidget instead?
+Manager *newManager(void)
+{
+	return Manager(g_object_new(ManagerType, NULL));
 }
