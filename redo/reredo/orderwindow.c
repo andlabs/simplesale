@@ -79,6 +79,24 @@ static void orderListSelected(GtkTreeSelection *sel, gpointer data)
 	gtk_widget_set_sensitive(o->priv->removeItem, selected);
 }
 
+static void payNow(GtkButton *b, gpointer data)
+{
+	OrderWindow *o = OrderWindow(data);
+	GtkWidget *p;
+
+	// TODO make sure we're actually buying something
+	// TODO disable the button until then?
+	p = newPayDialog();
+	// TODO
+	gtk_window_set_transient_for(GTK_WINDOW(p), GTK_WINDOW(o));
+	gtk_window_set_modal(GTK_WINDOW(p), TRUE);
+	printf("%d\n", gtk_dialog_run(GTK_DIALOG(p)));
+	gtk_widget_destroy(p);
+	// TODO actually implement this properly
+}
+
+// TODO payLater, cancel
+
 static void OrderWindow_init(OrderWindow *o)
 {
 	o->priv = OrderWindow_get_instance_private(o);
@@ -95,6 +113,7 @@ static void OrderWindow_init(OrderWindow *o)
 	g_signal_connect(o->priv->removeItem, "clicked", G_CALLBACK(removeItem), o);
 	g_signal_connect(o->priv->addNote, "clicked", G_CALLBACK(addNote), o);
 	g_signal_connect(o->priv->orderListSelection, "changed", G_CALLBACK(orderListSelected), o);
+	g_signal_connect(o->priv->payNow, "clicked", G_CALLBACK(payNow), o);
 
 	// TODO necessary?
 	orderListSelected(o->priv->orderListSelection, o);

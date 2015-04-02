@@ -140,8 +140,8 @@ struct PayDialogClass {
 extern GType PayDialog_get_type(void);
 extern GtkWidget *newPayDialog(void);
 enum {
-	PayDialogResponsePayNow = 1,
-	PayDialogResponsePayLater,
+	PayDialogResponsePayCash = 1,
+	PayDialogResponsePayCredit,
 };
 
 // manager.c

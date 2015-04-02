@@ -17,11 +17,37 @@ struct PayDialogPrivate {
 G_DEFINE_TYPE_WITH_CODE(PayDialog, PayDialog, GTK_TYPE_DIALOG,
 	G_ADD_PRIVATE(PayDialog))
 
+static void payCash(GtkButton *b, gpointer data)
+{
+	PayDialog *p = PayDialog(data);
+
+	// TODO check that we are paying enough
+	gtk_dialog_response(GTK_DIALOG(p), PayDialogResponsePayCash);
+}
+
+static void payCredit(GtkButton *b, gpointer data)
+{
+	PayDialog *p = PayDialog(data);
+
+	gtk_dialog_response(GTK_DIALOG(p), PayDialogResponsePayCredit);
+}
+
+static void cancel(GtkButton *b, gpointer data)
+{
+	PayDialog *p = PayDialog(data);
+
+	gtk_dialog_response(GTK_DIALOG(p), GTK_RESPONSE_CANCEL);
+}
+
 static void PayDialog_init(PayDialog *p)
 {
 	p->priv = PayDialog_get_instance_private(p);
 
 	gtk_widget_init_template(GTK_WIDGET(p));
+
+	g_signal_connect(p->priv->payCash, "clicked", G_CALLBACK(payCash), p);
+	g_signal_connect(p->priv->payCredit, "clicked", G_CALLBACK(payCredit), p);
+	g_signal_connect(p->priv->cancel, "clicked", G_CALLBACK(cancel), p);
 }
 
 static void PayDialog_dispose(GObject *obj)
