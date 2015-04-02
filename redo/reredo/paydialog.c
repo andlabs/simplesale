@@ -4,6 +4,14 @@
 typedef struct PayDialogPrivate PayDialogPrivate;
 
 struct PayDialogPrivate {
+	GtkWidget *cost;
+	GtkWidget *paid;
+	GtkWidget *b[10];
+	GtkWidget *bPoint;
+	GtkWidget *bClear;
+	GtkWidget *payCash;
+	GtkWidget *payCredit;
+	GtkWidget *cancel;
 };
 
 G_DEFINE_TYPE_WITH_CODE(PayDialog, PayDialog, GTK_TYPE_DIALOG,
@@ -28,14 +36,31 @@ static void PayDialog_finalize(GObject *obj)
 
 static void PayDialog_class_init(PayDialogClass *class)
 {
+	int i;
+	char s[3] = { 'b', '#', '\0' };
+	gssize off;
+
 	G_OBJECT_CLASS(class)->dispose = PayDialog_dispose;
 	G_OBJECT_CLASS(class)->finalize = PayDialog_finalize;
 
 	// TODO macroize filename somehow?
 	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/simplesale/paydialog.ui");
 #define T(name) gtk_widget_class_bind_template_child_private(GTK_WIDGET_CLASS(class), PayDialog, name)
-//TODO	T(tax);
-//TODO	T(changeManagerPassword);
+	T(cost);
+	T(paid);
+	// TODO verify that this is safe
+	off = G_PRIVATE_OFFSET(PayDialog, b);
+	for (i = 0; i < 10; i++) {
+		s[1] = i + '0';
+		gtk_widget_class_bind_template_child_full(GTK_WIDGET_CLASS(class), s, FALSE, off);
+		off += sizeof (GtkWidget *);
+	}
+	GtkWidget *b[10];
+	T(bPoint);
+	T(bClear);
+	T(payCash);
+	T(payCredit);
+	T(cancel);
 #undef T
 }
 
