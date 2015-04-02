@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
 	<gresource prefix="/simplesale">
+		<file compressed="true">orderwindow.ui</file>
+		<file compressed="true">paydialog.ui</file>
 		<file compressed="true">manager.ui</file>
 		<file compressed="true">itemeditor.ui</file>
 		<file compressed="true">employeeeditor.ui</file>
 		<file compressed="true">deviceeditor.ui</file>
-		<file compressed="true">orderwindow.ui</file>
 		<file compressed="true">othersettings.ui</file>
 		<file compressed="true">addremovemoney.ui</file>
 		<file compressed="true">logviewer.ui</file>

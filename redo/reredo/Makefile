@@ -20,6 +20,7 @@ CFILES = \
 	order.c \
 	orderwindow.c \
 	othersettings.c \
+	paydialog.c \
 	price.c \
 	priceentry.c \
 	pricerenderer.c \

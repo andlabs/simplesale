@@ -31,11 +31,17 @@ int main(int argc, char *argv[])
 		m = newManager();
 		gtk_widget_show_all(GTK_WIDGET(m));
 		gtk_main();
-	} else {
+	} else if (argc == 2 && strcmp(argv[1], "order") == 0) {
 		OrderWindow *o;
 
 		o = newOrderWindow();
 		gtk_widget_show_all(GTK_WIDGET(o));
+		gtk_main();
+	} else {
+		GtkWidget *widget;
+
+		widget = newPayDialog();
+		gtk_widget_show_all(widget);
 		gtk_main();
 	}
 	return 0;

@@ -3,8 +3,7 @@
 <interface>
   <requires lib="gtk+" version="3.16"/>
   <requires lib="simplesale" version="0.0"/>
-  <object class="GtkDialog" id="main">
-    <property name="name">PayDialog</property>
+  <template class="PayDialog" parent="GtkDialog">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
@@ -298,5 +297,5 @@
     <style>
       <class name="message-dialog"/>
     </style>
-  </object>
+  </template>
 </interface>

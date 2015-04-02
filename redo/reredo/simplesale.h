@@ -121,6 +121,29 @@ struct OrderWindowClass {
 extern GType OrderWindow_get_type(void);
 extern OrderWindow *newOrderWindow(void);
 
+// paydialog.c
+#define PayDialogType (PayDialog_get_type())
+#define PayDialog(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), PayDialogType, PayDialog))
+#define IsPayDialog(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PayDialogType))
+#define PayDialogClass(class) (G_TYPE_CHECK_CLASS_CAST((class), PayDialogType, PayDialogClass))
+#define IsPayDialogClass(class) (G_TYPE_CHECK_CLASS_TYPE((class), PayDialog))
+#define GetPayDialogClass(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), PayDialogType, PayDialogClass))
+typedef struct PayDialog PayDialog;
+typedef struct PayDialogClass PayDialogClass;
+struct PayDialog {
+	GtkDialog parent_instance;
+	struct PayDialogPrivate *priv;
+};
+struct PayDialogClass {
+	GtkDialogClass parent_class;
+};
+extern GType PayDialog_get_type(void);
+extern GtkWidget *newPayDialog(void);
+enum {
+	PayDialogResponsePayNow = 1,
+	PayDialogResponsePayLater,
+};
+
 // manager.c
 #define ManagerType (Manager_get_type())
 #define Manager(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), ManagerType, Manager))
